@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,12 +15,10 @@
       --panel:rgba(7,17,31,.48);
       --panel-strong:rgba(5,12,24,.66);
       --line:rgba(154,211,255,.18);
-      --line-strong:rgba(154,211,255,.3);
       --text:#eef7ff;
       --muted:#c6d8ea;
       --ice:#88d4ff;
       --ice-bright:#b9ecff;
-      --glow:#5e7cff;
       --warn:#ffe37f;
       --ok:#7fffb8;
       --err:#ff8a8a;
@@ -88,24 +87,9 @@
       padding:24px;
     }
 
-    .main-panel::after,
-    .side-panel::after{
-      content:"";
-      position:absolute;
-      right:-90px;
-      bottom:-90px;
-      width:270px;
-      height:270px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(136,212,255,.18), transparent 68%);
-      filter:blur(18px);
-      pointer-events:none;
-    }
-
     .hero{
       width:min(820px, 100%);
       text-align:center;
-      animation:rise .7s ease both;
     }
 
     .eyebrow{
@@ -150,13 +134,8 @@
       margin-bottom:18px;
     }
 
-    h2{
-      font-size:clamp(1.4rem, 2.4vw, 2rem);
-    }
-
-    h3{
-      font-size:1.35rem;
-    }
+    h2{font-size:clamp(1.4rem, 2.4vw, 2rem)}
+    h3{font-size:1.35rem}
 
     .lead{
       max-width:58ch;
@@ -190,12 +169,7 @@
       font:inherit;
       font-size:1rem;
       font-weight:800;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
-    }
-
-    .btn:active,
-    .btn-link:active{
-      transform:translateY(1px) scale(.99);
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
     }
 
     .discord{
@@ -204,20 +178,10 @@
       box-shadow:0 18px 42px rgba(88,101,242,.32);
     }
 
-    .discord:hover{
-      transform:translateY(-2px);
-      box-shadow:0 24px 48px rgba(88,101,242,.38);
-    }
-
     .pearl{
       color:#03111d;
       background:linear-gradient(135deg, var(--ice), var(--ice-bright));
       box-shadow:0 18px 42px rgba(136,212,255,.25);
-    }
-
-    .pearl:hover{
-      transform:translateY(-2px);
-      box-shadow:0 24px 52px rgba(136,212,255,.34);
     }
 
     .ghost{
@@ -226,12 +190,7 @@
       border:1px solid rgba(255,255,255,.08);
     }
 
-    .ghost:hover{
-      transform:translateY(-2px);
-      background:rgba(255,255,255,.065);
-      border-color:rgba(255,255,255,.14);
-    }
-
+    .btn:hover,.btn-link:hover{transform:translateY(-2px)}
     .hidden{display:none !important}
 
     .side-copy{
@@ -263,10 +222,7 @@
       flex:none;
     }
 
-    .stack{
-      display:grid;
-      gap:12px;
-    }
+    .stack{display:grid;gap:12px}
 
     .info,
     .log-card{
@@ -334,11 +290,6 @@
       box-shadow:0 0 10px rgba(127,255,184,.5);
     }
 
-    @keyframes rise{
-      from{opacity:0; transform:translateY(18px)}
-      to{opacity:1; transform:translateY(0)}
-    }
-
     @media (max-width:1080px){
       .shell{grid-template-columns:1fr}
       .main-panel,.side-panel{min-height:auto}
@@ -356,9 +307,7 @@
     <section class="main-panel">
       <div class="hero">
         <div class="eyebrow">Minecraft Server Control</div>
-
         <img src="Logo.png" alt="Frosted Fang logo" class="logo">
-
         <h1>Pearl Pull System</h1>
         <p class="lead">
           Login with Discord to verify access. Once your role is approved, the Discord button disappears
@@ -368,9 +317,7 @@
         <div id="userChip" class="user-chip hidden"></div>
 
         <div id="loginWrap" class="actions">
-          <a id="discordLoginBtn" class="btn-link discord" href="#">
-            Login with Discord
-          </a>
+          <a id="discordLoginBtn" class="btn-link discord" href="#">Login with Discord</a>
         </div>
 
         <div id="pearlWrap" class="actions hidden">
@@ -395,14 +342,12 @@
 
       <div class="stack">
         <button class="btn ghost" type="button" id="refreshBtn">Refresh Panel</button>
-        <button class="btn ghost hidden" type="button" id="logoutVisualBtn">Hide Controls</button>
       </div>
 
       <div class="info">
         <h3>System State</h3>
         <p>
           This page is public, but login, session checks, and pearl actions all depend on your Render backend.
-          If the backend is online, the site can verify your Discord session and unlock the buttons.
         </p>
       </div>
 
@@ -424,7 +369,6 @@
     const statusBox = document.getElementById('statusBox');
     const log = document.getElementById('log');
     const refreshBtn = document.getElementById('refreshBtn');
-    const logoutVisualBtn = document.getElementById('logoutVisualBtn');
     const discordLoginBtn = document.getElementById('discordLoginBtn');
     const userChip = document.getElementById('userChip');
 
@@ -447,7 +391,6 @@
     function showLoggedOut() {
       loginWrap.classList.remove('hidden');
       pearlWrap.classList.add('hidden');
-      logoutVisualBtn.classList.add('hidden');
       userChip.classList.add('hidden');
       userChip.textContent = '';
     }
@@ -455,7 +398,6 @@
     function showLoggedIn(name) {
       loginWrap.classList.add('hidden');
       pearlWrap.classList.remove('hidden');
-      logoutVisualBtn.classList.remove('hidden');
       userChip.classList.remove('hidden');
       userChip.textContent = `Approved as ${name}`;
     }
@@ -497,8 +439,7 @@
           setLog([
             '<div class="line ok">• Panel loaded</div>',
             '<div class="line ok">• Backend reachable</div>',
-            '<div class="line warn">• No active session found</div>',
-            '<div class="line dim">• Login with Discord button is available</div>'
+            '<div class="line warn">• No active session found</div>'
           ]);
         }
       } catch (error) {
@@ -546,13 +487,6 @@
     });
 
     refreshBtn.addEventListener('click', checkLogin);
-
-    logoutVisualBtn.addEventListener('click', () => {
-      showLoggedOut();
-      setStatus('Controls hidden on page');
-      addLog('Controls hidden locally. Backend session may still exist.', 'warn');
-    });
-
     window.addEventListener('load', checkLogin);
   </script>
 </body>
