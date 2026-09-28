@@ -4,14 +4,16 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const axios = require('axios');
+const http = require('http');
+const { WebSocketServer } = require('ws');
 
 const app = express();
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 3000;
 const DISCORD_API = 'https://discord.com/api';
 
-const allowedOrigins = [
-  'https://necroxeye.github.io'
-];
+const allowedOrigins = ['https://necroxeye.github.io'];
 
 app.set('trust proxy', 1);
 
@@ -42,6 +44,25 @@ app.use(session({
   }
 }));
 
+let minecraftClient = null;
+let latestSignal = null;
+
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) => {
+  console.log('Minecraft bridge connected');
+  minecraftClient = ws;
+
+  ws.on('close', () => {
+    console.log('Minecraft bridge disconnected');
+    if (minecraftClient === ws) minecraftClient = null;
+  });
+
+  ws.on('message', (msg) => {
+    console.log('Bridge message:', msg.toString());
+  });
+});
+
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
@@ -60,6 +81,10 @@ app.get('/api/me', (req, res) => {
     console.error('Error in /api/me:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+app.get('/api/latest-signal', (req, res) => {
+  return res.json(latestSignal || { player: null, signal: 0, at: 0 });
 });
 
 app.get('/auth/discord', (req, res) => {
@@ -155,7 +180,7 @@ app.get('/auth/discord/callback', async (req, res) => {
   }
 });
 
-app.post('/api/pull-pearl', (req, res) => {
+app.post('/api/pull-pearl', async (req, res) => {
   try {
     const { player } = req.body;
 
@@ -167,14 +192,34 @@ app.post('/api/pull-pearl', (req, res) => {
       return res.status(400).json({ message: 'Missing player' });
     }
 
-    console.log(`Pearl action requested for: ${player} by ${req.session.discordUser.username}`);
-    return res.json({ message: `Pearl action sent for ${player}` });
+    let signal = 0;
+
+    if (player === 'Necrox') signal = 15;
+    else if (player === 'Alice') signal = 13;
+    else return res.status(400).json({ message: 'Unknown player' });
+
+    latestSignal = {
+      player,
+      signal,
+      at: Date.now()
+    };
+
+    if (minecraftClient && minecraftClient.readyState === 1) {
+      minecraftClient.send(JSON.stringify({
+        type: 'pearl',
+        player,
+        signal
+      }));
+    }
+
+    console.log(`Pearl action requested for ${player}, signal ${signal}`);
+    return res.json({ message: `Sent signal ${signal} for ${player}` });
   } catch (err) {
     console.error('Error in /api/pull-pearl:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
