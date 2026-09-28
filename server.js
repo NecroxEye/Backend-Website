@@ -142,7 +142,7 @@ app.get('/auth/discord/callback', async (req, res) => {
         return res.status(500).send('Failed to save session');
       }
 
-      res.redirect('https://necroxeye.github.io');
+      res.redirect('https://necroxeye.github.io/Backend-Website/');
     });
   } catch (error) {
     console.error('Discord callback error:', error.response?.data || error.message);
