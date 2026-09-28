@@ -1,14 +1,16 @@
-require('dotenv').config();
-
+<!-- server.js -->
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DISCORD_API = 'https://discord.com/api';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://necroxeye.github.io/minecraft-pannel/';
+const FRONTEND_URL = 'https://necroxeye.github.io/Backend-Website/';
+
+app.set('trust proxy', 1);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -22,7 +24,6 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'change_this_secret',
   resave: false,
   saveUninitialized: false,
-  proxy: true,
   cookie: {
     httpOnly: true,
     secure: true,
