@@ -10,10 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DISCORD_API = 'https://discord.com/api';
 
 const allowedOrigins = [
-  'https://necroxeye.github.io/Backend-Website',
-  'https://necroxeye.github.io/Backend-Website/',
-  'https://necroxeye.github.io/minecraft-pannel',
-  'https://necroxeye.github.io/minecraft-pannel/'
+  'https://necroxeye.github.io'
 ];
 
 app.set('trust proxy', 1);
@@ -145,7 +142,7 @@ app.get('/auth/discord/callback', async (req, res) => {
         return res.status(500).send('Failed to save session');
       }
 
-      res.redirect('https://necroxeye.github.io/Backend-Website/');
+      res.redirect('https://necroxeye.github.io');
     });
   } catch (error) {
     console.error('Discord callback error:', error.response?.data || error.message);
