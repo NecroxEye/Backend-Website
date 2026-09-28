@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pearl Pull System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --panel:rgba(10,18,14,0.30);
+      --panel-2:rgba(15,27,21,0.40);
+      --line:rgba(140,255,188,0.18);
+      --text:#f3fff7;
+      --muted:#c4d8cc;
+      --green:#66f2a3;
+      --cyan:#8ce9ff;
+      --gold:#ffe28a;
+      --danger:#ff7b7b;
+      --shadow:0 24px 70px rgba(0,0,0,.35);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%}
+
+    body{
+      font-family:"Inter", sans-serif;
+      color:var(--text);
+      background:
+        linear-gradient(rgba(2,7,5,0.12), rgba(2,7,5,0.22)),
+        url("/background.png");
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-attachment:fixed;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size:34px 34px;
+      opacity:.16;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.55), transparent 95%);
+    }
+
+    .page{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:minmax(0, 1.2fr) 390px;
+      gap:22px;
+      padding:24px;
+    }
+
+    .hero,
+    .side-panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero{
+      min-height:calc(100vh - 48px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px;
+    }
+
+    .side-panel{
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      min-height:calc(100vh - 48px);
+    }
+
+    .hero::after,
+    .side-panel::after{
+      content:"";
+      position:absolute;
+      inset:auto -10% -18% auto;
+      width:280px;
+      height:280px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(102,242,163,.16), transparent 68%);
+      filter:blur(14px);
+      pointer-events:none;
+    }
+
+    .center-wrap{
+      width:min(760px, 100%);
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      animation:fadeUp .7s ease both;
+    }
+
+    .logo{
+      width:min(260px, 52vw);
+      height:auto;
+      display:block;
+      margin:0 auto 18px;
+      filter:drop-shadow(0 20px 30px rgba(0,0,0,.28));
+    }
+
+    h1,h2,h3{
+      margin:0;
+      font-family:"Oxanium", sans-serif;
+      line-height:.95;
+      letter-spacing:-.02em;
+    }
+
+    h1{
+      font-size:clamp(2.5rem, 5vw, 5rem);
+      text-shadow:0 8px 30px rgba(0,0,0,.28);
+      margin-bottom:16px;
+    }
+
+    .lead{
+      max-width:54ch;
+      color:var(--muted);
+      font-size:1.04rem;
+      line-height:1.75;
+      margin:0 auto;
+    }
+
+    .hero-buttons{
+      width:min(520px, 100%);
+      display:grid;
+      gap:14px;
+      margin-top:28px;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:16px 0 18px;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      color:var(--muted);
+      font-size:.94rem;
+      animation:fadeUp .6s ease both;
+    }
+
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--gold);
+      box-shadow:0 0 16px rgba(255,226,138,.45);
+      flex:none;
+    }
+
+    .panel-head p{
+      margin:10px 0 0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:.96rem;
+    }
+
+    .button-stack{
+      display:grid;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    button,
+    a.panel-link{
+      width:100%;
+      min-height:60px;
+      border:none;
+      border-radius:18px;
+      font:inherit;
+      font-weight:800;
+      font-size:1rem;
+      cursor:pointer;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:0 18px;
+    }
+
+    button:active,
+    a.panel-link:active{
+      transform:translateY(1px) scale(.99);
+    }
+
+    .main-btn{
+      color:#041009;
+      background:linear-gradient(135deg, var(--green), #c8ffda);
+      box-shadow:0 16px 34px rgba(102,242,163,.22);
+    }
+
+    .main-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 22px 42px rgba(102,242,163,.28);
+    }
+
+    .ghost-btn{
+      color:var(--text);
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .ghost-btn:hover{
+      transform:translateY(-2px);
+      background:rgba(255,255,255,.08);
+    }
+
+    .discord-btn{
+      color:#eef4ff;
+      background:linear-gradient(135deg, #5865f2, #7b8aff);
+      box-shadow:0 16px 34px rgba(88,101,242,.26);
+    }
+
+    .discord-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 20px 42px rgba(88,101,242,.32);
+    }
+
+    .info-box,
+    .log-box{
+      margin-top:18px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.07);
+    }
+
+    .info-box h3,
+    .log-box h3{
+      font-size:1.1rem;
+      margin-bottom:10px;
+    }
+
+    .info-box p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:.94rem;
+    }
+
+    .log-box{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      animation:fadeUp .8s ease both;
+    }
+
+    #log{
+      margin-top:12px;
+      flex:1;
+      min-height:220px;
+      border-radius:14px;
+      background:#08100d;
+      border:1px solid rgba(140,255,188,.1);
+      padding:12px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:.86rem;
+      line-height:1.55;
+      overflow:auto;
+      color:#bfffd7;
+    }
+
+    .line{margin-bottom:8px}
+    .line.dim{color:#82a392}
+    .line.warn{color:var(--gold)}
+    .line.err{color:var(--danger)}
+    .line.ok{color:var(--green)}
+    .hidden{display:none!important}
+
+    .topline{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:16px;
+      color:var(--green);
+      font-size:.85rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:800;
+    }
+
+    .topline::before{
+      content:"";
+      width:12px;
+      height:12px;
+      border-radius:4px;
+      background:linear-gradient(135deg, var(--green), var(--gold));
+      box-shadow:0 0 18px rgba(102,242,163,.35);
+    }
+
+    @keyframes fadeUp{
+      from{opacity:0; transform:translateY(18px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    @media (max-width:1080px){
+      .page{grid-template-columns:1fr}
+      .hero,.side-panel{min-height:auto}
+      .hero{padding:30px}
+    }
+
+    @media (max-width:700px){
+      .page{padding:14px}
+      .hero,.side-panel{padding:18px}
+      .logo{width:min(210px, 62vw)}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="center-wrap">
+        <div class="topline">Minecraft server control</div>
+        <img src="/Logo.png" alt="Pearl Pull System Logo" class="logo">
+        <h1>Pearl Pull
