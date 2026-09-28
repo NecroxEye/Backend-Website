@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pearl Pull System</title>
+  <title>Frosted Fang — Pearl Pull System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #07110b;
-      --panel: rgba(10, 18, 14, .34);
-      --panel-strong: rgba(7, 14, 10, .52);
-      --line: rgba(126, 255, 178, .18);
-      --line-strong: rgba(126, 255, 178, .28);
-      --text: #f4fff7;
-      --muted: #c7d8cd;
-      --green: #73f2aa;
-      --green-2: #b8ffd2;
-      --gold: #ffe18a;
-      --danger: #ff8484;
-      --discord-a: #5865f2;
-      --discord-b: #7b86ff;
-      --shadow: 0 24px 70px rgba(0,0,0,.34);
-      --radius: 26px;
+      --bg-deep:#03111d;
+      --bg-mid:#0a1f38;
+      --panel:rgba(7,17,31,.48);
+      --panel-strong:rgba(5,12,24,.66);
+      --line:rgba(154,211,255,.18);
+      --line-strong:rgba(154,211,255,.3);
+      --text:#eef7ff;
+      --muted:#c6d8ea;
+      --ice:#88d4ff;
+      --ice-bright:#b9ecff;
+      --glow:#5e7cff;
+      --warn:#ffe37f;
+      --ok:#7fffb8;
+      --err:#ff8a8a;
+      --shadow:0 26px 80px rgba(0,0,0,.34);
+      --radius:26px;
     }
 
     *{box-sizing:border-box}
@@ -33,7 +34,7 @@
       font-family:"Inter", sans-serif;
       color:var(--text);
       background:
-        linear-gradient(rgba(3,8,5,.18), rgba(3,8,5,.38)),
+        linear-gradient(180deg, rgba(2,8,18,.35), rgba(2,8,18,.62)),
         url("background.png") center/cover no-repeat fixed;
       overflow-x:hidden;
     }
@@ -44,96 +45,96 @@
       inset:0;
       pointer-events:none;
       background:
-        linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
       background-size:34px 34px;
-      opacity:.15;
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.85), transparent 96%);
-      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.85), transparent 96%);
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.75), transparent 96%);
+      -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,.75), transparent 96%);
+      opacity:.12;
     }
 
-    .layout{
+    .shell{
       min-height:100vh;
-      padding:22px;
+      padding:24px;
       display:grid;
-      grid-template-columns:minmax(0,1.2fr) 360px;
+      grid-template-columns:minmax(0,1.4fr) 360px;
       gap:22px;
     }
 
-    .stage,
-    .side{
+    .main-panel,
+    .side-panel{
       position:relative;
       overflow:hidden;
       border-radius:var(--radius);
       border:1px solid var(--line);
       background:linear-gradient(180deg, var(--panel), var(--panel-strong));
-      backdrop-filter:blur(6px);
-      -webkit-backdrop-filter:blur(6px);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
       box-shadow:var(--shadow);
     }
 
-    .stage{
-      min-height:calc(100vh - 44px);
+    .main-panel{
+      min-height:calc(100vh - 48px);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:40px 28px;
+      padding:48px 28px;
     }
 
-    .side{
-      min-height:calc(100vh - 44px);
+    .side-panel{
+      min-height:calc(100vh - 48px);
       display:flex;
       flex-direction:column;
-      padding:22px;
+      padding:24px;
     }
 
-    .stage::after,
-    .side::after{
+    .main-panel::after,
+    .side-panel::after{
       content:"";
       position:absolute;
-      right:-80px;
-      bottom:-80px;
-      width:260px;
-      height:260px;
+      right:-90px;
+      bottom:-90px;
+      width:270px;
+      height:270px;
       border-radius:50%;
-      background:radial-gradient(circle, rgba(115,242,170,.16), transparent 68%);
-      filter:blur(16px);
+      background:radial-gradient(circle, rgba(136,212,255,.18), transparent 68%);
+      filter:blur(18px);
       pointer-events:none;
     }
 
     .hero{
-      width:min(760px, 100%);
+      width:min(820px, 100%);
       text-align:center;
-      animation:fadeUp .7s ease both;
+      animation:rise .7s ease both;
     }
 
     .eyebrow{
       display:inline-flex;
       align-items:center;
       gap:10px;
-      color:var(--green);
+      color:var(--ok);
       text-transform:uppercase;
       letter-spacing:.14em;
-      font-size:.82rem;
+      font-size:.86rem;
       font-weight:800;
-      margin-bottom:16px;
+      margin-bottom:18px;
     }
 
     .eyebrow::before{
       content:"";
       width:12px;
       height:12px;
-      border-radius:4px;
-      background:linear-gradient(135deg, var(--green), var(--gold));
-      box-shadow:0 0 16px rgba(115,242,170,.4);
+      border-radius:50%;
+      background:linear-gradient(135deg, var(--ok), var(--ice));
+      box-shadow:0 0 14px rgba(127,255,184,.4);
     }
 
     .logo{
-      width:min(260px, 56vw);
+      width:min(260px, 54vw);
       height:auto;
       display:block;
-      margin:0 auto 18px;
-      filter:drop-shadow(0 16px 30px rgba(0,0,0,.28));
+      margin:0 auto 20px;
+      filter:drop-shadow(0 20px 40px rgba(0,0,0,.35));
     }
 
     h1,h2,h3{
@@ -144,232 +145,272 @@
     }
 
     h1{
-      font-size:clamp(2.5rem, 5vw, 5rem);
-      text-shadow:0 12px 32px rgba(0,0,0,.3);
-      margin-bottom:16px;
+      font-size:clamp(2.7rem, 6vw, 5.5rem);
+      text-shadow:0 14px 34px rgba(0,0,0,.28);
+      margin-bottom:18px;
+    }
+
+    h2{
+      font-size:clamp(1.4rem, 2.4vw, 2rem);
+    }
+
+    h3{
+      font-size:1.35rem;
     }
 
     .lead{
-      max-width:56ch;
+      max-width:58ch;
       margin:0 auto;
       color:var(--muted);
-      line-height:1.72;
-      font-size:1rem;
+      line-height:1.75;
+      font-size:1.03rem;
     }
 
-    .action-stack{
-      width:min(520px, 100%);
+    .actions{
+      width:min(560px, 100%);
       margin:28px auto 0;
       display:grid;
       gap:14px;
     }
 
     .btn,
-    .link-btn{
+    .btn-link{
       appearance:none;
       border:none;
       width:100%;
       min-height:60px;
       padding:0 18px;
       border-radius:18px;
-      cursor:pointer;
-      font:inherit;
-      font-size:1rem;
-      font-weight:800;
       text-decoration:none;
+      cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
       gap:10px;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, opacity .18s ease;
+      font:inherit;
+      font-size:1rem;
+      font-weight:800;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
     }
 
     .btn:active,
-    .link-btn:active{
+    .btn-link:active{
       transform:translateY(1px) scale(.99);
     }
 
-    .discord-btn{
-      color:#f7f9ff;
-      background:linear-gradient(135deg, var(--discord-a), var(--discord-b));
-      box-shadow:0 18px 38px rgba(88,101,242,.28);
+    .discord{
+      color:#f7fbff;
+      background:linear-gradient(135deg, #5865f2, #8091ff);
+      box-shadow:0 18px 42px rgba(88,101,242,.32);
     }
 
-    .discord-btn:hover{
+    .discord:hover{
       transform:translateY(-2px);
-      box-shadow:0 24px 46px rgba(88,101,242,.34);
+      box-shadow:0 24px 48px rgba(88,101,242,.38);
     }
 
-    .pearl-btn{
-      color:#05110a;
-      background:linear-gradient(135deg, var(--green), var(--green-2));
-      box-shadow:0 18px 38px rgba(115,242,170,.22);
+    .pearl{
+      color:#03111d;
+      background:linear-gradient(135deg, var(--ice), var(--ice-bright));
+      box-shadow:0 18px 42px rgba(136,212,255,.25);
     }
 
-    .pearl-btn:hover{
+    .pearl:hover{
       transform:translateY(-2px);
-      box-shadow:0 24px 46px rgba(115,242,170,.28);
+      box-shadow:0 24px 52px rgba(136,212,255,.34);
     }
 
-    .secondary{
+    .ghost{
       color:var(--text);
       background:rgba(255,255,255,.045);
       border:1px solid rgba(255,255,255,.08);
     }
 
-    .secondary:hover{
+    .ghost:hover{
       transform:translateY(-2px);
-      background:rgba(255,255,255,.07);
+      background:rgba(255,255,255,.065);
+      border-color:rgba(255,255,255,.14);
     }
 
     .hidden{display:none !important}
 
-    .panel-head p,
-    .info p{
+    .side-copy{
       color:var(--muted);
       line-height:1.7;
       margin:10px 0 0;
-      font-size:.95rem;
+      font-size:.96rem;
     }
 
     .status{
       display:flex;
       align-items:center;
-      gap:10px;
-      margin:18px 0;
-      padding:14px 15px;
-      border-radius:16px;
+      gap:12px;
+      margin:18px 0 20px;
+      padding:14px 16px;
+      border-radius:18px;
       background:rgba(255,255,255,.04);
       border:1px solid rgba(255,255,255,.07);
       color:var(--muted);
-      font-size:.95rem;
+      font-size:.96rem;
     }
 
-    .dot{
+    .status-dot{
       width:10px;
       height:10px;
       border-radius:50%;
-      background:var(--gold);
-      box-shadow:0 0 14px rgba(255,225,138,.4);
+      background:var(--warn);
+      box-shadow:0 0 14px rgba(255,227,127,.44);
       flex:none;
     }
 
     .stack{
       display:grid;
       gap:12px;
-      margin-top:6px;
     }
 
     .info,
-    .log-wrap{
-      margin-top:18px;
+    .log-card{
+      margin-top:20px;
       padding:16px;
-      border-radius:18px;
-      background:rgba(0,0,0,.18);
+      border-radius:20px;
+      background:rgba(0,0,0,.16);
       border:1px solid rgba(255,255,255,.07);
     }
 
-    .log-wrap{
+    .info p{
+      margin:10px 0 0;
+      color:var(--muted);
+      line-height:1.72;
+      font-size:.95rem;
+    }
+
+    .log-card{
       flex:1;
       display:flex;
       flex-direction:column;
-      min-height:260px;
+      min-height:280px;
     }
 
     #log{
       margin-top:12px;
       flex:1;
       min-height:220px;
-      border-radius:14px;
-      background:#08100d;
-      border:1px solid rgba(115,242,170,.12);
+      border-radius:16px;
+      background:#04121b;
+      border:1px solid rgba(136,212,255,.13);
       padding:12px;
       overflow:auto;
       font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size:.86rem;
-      line-height:1.55;
-      color:#c4ffda;
+      line-height:1.6;
+      color:#d2f1ff;
     }
 
     .line{margin-bottom:8px}
-    .ok{color:var(--green)}
-    .warn{color:var(--gold)}
-    .err{color:var(--danger)}
-    .dim{color:#86a594}
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .err{color:var(--err)}
+    .dim{color:#94a9bc}
 
-    @keyframes fadeUp{
+    .user-chip{
+      margin-top:16px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:999px;
+      background:rgba(136,212,255,.1);
+      border:1px solid rgba(136,212,255,.18);
+      color:var(--ice-bright);
+      font-weight:700;
+    }
+
+    .user-chip::before{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--ok);
+      box-shadow:0 0 10px rgba(127,255,184,.5);
+    }
+
+    @keyframes rise{
       from{opacity:0; transform:translateY(18px)}
       to{opacity:1; transform:translateY(0)}
     }
 
     @media (max-width:1080px){
-      .layout{grid-template-columns:1fr}
-      .stage,.side{min-height:auto}
+      .shell{grid-template-columns:1fr}
+      .main-panel,.side-panel{min-height:auto}
     }
 
     @media (max-width:700px){
-      .layout{padding:14px; gap:14px}
-      .stage,.side{padding:18px}
+      .shell{padding:14px; gap:14px}
+      .main-panel,.side-panel{padding:18px}
       .logo{width:min(210px, 64vw)}
     }
   </style>
 </head>
 <body>
-  <main class="layout">
-    <section class="stage">
+  <main class="shell">
+    <section class="main-panel">
       <div class="hero">
-        <div class="eyebrow">Minecraft control panel</div>
+        <div class="eyebrow">Minecraft Server Control</div>
 
-        <img src="Logo.png" alt="Pearl Pull System Logo" class="logo">
+        <img src="Logo.png" alt="Frosted Fang logo" class="logo">
 
         <h1>Pearl Pull System</h1>
         <p class="lead">
-          Authorize with Discord to unlock the pull controls. If your role is approved,
-          the login button disappears and the pearl buttons become available.
+          Login with Discord to verify access. Once your role is approved, the Discord button disappears
+          and your pearl controls unlock automatically.
         </p>
 
-        <div id="loginWrap" class="action-stack">
-          <a id="discordLoginBtn" class="link-btn discord-btn" href="#">
+        <div id="userChip" class="user-chip hidden"></div>
+
+        <div id="loginWrap" class="actions">
+          <a id="discordLoginBtn" class="btn-link discord" href="#">
             Login with Discord
           </a>
         </div>
 
-        <div id="pearlWrap" class="action-stack hidden">
-          <button class="btn pearl-btn pearl-action" type="button" data-player="Necrox">Necrox Pearl</button>
-          <button class="btn pearl-btn pearl-action" type="button" data-player="Alice">Alice Pearl</button>
+        <div id="pearlWrap" class="actions hidden">
+          <button class="btn pearl pearl-action" type="button" data-player="Necrox">Necrox Pearl</button>
+          <button class="btn pearl pearl-action" type="button" data-player="Alice">Alice Pearl</button>
         </div>
       </div>
     </section>
 
-    <aside class="side">
-      <div class="panel-head">
-        <h2>Access Status</h2>
-        <p>The panel checks your session against the backend and only shows controls after successful Discord authentication.</p>
+    <aside class="side-panel">
+      <div>
+        <h2>Access</h2>
+        <p class="side-copy">
+          Discord verification is required before control actions are unlocked.
+        </p>
       </div>
 
       <div id="statusBox" class="status">
-        <span class="dot"></span>
+        <span class="status-dot"></span>
         <span>Checking backend...</span>
       </div>
 
       <div class="stack">
-        <button class="btn secondary" type="button" id="refreshBtn">Refresh status</button>
-        <button class="btn secondary hidden" type="button" id="logoutBtn">Hide controls</button>
+        <button class="btn ghost" type="button" id="refreshBtn">Refresh Panel</button>
+        <button class="btn ghost hidden" type="button" id="logoutVisualBtn">Hide Controls</button>
       </div>
 
       <div class="info">
-        <h3>How it works</h3>
+        <h3>System State</h3>
         <p>
-          Users authenticate through your Discord application on the backend. If the role check passes,
-          the session is accepted and the pearl controls are unlocked on this page.
+          This page is public, but login, session checks, and pearl actions all depend on your Render backend.
+          If the backend is online, the site can verify your Discord session and unlock the buttons.
         </p>
       </div>
 
-      <div class="log-wrap">
+      <div class="log-card">
         <h3>Status Log</h3>
         <div id="log">
           <div class="line ok">• Panel loaded</div>
-          <div class="line dim">• Waiting for session check...</div>
+          <div class="line dim">• Waiting for backend check...</div>
         </div>
       </div>
     </aside>
@@ -383,10 +424,15 @@
     const statusBox = document.getElementById('statusBox');
     const log = document.getElementById('log');
     const refreshBtn = document.getElementById('refreshBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutVisualBtn = document.getElementById('logoutVisualBtn');
     const discordLoginBtn = document.getElementById('discordLoginBtn');
+    const userChip = document.getElementById('userChip');
 
     discordLoginBtn.href = `${BACKEND_URL}/auth/discord`;
+
+    function setStatus(text) {
+      statusBox.innerHTML = `<span class="status-dot"></span><span>${text}</span>`;
+    }
 
     function setLog(lines) {
       log.innerHTML = lines.join('');
@@ -398,15 +444,27 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    function setStatus(text) {
-      statusBox.innerHTML = `<span class="dot"></span><span>${text}</span>`;
+    function showLoggedOut() {
+      loginWrap.classList.remove('hidden');
+      pearlWrap.classList.add('hidden');
+      logoutVisualBtn.classList.add('hidden');
+      userChip.classList.add('hidden');
+      userChip.textContent = '';
+    }
+
+    function showLoggedIn(name) {
+      loginWrap.classList.add('hidden');
+      pearlWrap.classList.remove('hidden');
+      logoutVisualBtn.classList.remove('hidden');
+      userChip.classList.remove('hidden');
+      userChip.textContent = `Approved as ${name}`;
     }
 
     async function checkLogin() {
-      setStatus('Checking login...');
+      setStatus('Checking backend...');
       setLog([
         '<div class="line ok">• Panel loaded</div>',
-        '<div class="line warn">• Checking backend session...</div>'
+        '<div class="line warn">• Requesting session status from backend...</div>'
       ]);
 
       try {
@@ -423,50 +481,40 @@
 
         if (data.loggedIn) {
           const name = data.user?.global_name || data.user?.username || 'Approved User';
-
-          loginWrap.classList.add('hidden');
-          pearlWrap.classList.remove('hidden');
-          logoutBtn.classList.remove('hidden');
-
-          setStatus(`Logged in as ${name}`);
+          showLoggedIn(name);
+          setStatus(`Authorized as ${name}`);
           setLog([
             '<div class="line ok">• Panel loaded</div>',
             '<div class="line ok">• Backend reachable</div>',
-            `<div class="line ok">• Auth approved for ${name}</div>`,
+            `<div class="line ok">• Session active for ${name}</div>`,
             '<div class="line ok">• Login button hidden</div>',
-            '<div class="line ok">• Necrox Pearl and Alice Pearl unlocked</div>'
+            '<div class="line ok">• Necrox Pearl unlocked</div>',
+            '<div class="line ok">• Alice Pearl unlocked</div>'
           ]);
         } else {
-          loginWrap.classList.remove('hidden');
-          pearlWrap.classList.add('hidden');
-          logoutBtn.classList.add('hidden');
-
+          showLoggedOut();
           setStatus('Not logged in');
           setLog([
             '<div class="line ok">• Panel loaded</div>',
             '<div class="line ok">• Backend reachable</div>',
-            '<div class="line warn">• No active approved session</div>',
-            '<div class="line dim">• Login button displayed under logo</div>'
+            '<div class="line warn">• No active session found</div>',
+            '<div class="line dim">• Login with Discord button is available</div>'
           ]);
         }
       } catch (error) {
-        console.error(error);
-
-        loginWrap.classList.remove('hidden');
-        pearlWrap.classList.add('hidden');
-        logoutBtn.classList.add('hidden');
-
+        console.error('checkLogin error:', error);
+        showLoggedOut();
         setStatus('Backend unavailable');
         setLog([
           '<div class="line ok">• Panel loaded</div>',
           '<div class="line err">• Could not reach backend</div>',
-          '<div class="line dim">• Check Render service, env vars, and CORS/session config</div>'
+          '<div class="line dim">• Check backend URL, CORS, session cookie, and Render service status</div>'
         ]);
       }
     }
 
     async function sendPearl(player) {
-      addLog(`Sending pearl request for ${player}...`, 'warn');
+      addLog(`Sending pearl action for ${player}...`, 'warn');
 
       try {
         const response = await fetch(`${BACKEND_URL}/api/pull-pearl`, {
@@ -481,13 +529,13 @@
         const data = await response.json();
 
         if (response.ok) {
-          addLog(data.message || `Pearl request sent for ${player}`, 'ok');
+          addLog(data.message || `Pearl action sent for ${player}`, 'ok');
         } else {
-          addLog(data.message || `Pearl request failed for ${player}`, 'err');
+          addLog(data.message || `Pearl action failed for ${player}`, 'err');
         }
       } catch (error) {
-        console.error(error);
-        addLog(`Backend request failed for ${player}`, 'err');
+        console.error('sendPearl error:', error);
+        addLog(`Request failed for ${player}`, 'err');
       }
     }
 
@@ -499,12 +547,10 @@
 
     refreshBtn.addEventListener('click', checkLogin);
 
-    logoutBtn.addEventListener('click', () => {
-      pearlWrap.classList.add('hidden');
-      loginWrap.classList.remove('hidden');
-      logoutBtn.classList.add('hidden');
+    logoutVisualBtn.addEventListener('click', () => {
+      showLoggedOut();
       setStatus('Controls hidden on page');
-      addLog('Controls hidden locally. Session may still exist on backend.', 'warn');
+      addLog('Controls hidden locally. Backend session may still exist.', 'warn');
     });
 
     window.addEventListener('load', checkLogin);
