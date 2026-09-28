@@ -22,6 +22,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'change_this_secret',
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
     httpOnly: true,
     secure: true,
@@ -29,6 +30,10 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }));
+
+app.get('/', (req, res) => {
+  res.send('Backend is running');
+});
 
 app.get('/api/me', (req, res) => {
   try {
