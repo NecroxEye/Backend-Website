@@ -195,7 +195,7 @@ app.post('/api/pull-pearl', async (req, res) => {
     let signal = 0;
 
     if (player === 'Necrox') signal = 15;
-    else if (player === 'Alice') signal = 13;
+    else if (player === 'Alice') signal = 15;
     else return res.status(400).json({ message: 'Unknown player' });
 
     latestSignal = {
