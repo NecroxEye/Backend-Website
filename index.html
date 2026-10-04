@@ -14,18 +14,14 @@
       --bg-3:#0b3a4c;
       --ice:#dffcff;
       --cyan:#8af7ff;
-      --cyan-2:#57e7ff;
-      --cyan-3:#26cde8;
       --line:rgba(138,247,255,.22);
       --line-strong:rgba(138,247,255,.42);
-      --panel:rgba(10,30,39,.44);
-      --panel-2:rgba(7,23,31,.58);
       --text:#ecfdff;
       --muted:#a7d8df;
       --success:#7fffd4;
+      --danger:#ff9ab2;
       --shadow:0 24px 80px rgba(0,0,0,.35);
       --radius:26px;
-      --radius-sm:18px;
       --max:1220px;
     }
 
@@ -56,34 +52,35 @@
       mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
     }
 
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        radial-gradient(circle at center, rgba(255,255,255,.05), transparent 60%);
-      mix-blend-mode:screen;
-      opacity:.5;
-    }
-
     .shell{
       width:min(calc(100% - 28px), var(--max));
       margin-inline:auto;
     }
 
-    .reveal{
-      opacity:0;
-      transform:translateY(18px);
-      animation:reveal .7s ease forwards;
+    .glass{
+      border:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)),
+        linear-gradient(180deg, rgba(8,29,38,.56), rgba(5,17,22,.56));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(20px) saturate(160%);
+      -webkit-backdrop-filter:blur(20px) saturate(160%);
+      position:relative;
+      overflow:hidden;
     }
-    .d1{animation-delay:.08s}
-    .d2{animation-delay:.16s}
-    .d3{animation-delay:.24s}
 
-    header{
-      padding:22px 0 10px;
+    .glass::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.16), transparent 20%, transparent 75%, rgba(138,247,255,.07)),
+        radial-gradient(circle at top left, rgba(255,255,255,.12), transparent 28%);
     }
+
+    header{padding:22px 0 10px}
 
     .topbar{
       display:flex;
@@ -96,7 +93,6 @@
       background:linear-gradient(180deg, rgba(222,252,255,.10), rgba(7,24,31,.30));
       box-shadow:var(--shadow);
       backdrop-filter:blur(18px) saturate(150%);
-      -webkit-backdrop-filter:blur(18px) saturate(150%);
     }
 
     .brand{
@@ -107,22 +103,34 @@
     }
 
     .logo-wrap{
-      width:52px;
-      height:52px;
+      width:56px;
+      height:56px;
       border-radius:16px;
       display:grid;
       place-items:center;
       background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
       border:1px solid var(--line);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 12px 24px rgba(0,0,0,.18);
       overflow:hidden;
       flex:0 0 auto;
+      padding:6px;
     }
 
-    .logo-svg{
-      width:34px;
-      height:34px;
-      filter:drop-shadow(0 0 12px rgba(138,247,255,.45));
+    .logo-wrap img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .logo-fallback{
+      width:100%;
+      height:100%;
+      display:none;
+      place-items:center;
+      color:var(--cyan);
+      font-family:"Orbitron", sans-serif;
+      font-size:1.2rem;
+      text-transform:uppercase;
     }
 
     .brand-copy small{
@@ -154,7 +162,6 @@
       border:1px solid var(--line);
       background:rgba(255,255,255,.06);
       color:var(--muted);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
       white-space:nowrap;
     }
 
@@ -165,38 +172,13 @@
       animation:pulse 2s infinite;
     }
 
-    main{
-      padding:18px 0 38px;
-    }
+    main{padding:18px 0 38px}
 
     .hero{
       display:grid;
-      grid-template-columns:1.2fr .8fr;
+      grid-template-columns:1.15fr .85fr;
       gap:22px;
       align-items:stretch;
-    }
-
-    .glass{
-      border:1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)),
-        linear-gradient(180deg, rgba(8,29,38,.56), rgba(5,17,22,.56));
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(20px) saturate(160%);
-      -webkit-backdrop-filter:blur(20px) saturate(160%);
-      position:relative;
-      overflow:hidden;
-    }
-
-    .glass::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(130deg, rgba(255,255,255,.16), transparent 20%, transparent 75%, rgba(138,247,255,.07)),
-        radial-gradient(circle at top left, rgba(255,255,255,.12), transparent 28%);
     }
 
     .hero-copy{
@@ -225,10 +207,9 @@
     }
 
     h1{
-      font-size:clamp(2.9rem, 7vw, 6rem);
-      max-width:8ch;
+      font-size:clamp(2.8rem, 7vw, 5.8rem);
+      max-width:9ch;
       margin-bottom:18px;
-      text-shadow:0 0 20px rgba(138,247,255,.14);
     }
 
     .lead{
@@ -257,7 +238,7 @@
     .hero-side{
       padding:22px;
       display:grid;
-      grid-template-rows:auto 1fr auto;
+      grid-template-rows:auto auto 1fr auto;
       gap:16px;
     }
 
@@ -268,6 +249,48 @@
       font-size:.74rem;
     }
 
+    .auth-box{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px 14px;
+      background:rgba(255,255,255,.05);
+    }
+
+    .auth-text{
+      color:var(--ice);
+      font-size:.92rem;
+      line-height:1.6;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:12px 16px;
+      font:inherit;
+      font-weight:700;
+      transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+    }
+
+    .btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
+    .btn:active{transform:translateY(0) scale(.985)}
+
+    .btn-login{
+      color:#03242d;
+      background:linear-gradient(180deg, #dffcff, #8af7ff);
+    }
+
+    .btn-logout{
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--line);
+    }
+
     .console{
       border-radius:22px;
       overflow:hidden;
@@ -275,7 +298,7 @@
       background:
         linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)),
         linear-gradient(180deg, rgba(4,15,20,.92), rgba(3,11,15,.96));
-      min-height:330px;
+      min-height:250px;
       display:grid;
       grid-template-rows:auto 1fr;
     }
@@ -298,22 +321,12 @@
     .dot:nth-child(3){opacity:1}
 
     .console-screen{
-      position:relative;
       padding:20px;
       color:var(--success);
       font-size:1rem;
       line-height:1.7;
       white-space:pre-line;
       overflow:hidden;
-    }
-
-    .console-screen::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:linear-gradient(180deg, transparent 0%, rgba(138,247,255,.03) 45%, transparent 100%);
-      animation:scan 6s linear infinite;
     }
 
     .console-meta{
@@ -324,13 +337,9 @@
       font-size:.86rem;
     }
 
-    .section{
-      margin-top:24px;
-    }
+    .section{margin-top:24px}
 
-    .panel{
-      padding:clamp(22px, 4vw, 34px);
-    }
+    .panel{padding:clamp(22px, 4vw, 34px)}
 
     .panel-head{
       display:flex;
@@ -351,7 +360,6 @@
       font-family:"Orbitron", sans-serif;
       font-size:clamp(2.2rem, 5vw, 3.4rem);
       color:var(--cyan);
-      text-shadow:0 0 20px rgba(138,247,255,.18);
     }
 
     .players{
@@ -365,15 +373,15 @@
       cursor:pointer;
       text-align:left;
       padding:20px 18px;
-      min-height:126px;
+      min-height:140px;
       border-radius:22px;
       color:var(--text);
       background:
         linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03)),
         linear-gradient(180deg, rgba(11,38,49,.78), rgba(6,21,29,.9));
       border:1px solid rgba(138,247,255,.20);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 16px 28px rgba(0,0,0,.18);
-      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+      box-shadow:0 16px 28px rgba(0,0,0,.18);
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
       position:relative;
       overflow:hidden;
     }
@@ -386,19 +394,19 @@
       background:linear-gradient(90deg, rgba(138,247,255,.9), transparent 78%);
     }
 
-    .player-btn:hover{
+    .player-btn:hover:not(:disabled){
       transform:translateY(-4px);
       border-color:var(--line-strong);
-      box-shadow:0 20px 34px rgba(0,0,0,.22), 0 0 0 1px rgba(138,247,255,.08) inset;
+      box-shadow:0 20px 34px rgba(0,0,0,.22);
     }
 
-    .player-btn:active{
+    .player-btn:active:not(:disabled){
       transform:translateY(0) scale(.985);
     }
 
-    .player-btn.loading{
-      pointer-events:none;
-      opacity:.82;
+    .player-btn:disabled{
+      cursor:not-allowed;
+      opacity:.52;
     }
 
     .player-btn .label{
@@ -413,7 +421,7 @@
     .player-btn .name{
       display:block;
       font-family:"Orbitron", sans-serif;
-      font-size:clamp(1.35rem, 2.5vw, 1.75rem);
+      font-size:clamp(1.2rem, 2.3vw, 1.6rem);
       line-height:1.1;
       margin-bottom:10px;
       text-transform:uppercase;
@@ -422,18 +430,26 @@
     .player-btn .sub{
       display:block;
       color:#d9fbff;
-      font-size:.9rem;
+      font-size:.88rem;
+      line-height:1.65;
     }
 
-    .toolbar{
-      display:flex;
-      flex-wrap:wrap;
+    .admin-panel{
+      margin-top:20px;
+      padding:18px;
+      border:1px solid rgba(138,247,255,.16);
+      border-radius:20px;
+      background:rgba(255,255,255,.04);
+    }
+
+    .admin-grid{
+      display:grid;
+      grid-template-columns:1.35fr .75fr .75fr 1fr;
       gap:12px;
-      margin-top:22px;
+      margin-top:14px;
     }
 
-    .input{
-      flex:1 1 280px;
+    .input, .select{
       min-width:0;
       border-radius:16px;
       border:1px solid rgba(138,247,255,.22);
@@ -442,30 +458,32 @@
       padding:14px 16px;
       font:inherit;
       outline:none;
-      backdrop-filter:blur(10px);
+      width:100%;
+    }
+
+    .select option{
+      color:#000;
     }
 
     .input::placeholder{color:#b5e8ef}
 
-    .input:focus{
+    .input:focus, .select:focus{
       border-color:var(--line-strong);
       box-shadow:0 0 0 4px rgba(138,247,255,.08);
     }
 
     .add-btn{
-      border:none;
-      cursor:pointer;
-      border-radius:16px;
-      padding:14px 18px;
-      font:inherit;
-      font-weight:700;
+      margin-top:12px;
       color:#03242d;
       background:linear-gradient(180deg, #dffcff, #8af7ff);
-      transition:transform .18s ease, filter .18s ease;
     }
 
-    .add-btn:hover{transform:translateY(-2px);filter:brightness(1.02)}
-    .add-btn:active{transform:translateY(0) scale(.985)}
+    .admin-note{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.6;
+    }
 
     .hint{
       margin-top:12px;
@@ -483,7 +501,6 @@
       padding:22px;
       background:rgba(3,13,17,.48);
       backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
       opacity:0;
       pointer-events:none;
       transition:opacity .24s ease;
@@ -503,26 +520,14 @@
       background:
         linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
         linear-gradient(180deg, rgba(8,28,36,.88), rgba(5,16,22,.94));
-      box-shadow:0 30px 90px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);
+      box-shadow:0 30px 90px rgba(0,0,0,.35);
       transform:translateY(12px) scale(.985);
       transition:transform .24s ease;
       position:relative;
-      overflow:hidden;
     }
 
     .overlay.show .anim-panel{
       transform:translateY(0) scale(1);
-    }
-
-    .anim-panel::before{
-      content:"";
-      position:absolute;
-      inset:-20%;
-      background:
-        radial-gradient(circle at center, rgba(138,247,255,.14), transparent 26%),
-        radial-gradient(circle at center, rgba(255,255,255,.08), transparent 48%);
-      animation:floatGlow 3.2s ease-in-out infinite;
-      pointer-events:none;
     }
 
     .anim-head{
@@ -532,13 +537,9 @@
       gap:8px;
       border-bottom:1px solid rgba(138,247,255,.14);
       background:rgba(255,255,255,.05);
-      position:relative;
-      z-index:1;
     }
 
     .anim-body{
-      position:relative;
-      z-index:1;
       padding:28px 26px 30px;
       display:grid;
       gap:18px;
@@ -548,7 +549,6 @@
 
     .eye-wrap{
       width:min(100%, 520px);
-      padding:8px 0 4px;
     }
 
     .eye-svg{
@@ -575,20 +575,12 @@
       opacity:0;
     }
 
-    .eye-beam{
-      stroke:rgba(138,247,255,.34);
-      stroke-width:2;
-      stroke-dasharray:12 18;
-      animation:beam 2s linear infinite;
-    }
-
     .anim-title{
       font-family:"Orbitron", sans-serif;
       font-size:clamp(1.25rem, 2.6vw, 2rem);
       letter-spacing:.08em;
       text-transform:uppercase;
       margin:0;
-      text-shadow:0 0 18px rgba(138,247,255,.18);
     }
 
     .anim-text{
@@ -596,28 +588,13 @@
       color:var(--success);
       font-size:clamp(1rem, 1.7vw, 1.08rem);
       line-height:1.8;
-      white-space:pre-line;
     }
 
-    footer{
-      padding:14px 0 36px;
-      text-align:center;
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    @keyframes reveal{
-      to{opacity:1;transform:translateY(0)}
-    }
+    .hidden{display:none !important}
 
     @keyframes pulse{
       0%,100%{transform:scale(1);opacity:1}
       50%{transform:scale(1.16);opacity:.84}
-    }
-
-    @keyframes scan{
-      0%{transform:translateY(-100%)}
-      100%{transform:translateY(100%)}
     }
 
     @keyframes drawEye{
@@ -630,19 +607,10 @@
       100%{transform:scale(1);opacity:1}
     }
 
-    @keyframes beam{
-      from{stroke-dashoffset:0}
-      to{stroke-dashoffset:-60}
-    }
-
-    @keyframes floatGlow{
-      0%,100%{transform:translateY(0) scale(1)}
-      50%{transform:translateY(-8px) scale(1.02)}
-    }
-
     @media (max-width: 980px){
       .hero{grid-template-columns:1fr}
       .players{grid-template-columns:repeat(2, minmax(0,1fr))}
+      .admin-grid{grid-template-columns:1fr 1fr}
     }
 
     @media (max-width: 640px){
@@ -656,21 +624,18 @@
         align-items:flex-start;
       }
       .players{grid-template-columns:1fr}
-      .anim-body{padding:24px 18px 26px}
+      .admin-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <header class="reveal">
+    <header>
       <div class="topbar">
         <div class="brand">
-          <div class="logo-wrap" aria-hidden="true">
-            <svg class="logo-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M32 8C20 8 11 18 11 31C11 44 20 54 32 54C44 54 53 44 53 31C53 18 44 8 32 8Z" stroke="#8AF7FF" stroke-width="3"/>
-              <path d="M18 31C22 23 28 19 32 19C36 19 42 23 46 31C42 39 36 43 32 43C28 43 22 39 18 31Z" stroke="#DFFCFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="32" cy="31" r="6" fill="#8AF7FF"/>
-            </svg>
+          <div class="logo-wrap">
+            <img id="logoImage" src="./logo.png" alt="Frosted Fang logo" />
+            <div id="logoFallback" class="logo-fallback">FF</div>
           </div>
           <div class="brand-copy">
             <small>Frosted Division</small>
@@ -687,23 +652,31 @@
 
     <main>
       <section class="hero">
-        <article class="glass hero-copy reveal d1">
+        <article class="glass hero-copy">
           <span class="eyebrow">Cryo Control Interface</span>
           <h1>Frosted Fang</h1>
           <p class="lead">
-            Cold-glass control panel for instant pearl triggers. Add names, generate buttons automatically,
-            and fire a clean confirmation animation with the Frosted Fang eye system.
+            Secure role-based access, persistent login, channel-aware player configs, and a frosted cyan control panel for instant pearl pulls.
           </p>
           <div class="hero-tags">
-            <span class="tag">Blue frosted cyan UI</span>
-            <span class="tag">Auto-generated player buttons</span>
-            <span class="tag">Animated eye confirmation</span>
+            <span class="tag">Discord auth</span>
+            <span class="tag">Role restricted admin add</span>
+            <span class="tag">Signal • side • channel</span>
           </div>
         </article>
 
-        <aside class="glass hero-side reveal d2">
-          <div class="mini">System Console</div>
+        <aside class="glass hero-side">
+          <div class="mini">Authorization</div>
 
+          <div class="auth-box">
+            <div class="auth-text" id="authText">Checking login...</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="loginBtn" class="btn btn-login" type="button">Login with Discord</button>
+              <button id="logoutBtn" class="btn btn-logout hidden" type="button">Logout</button>
+            </div>
+          </div>
+
+          <div class="mini">System Console</div>
           <div class="console">
             <div class="console-bar">
               <span class="dot"></span>
@@ -711,7 +684,7 @@
               <span class="dot"></span>
             </div>
             <div class="console-screen" id="consoleScreen">Frosted Fang System
-Awaiting command...</div>
+Awaiting authorization...</div>
           </div>
 
           <div class="console-meta">
@@ -722,13 +695,13 @@ Awaiting command...</div>
       </section>
 
       <section class="section">
-        <article class="glass panel reveal d3">
+        <article class="glass panel">
           <div class="panel-head">
             <div>
               <span class="eyebrow">Operator Grid</span>
               <h2>Team Pearl Controls</h2>
               <p>
-                Each player name creates its own button. Add a new teammate below and the interface updates instantly.
+                Each player carries its own signal, redstone side, and channel name. Only users with the admin Discord role can add new players.
               </p>
             </div>
             <div class="big-count" id="playerCountBig">0</div>
@@ -736,21 +709,37 @@ Awaiting command...</div>
 
           <div class="players" id="playersGrid"></div>
 
-          <div class="toolbar">
-            <input id="newPlayerInput" class="input" type="text" maxlength="24" placeholder="Add a new player name..." />
-            <button id="addPlayerBtn" class="add-btn" type="button">Add Player</button>
+          <div id="adminPanel" class="admin-panel hidden">
+            <span class="eyebrow">Admin Configuration</span>
+            <h2 style="font-size:clamp(1.3rem,2vw,1.7rem); margin-top:4px;">Add New Player</h2>
+
+            <div class="admin-grid">
+              <input id="newPlayerName" class="input" type="text" maxlength="24" placeholder="Player name" />
+              <input id="newPlayerSignal" class="input" type="number" min="1" max="15" value="15" placeholder="Signal" />
+              <select id="newPlayerSide" class="select">
+                <option value="back">back</option>
+                <option value="front">front</option>
+                <option value="left">left</option>
+                <option value="right">right</option>
+                <option value="top">top</option>
+                <option value="bottom">bottom</option>
+              </select>
+              <input id="newPlayerChannel" class="input" type="text" maxlength="32" value="Oil Rig" placeholder="Channel name" />
+            </div>
+
+            <button id="addPlayerBtn" class="btn add-btn" type="button">Add Player</button>
+
+            <p class="admin-note">
+              Admin role required: <strong>1556390847191322806</strong>
+            </p>
           </div>
 
           <p class="hint">
-            To make names stay forever, keep them in the player list inside this file or later move them to your backend.
+            Put your real logo file next to this HTML as <strong>logo.png</strong>. If it is missing, a fallback FF icon appears.
           </p>
         </article>
       </section>
     </main>
-
-    <footer>
-      Frosted Fang System • Cryo-linked pearl trigger interface
-    </footer>
   </div>
 
   <div class="overlay" id="overlay" aria-hidden="true">
@@ -763,7 +752,6 @@ Awaiting command...</div>
       <div class="anim-body">
         <div class="eye-wrap" aria-hidden="true">
           <svg class="eye-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
-            <path class="eye-beam" d="M110 100H490"/>
             <path class="eye-outline" d="M85 100C145 42 225 28 300 28C375 28 455 42 515 100C455 158 375 172 300 172C225 172 145 158 85 100Z"/>
             <circle class="eye-pupil" cx="300" cy="100" r="24"/>
           </svg>
@@ -776,13 +764,17 @@ Awaiting command...</div>
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
+    const ADMIN_ROLE_ID = '1556390847191322806';
 
-    // Add names here. Each one gets a button automatically.
     const players = [
-      'Necrox',
-      'Alice',
-      'Feather Fang'
+      { name: 'Necrox', signal: 15, side: 'back', channel: 'Oil Rig' },
+      { name: 'Alice', signal: 15, side: 'top', channel: 'Oil Rig' },
+      { name: 'Frosted Fang', signal: 15, side: 'left', channel: 'Oil Rig' }
     ];
+
+    let isLoggedIn = false;
+    let currentUser = null;
+    let canManagePlayers = false;
 
     const playersGrid = document.getElementById('playersGrid');
     const playerCountSmall = document.getElementById('playerCountSmall');
@@ -790,10 +782,24 @@ Awaiting command...</div>
     const backendStatus = document.getElementById('backendStatus');
     const consoleScreen = document.getElementById('consoleScreen');
     const lastAction = document.getElementById('lastAction');
-    const newPlayerInput = document.getElementById('newPlayerInput');
-    const addPlayerBtn = document.getElementById('addPlayerBtn');
     const overlay = document.getElementById('overlay');
     const animText = document.getElementById('animText');
+    const authText = document.getElementById('authText');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const newPlayerName = document.getElementById('newPlayerName');
+    const newPlayerSignal = document.getElementById('newPlayerSignal');
+    const newPlayerSide = document.getElementById('newPlayerSide');
+    const newPlayerChannel = document.getElementById('newPlayerChannel');
+    const logoImage = document.getElementById('logoImage');
+    const logoFallback = document.getElementById('logoFallback');
+
+    logoImage.addEventListener('error', () => {
+      logoImage.style.display = 'none';
+      logoFallback.style.display = 'grid';
+    });
 
     function updateCounts() {
       const count = players.length;
@@ -809,14 +815,62 @@ Awaiting command...</div>
       return name.replace(/\s+/g, ' ').trim();
     }
 
+    function updateAuthUI() {
+      const buttons = document.querySelectorAll('.player-btn');
+      buttons.forEach(btn => btn.disabled = !isLoggedIn);
+
+      adminPanel.classList.toggle('hidden', !canManagePlayers);
+
+      if (isLoggedIn) {
+        const name = currentUser?.global_name || currentUser?.username || 'Authorized User';
+        const adminText = canManagePlayers ? '\nAdmin role detected.' : '\nStandard operator access.';
+        authText.textContent = `Logged in as ${name}`;
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+        setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${name}${adminText}`);
+      } else {
+        authText.textContent = 'Not logged in';
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+        adminPanel.classList.add('hidden');
+        setConsole('Frosted Fang System\nAwaiting authorization...');
+      }
+    }
+
     async function checkBackend() {
       try {
-        const res = await fetch(`${API_BASE}/`, { method: 'GET' });
+        const res = await fetch(`${API_BASE}/`, { method: 'GET', credentials: 'include' });
         if (!res.ok) throw new Error();
         backendStatus.textContent = 'Backend: online';
       } catch {
         backendStatus.textContent = 'Backend: offline';
       }
+    }
+
+    async function checkLogin() {
+      try {
+        const res = await fetch(`${API_BASE}/api/me`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await res.json();
+
+        if (data.loggedIn) {
+          isLoggedIn = true;
+          currentUser = data.user;
+          canManagePlayers = Array.isArray(data.user.roles) && data.user.roles.includes(ADMIN_ROLE_ID);
+        } else {
+          isLoggedIn = false;
+          currentUser = null;
+          canManagePlayers = false;
+        }
+      } catch {
+        isLoggedIn = false;
+        currentUser = null;
+        canManagePlayers = false;
+      }
+
+      updateAuthUI();
     }
 
     function showAnimation(player) {
@@ -831,16 +885,20 @@ Awaiting command...</div>
     }
 
     async function pullPearl(player, button) {
-      button.classList.add('loading');
-      setConsole(`Frosted Fang System\nSending command...\nTarget: ${player}`);
+      if (!isLoggedIn) {
+        setConsole('Frosted Fang System\nAccess denied.\nPlease login first.');
+        return;
+      }
+
+      button.disabled = true;
+      setConsole(`Frosted Fang System\nSending command...\nTarget: ${player.name}\nSide: ${player.side}\nChannel: ${player.channel}`);
 
       try {
         const res = await fetch(`${API_BASE}/api/pull-pearl`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ player })
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(player)
         });
 
         const data = await res.json().catch(() => ({}));
@@ -849,13 +907,13 @@ Awaiting command...</div>
           throw new Error(data.message || 'Request failed');
         }
 
-        lastAction.textContent = `Last action: ${player}`;
-        setConsole(`Frosted Fang System\nCommand accepted.\nPulled ${player} Pearl`);
-        showAnimation(player);
+        lastAction.textContent = `Last action: ${player.name}`;
+        setConsole(`Frosted Fang System\nCommand accepted.\nPulled ${player.name} Pearl`);
+        showAnimation(player.name);
       } catch (err) {
         setConsole(`Frosted Fang System\nCommand failed.\n${err.message}`);
       } finally {
-        button.classList.remove('loading');
+        button.disabled = !isLoggedIn;
       }
     }
 
@@ -863,10 +921,11 @@ Awaiting command...</div>
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'player-btn';
+      button.disabled = !isLoggedIn;
       button.innerHTML = `
         <span class="label">Pearl Trigger</span>
-        <span class="name">${player}</span>
-        <span class="sub">Pull ${player}'s pearl</span>
+        <span class="name">${player.name}</span>
+        <span class="sub">Signal ${player.signal} • ${player.side} • ${player.channel}</span>
       `;
       button.addEventListener('click', () => pullPearl(player, button));
       return button;
@@ -878,32 +937,79 @@ Awaiting command...</div>
         playersGrid.appendChild(createPlayerButton(player));
       });
       updateCounts();
+      updateAuthUI();
     }
 
     function addPlayer() {
-      const name = cleanName(newPlayerInput.value);
-      if (!name) return;
-
-      const exists = players.some(p => p.toLowerCase() === name.toLowerCase());
-      if (exists) {
-        setConsole(`Frosted Fang System\nPlayer already exists.\n${name}`);
-        newPlayerInput.value = '';
+      if (!isLoggedIn) {
+        setConsole('Frosted Fang System\nAccess denied.\nPlease login first.');
         return;
       }
 
-      players.push(name);
+      if (!canManagePlayers) {
+        setConsole('Frosted Fang System\nAccess denied.\nAdmin role required to add players.');
+        return;
+      }
+
+      const name = cleanName(newPlayerName.value);
+      const signal = Number(newPlayerSignal.value);
+      const side = newPlayerSide.value;
+      const channel = cleanName(newPlayerChannel.value);
+
+      if (!name) {
+        setConsole('Frosted Fang System\nMissing player name.');
+        return;
+      }
+
+      if (!channel) {
+        setConsole('Frosted Fang System\nMissing channel name.');
+        return;
+      }
+
+      if (!Number.isInteger(signal) || signal < 1 || signal > 15) {
+        setConsole('Frosted Fang System\nSignal must be between 1 and 15.');
+        return;
+      }
+
+      const exists = players.some(p => p.name.toLowerCase() === name.toLowerCase());
+      if (exists) {
+        setConsole(`Frosted Fang System\nPlayer already exists.\n${name}`);
+        return;
+      }
+
+      players.push({ name, signal, side, channel });
       renderPlayers();
-      setConsole(`Frosted Fang System\nRegistered new player.\n${name}`);
-      newPlayerInput.value = '';
+      setConsole(`Frosted Fang System\nRegistered new player.\n${name}\nSignal: ${signal} • Side: ${side} • Channel: ${channel}`);
+
+      newPlayerName.value = '';
+      newPlayerSignal.value = '15';
+      newPlayerSide.value = 'back';
+      newPlayerChannel.value = 'Oil Rig';
     }
 
-    addPlayerBtn.addEventListener('click', addPlayer);
-    newPlayerInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addPlayer();
+    loginBtn.addEventListener('click', () => {
+      window.location.href = `${API_BASE}/auth/discord`;
     });
 
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+      } catch {}
+      isLoggedIn = false;
+      currentUser = null;
+      canManagePlayers = false;
+      updateAuthUI();
+    });
+
+    addPlayerBtn.addEventListener('click', addPlayer);
+
     renderPlayers();
+    updateAuthUI();
     checkBackend();
+    checkLogin();
   </script>
 </body>
 </html>
