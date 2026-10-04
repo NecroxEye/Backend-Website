@@ -3,40 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Feather Fang Pearl Panel</title>
+  <title>Frosted Fang System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0c0f0d;
-      --bg-2:#121712;
-      --panel:#0f140f;
-      --panel-2:rgba(14,20,14,.84);
-      --line:#243126;
-      --line-2:#324635;
-      --text:#e7f7e8;
-      --muted:#96b39a;
-      --green:#63ff8b;
-      --green-2:#2fc25d;
-      --green-d:#17321f;
-      --danger:#ff7272;
-      --shadow:0 20px 60px rgba(0,0,0,.45);
-      --radius:24px;
-      --radius-sm:16px;
-      --max:1200px;
+      --bg-1:#03131a;
+      --bg-2:#072532;
+      --bg-3:#0b3a4c;
+      --ice:#dffcff;
+      --cyan:#8af7ff;
+      --cyan-2:#57e7ff;
+      --cyan-3:#26cde8;
+      --line:rgba(138,247,255,.22);
+      --line-strong:rgba(138,247,255,.42);
+      --panel:rgba(10,30,39,.44);
+      --panel-2:rgba(7,23,31,.58);
+      --text:#ecfdff;
+      --muted:#a7d8df;
+      --success:#7fffd4;
+      --shadow:0 24px 80px rgba(0,0,0,.35);
+      --radius:26px;
+      --radius-sm:18px;
+      --max:1220px;
     }
 
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     body{
       min-height:100vh;
-      font-family:"Inter", sans-serif;
       color:var(--text);
+      font-family:"JetBrains Mono", monospace;
       background:
-        radial-gradient(circle at 20% 10%, rgba(99,255,139,.08), transparent 30%),
-        radial-gradient(circle at 80% 20%, rgba(47,194,93,.06), transparent 28%),
-        linear-gradient(180deg, #0b0e0c 0%, #0d120f 100%);
+        radial-gradient(circle at 15% 20%, rgba(138,247,255,.18), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(87,231,255,.14), transparent 22%),
+        radial-gradient(circle at 50% 85%, rgba(38,205,232,.12), transparent 28%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 42%, var(--bg-3) 100%);
       overflow-x:hidden;
     }
 
@@ -45,34 +48,55 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.08;
-      background-image:
-        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
-      background-size: 28px 28px;
-      mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+      background:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size:36px 36px;
+      opacity:.28;
+      mask-image: radial-gradient(circle at center, black 42%, transparent 100%);
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.05), transparent 60%);
+      mix-blend-mode:screen;
+      opacity:.5;
     }
 
     .shell{
-      width:min(calc(100% - 32px), var(--max));
+      width:min(calc(100% - 28px), var(--max));
       margin-inline:auto;
     }
 
+    .reveal{
+      opacity:0;
+      transform:translateY(18px);
+      animation:reveal .7s ease forwards;
+    }
+    .d1{animation-delay:.08s}
+    .d2{animation-delay:.16s}
+    .d3{animation-delay:.24s}
+
     header{
-      padding:24px 0 10px;
+      padding:22px 0 10px;
     }
 
     .topbar{
       display:flex;
-      gap:16px;
       justify-content:space-between;
       align-items:center;
-      padding:14px 18px;
+      gap:18px;
+      padding:14px 16px;
       border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(20,27,20,.9), rgba(11,15,11,.8));
-      backdrop-filter: blur(10px);
       border-radius:999px;
+      background:linear-gradient(180deg, rgba(222,252,255,.10), rgba(7,24,31,.30));
       box-shadow:var(--shadow);
+      backdrop-filter:blur(18px) saturate(150%);
+      -webkit-backdrop-filter:blur(18px) saturate(150%);
     }
 
     .brand{
@@ -82,50 +106,40 @@
       min-width:0;
     }
 
-    .brand-mark{
-      width:40px;
-      height:40px;
-      border-radius:12px;
-      border:1px solid rgba(99,255,139,.22);
-      background:
-        radial-gradient(circle at 35% 35%, rgba(99,255,139,.35), transparent 40%),
-        linear-gradient(135deg, #112016, #0c110d);
-      position:relative;
+    .logo-wrap{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), 0 12px 24px rgba(0,0,0,.18);
       overflow:hidden;
       flex:0 0 auto;
     }
 
-    .brand-mark::before,
-    .brand-mark::after{
-      content:"";
-      position:absolute;
-      inset:auto;
-      background:var(--green);
-      opacity:.85;
+    .logo-svg{
+      width:34px;
+      height:34px;
+      filter:drop-shadow(0 0 12px rgba(138,247,255,.45));
     }
 
-    .brand-mark::before{
-      width:18px;height:2px;left:11px;top:13px;
-      box-shadow:0 8px 0 var(--green), 0 16px 0 var(--green);
-    }
-
-    .brand-mark::after{
-      width:2px;height:18px;left:19px;top:11px;
-    }
-
-    .brand-copy{min-width:0}
-    .eyebrow{
+    .brand-copy small{
       display:block;
       color:var(--muted);
-      font-size:.76rem;
-      text-transform:uppercase;
       letter-spacing:.18em;
-      margin-bottom:2px;
-      white-space:nowrap;
+      text-transform:uppercase;
+      font-size:.72rem;
+      margin-bottom:4px;
     }
+
     .brand-copy strong{
       display:block;
+      font-family:"Orbitron", sans-serif;
       font-size:1rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -137,281 +151,278 @@
       gap:10px;
       padding:10px 14px;
       border-radius:999px;
-      border:1px solid var(--line-2);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
       color:var(--muted);
-      background:rgba(10,14,10,.7);
-      font-size:.92rem;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
       white-space:nowrap;
     }
 
     .status-dot{
       width:10px;height:10px;border-radius:50%;
-      background:var(--green);
-      box-shadow:0 0 0 6px rgba(99,255,139,.10), 0 0 16px rgba(99,255,139,.55);
+      background:var(--cyan);
+      box-shadow:0 0 0 7px rgba(138,247,255,.10), 0 0 16px rgba(138,247,255,.6);
       animation:pulse 2s infinite;
     }
 
     main{
-      padding:26px 0 40px;
+      padding:18px 0 38px;
     }
 
     .hero{
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:24px;
+      grid-template-columns:1.2fr .8fr;
+      gap:22px;
       align-items:stretch;
     }
 
-    .hero-copy,
-    .hero-side{
+    .glass{
       border:1px solid var(--line);
-      border-radius:var(--radius);
       background:
-        linear-gradient(180deg, rgba(20,27,20,.82), rgba(10,14,10,.88));
+        linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)),
+        linear-gradient(180deg, rgba(8,29,38,.56), rgba(5,17,22,.56));
+      border-radius:var(--radius);
       box-shadow:var(--shadow);
+      backdrop-filter:blur(20px) saturate(160%);
+      -webkit-backdrop-filter:blur(20px) saturate(160%);
       position:relative;
       overflow:hidden;
     }
 
-    .hero-copy{
-      padding:clamp(24px, 5vw, 54px);
-    }
-
-    .hero-copy::after,
-    .hero-side::after{
+    .glass::before{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
-      background:linear-gradient(135deg, rgba(99,255,139,.06), transparent 30%, transparent 70%, rgba(99,255,139,.04));
+      background:
+        linear-gradient(130deg, rgba(255,255,255,.16), transparent 20%, transparent 75%, rgba(138,247,255,.07)),
+        radial-gradient(circle at top left, rgba(255,255,255,.12), transparent 28%);
     }
 
-    h1,h2,h3{
-      font-family:"VT323", monospace;
-      font-weight:400;
-      line-height:.95;
+    .hero-copy{
+      padding:clamp(24px, 5vw, 52px);
+      min-height:420px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .eyebrow{
+      display:inline-block;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.24em;
+      font-size:.75rem;
+      margin-bottom:14px;
+    }
+
+    h1,h2{
       margin:0;
-      letter-spacing:.02em;
+      font-family:"Orbitron", sans-serif;
+      text-transform:uppercase;
+      line-height:.92;
+      letter-spacing:.04em;
     }
 
     h1{
-      font-size:clamp(3.6rem, 8vw, 7rem);
-      text-transform:uppercase;
+      font-size:clamp(2.9rem, 7vw, 6rem);
+      max-width:8ch;
       margin-bottom:18px;
+      text-shadow:0 0 20px rgba(138,247,255,.14);
     }
 
     .lead{
+      margin:0 0 24px;
       max-width:58ch;
-      color:#c8ddcb;
-      font-size:clamp(1rem, 1.6vw, 1.1rem);
-      line-height:1.7;
-      margin:0 0 28px;
+      color:#d3f7fb;
+      line-height:1.75;
+      font-size:clamp(.98rem, 1.4vw, 1.05rem);
     }
 
-    .hero-meta{
+    .hero-tags{
       display:flex;
       flex-wrap:wrap;
       gap:12px;
     }
 
-    .meta-chip{
-      border:1px solid var(--line-2);
-      background:rgba(19,27,20,.7);
-      color:var(--text);
-      padding:10px 14px;
+    .tag{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--ice);
       border-radius:999px;
-      font-size:.92rem;
+      padding:10px 14px;
+      font-size:.88rem;
     }
 
     .hero-side{
       padding:22px;
       display:grid;
       grid-template-rows:auto 1fr auto;
-      gap:18px;
+      gap:16px;
     }
 
-    .mini-label{
+    .mini{
       color:var(--muted);
       text-transform:uppercase;
       letter-spacing:.18em;
-      font-size:.76rem;
+      font-size:.74rem;
     }
 
-    .terminal{
-      border:1px solid #2d4532;
-      border-radius:20px;
-      background:#081008;
+    .console{
+      border-radius:22px;
       overflow:hidden;
-      min-height:320px;
+      border:1px solid rgba(138,247,255,.22);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)),
+        linear-gradient(180deg, rgba(4,15,20,.92), rgba(3,11,15,.96));
+      min-height:330px;
       display:grid;
       grid-template-rows:auto 1fr;
-      box-shadow: inset 0 0 0 1px rgba(99,255,139,.03);
     }
 
-    .terminal-bar{
+    .console-bar{
       display:flex;
-      gap:8px;
       align-items:center;
+      gap:8px;
       padding:12px 14px;
-      background:#0c150d;
-      border-bottom:1px solid #223624;
+      border-bottom:1px solid rgba(138,247,255,.14);
+      background:rgba(255,255,255,.04);
     }
 
-    .term-dot{
+    .dot{
       width:10px;height:10px;border-radius:50%;
-      background:#28412d;
+      background:#7bc9da;
+      opacity:.5;
     }
-    .term-dot:nth-child(2){background:#345c3d}
-    .term-dot:nth-child(3){background:#63ff8b}
+    .dot:nth-child(2){opacity:.7}
+    .dot:nth-child(3){opacity:1}
 
-    .terminal-screen{
-      padding:18px;
-      font-family:"VT323", monospace;
-      color:var(--green);
-      font-size:clamp(1.35rem, 3vw, 1.8rem);
-      line-height:1.25;
-      white-space:pre-line;
-      display:flex;
-      align-items:flex-start;
-      justify-content:flex-start;
+    .console-screen{
       position:relative;
+      padding:20px;
+      color:var(--success);
+      font-size:1rem;
+      line-height:1.7;
+      white-space:pre-line;
       overflow:hidden;
     }
 
-    .terminal-screen::after{
+    .console-screen::after{
       content:"";
       position:absolute;
       inset:0;
-      background:linear-gradient(180deg, transparent 0%, rgba(99,255,139,.02) 50%, transparent 100%);
-      animation:scan 6s linear infinite;
       pointer-events:none;
+      background:linear-gradient(180deg, transparent 0%, rgba(138,247,255,.03) 45%, transparent 100%);
+      animation:scan 6s linear infinite;
     }
 
-    .terminal-footer{
+    .console-meta{
       display:flex;
       justify-content:space-between;
       gap:12px;
       color:var(--muted);
-      font-size:.88rem;
+      font-size:.86rem;
     }
 
     .section{
-      margin-top:26px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:24px;
+      margin-top:24px;
     }
 
     .panel{
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(17,23,18,.82), rgba(9,13,10,.92));
-      box-shadow:var(--shadow);
-      padding:clamp(22px, 3vw, 34px);
-      position:relative;
-      overflow:hidden;
+      padding:clamp(22px, 4vw, 34px);
     }
 
-    .panel-header{
+    .panel-head{
       display:flex;
       justify-content:space-between;
       align-items:end;
-      gap:16px;
+      gap:18px;
       margin-bottom:22px;
     }
 
-    .panel-header p{
+    .panel-head p{
       margin:8px 0 0;
       color:var(--muted);
-      max-width:60ch;
-      line-height:1.6;
+      max-width:62ch;
+      line-height:1.7;
     }
 
-    .count{
-      font-family:"VT323", monospace;
-      font-size:clamp(2rem, 4vw, 3rem);
-      color:var(--green);
+    .big-count{
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(2.2rem, 5vw, 3.4rem);
+      color:var(--cyan);
+      text-shadow:0 0 20px rgba(138,247,255,.18);
     }
 
-    .buttons-grid{
+    .players{
       display:grid;
       grid-template-columns:repeat(3, minmax(0,1fr));
       gap:16px;
     }
 
     .player-btn{
-      appearance:none;
       border:none;
-      text-align:left;
       cursor:pointer;
+      text-align:left;
       padding:20px 18px;
-      border-radius:20px;
+      min-height:126px;
+      border-radius:22px;
       color:var(--text);
       background:
-        linear-gradient(180deg, rgba(23,34,24,.95), rgba(11,15,11,.96));
-      border:1px solid #27382a;
-      transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+        linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03)),
+        linear-gradient(180deg, rgba(11,38,49,.78), rgba(6,21,29,.9));
+      border:1px solid rgba(138,247,255,.20);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03), 0 16px 28px rgba(0,0,0,.18);
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
       position:relative;
       overflow:hidden;
-      min-height:118px;
     }
 
     .player-btn::before{
       content:"";
       position:absolute;
-      inset:auto auto 0 0;
-      width:100%;
+      inset:auto 0 0 0;
       height:3px;
-      background:linear-gradient(90deg, var(--green), transparent 80%);
-      opacity:.75;
+      background:linear-gradient(90deg, rgba(138,247,255,.9), transparent 78%);
     }
 
     .player-btn:hover{
-      transform:translateY(-3px);
-      border-color:rgba(99,255,139,.5);
-      box-shadow:0 16px 30px rgba(0,0,0,.28), inset 0 0 0 1px rgba(99,255,139,.08);
+      transform:translateY(-4px);
+      border-color:var(--line-strong);
+      box-shadow:0 20px 34px rgba(0,0,0,.22), 0 0 0 1px rgba(138,247,255,.08) inset;
     }
 
     .player-btn:active{
       transform:translateY(0) scale(.985);
     }
 
-    .player-btn .small{
+    .player-btn.loading{
+      pointer-events:none;
+      opacity:.82;
+    }
+
+    .player-btn .label{
       display:block;
       color:var(--muted);
       text-transform:uppercase;
       letter-spacing:.16em;
-      font-size:.74rem;
+      font-size:.72rem;
       margin-bottom:10px;
     }
 
     .player-btn .name{
       display:block;
-      font-family:"VT323", monospace;
-      font-size:clamp(2rem, 4vw, 2.6rem);
-      line-height:.9;
-      margin-bottom:8px;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.35rem, 2.5vw, 1.75rem);
+      line-height:1.1;
+      margin-bottom:10px;
+      text-transform:uppercase;
     }
 
-    .player-btn .hint{
+    .player-btn .sub{
       display:block;
-      color:#bdd5c1;
-      font-size:.92rem;
-    }
-
-    .player-btn.loading{
-      pointer-events:none;
-      opacity:.8;
-      border-color:rgba(99,255,139,.5);
-    }
-
-    .player-btn.success{
-      border-color:rgba(99,255,139,.55);
-      box-shadow:0 0 0 1px rgba(99,255,139,.10), 0 0 26px rgba(99,255,139,.12);
-    }
-
-    .player-btn.error{
-      border-color:rgba(255,114,114,.5);
+      color:#d9fbff;
+      font-size:.9rem;
     }
 
     .toolbar{
@@ -421,22 +432,24 @@
       margin-top:22px;
     }
 
-    .tool-input{
-      flex:1 1 260px;
+    .input{
+      flex:1 1 280px;
       min-width:0;
-      border:1px solid #2b3e2e;
-      background:#0d140f;
-      color:var(--text);
       border-radius:16px;
+      border:1px solid rgba(138,247,255,.22);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
       padding:14px 16px;
-      outline:none;
       font:inherit;
-      transition:border-color .18s ease, box-shadow .18s ease;
+      outline:none;
+      backdrop-filter:blur(10px);
     }
 
-    .tool-input:focus{
-      border-color:rgba(99,255,139,.5);
-      box-shadow:0 0 0 4px rgba(99,255,139,.08);
+    .input::placeholder{color:#b5e8ef}
+
+    .input:focus{
+      border-color:var(--line-strong);
+      box-shadow:0 0 0 4px rgba(138,247,255,.08);
     }
 
     .add-btn{
@@ -446,91 +459,160 @@
       padding:14px 18px;
       font:inherit;
       font-weight:700;
-      color:#081008;
-      background:linear-gradient(180deg, #88ffac, #44d46f);
+      color:#03242d;
+      background:linear-gradient(180deg, #dffcff, #8af7ff);
       transition:transform .18s ease, filter .18s ease;
     }
 
-    .add-btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
+    .add-btn:hover{transform:translateY(-2px);filter:brightness(1.02)}
     .add-btn:active{transform:translateY(0) scale(.985)}
 
-    .inline-note{
+    .hint{
       margin-top:12px;
       color:var(--muted);
+      line-height:1.6;
       font-size:.92rem;
-      line-height:1.5;
     }
 
-    .reveal{
-      opacity:0;
-      transform:translateY(18px);
-      animation:reveal .65s ease forwards;
-    }
-    .delay-1{animation-delay:.08s}
-    .delay-2{animation-delay:.16s}
-    .delay-3{animation-delay:.24s}
-
-    .term-overlay{
+    .overlay{
       position:fixed;
       inset:0;
-      background:rgba(4,7,5,.58);
-      backdrop-filter: blur(6px);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:20px;
-      z-index:40;
+      padding:22px;
+      background:rgba(3,13,17,.48);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
       opacity:0;
       pointer-events:none;
-      transition:opacity .22s ease;
+      transition:opacity .24s ease;
+      z-index:50;
     }
 
-    .term-overlay.show{
+    .overlay.show{
       opacity:1;
       pointer-events:auto;
     }
 
-    .term-window{
+    .anim-panel{
       width:min(92vw, 760px);
-      border:1px solid #315237;
-      border-radius:22px;
+      border-radius:26px;
       overflow:hidden;
-      background:#071007;
-      box-shadow:0 30px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(99,255,139,.06);
-      transform:translateY(10px) scale(.985);
-      transition:transform .22s ease;
+      border:1px solid rgba(138,247,255,.26);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
+        linear-gradient(180deg, rgba(8,28,36,.88), rgba(5,16,22,.94));
+      box-shadow:0 30px 90px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);
+      transform:translateY(12px) scale(.985);
+      transition:transform .24s ease;
+      position:relative;
+      overflow:hidden;
     }
 
-    .term-overlay.show .term-window{
+    .overlay.show .anim-panel{
       transform:translateY(0) scale(1);
     }
 
-    .term-window .terminal-screen{
-      min-height:260px;
-      padding:28px;
-      font-size:clamp(1.65rem, 3vw, 2.2rem);
+    .anim-panel::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:
+        radial-gradient(circle at center, rgba(138,247,255,.14), transparent 26%),
+        radial-gradient(circle at center, rgba(255,255,255,.08), transparent 48%);
+      animation:floatGlow 3.2s ease-in-out infinite;
+      pointer-events:none;
     }
 
-    .cursor{
-      display:inline-block;
-      width:.58em;
-      animation:blink 1s steps(1,end) infinite;
+    .anim-head{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border-bottom:1px solid rgba(138,247,255,.14);
+      background:rgba(255,255,255,.05);
+      position:relative;
+      z-index:1;
+    }
+
+    .anim-body{
+      position:relative;
+      z-index:1;
+      padding:28px 26px 30px;
+      display:grid;
+      gap:18px;
+      justify-items:center;
+      text-align:center;
+    }
+
+    .eye-wrap{
+      width:min(100%, 520px);
+      padding:8px 0 4px;
+    }
+
+    .eye-svg{
+      width:100%;
+      height:auto;
+      display:block;
+      filter:drop-shadow(0 0 18px rgba(138,247,255,.28));
+    }
+
+    .eye-outline{
+      stroke:rgba(223,252,255,.95);
+      stroke-width:3.2;
+      fill:none;
+      stroke-linecap:round;
+      stroke-dasharray:900;
+      stroke-dashoffset:900;
+      animation:drawEye .9s ease forwards;
+    }
+
+    .eye-pupil{
+      fill:var(--cyan);
+      transform-origin:center;
+      animation:pupilPulse 1.25s ease .4s forwards;
+      opacity:0;
+    }
+
+    .eye-beam{
+      stroke:rgba(138,247,255,.34);
+      stroke-width:2;
+      stroke-dasharray:12 18;
+      animation:beam 2s linear infinite;
+    }
+
+    .anim-title{
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.25rem, 2.6vw, 2rem);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin:0;
+      text-shadow:0 0 18px rgba(138,247,255,.18);
+    }
+
+    .anim-text{
+      margin:0;
+      color:var(--success);
+      font-size:clamp(1rem, 1.7vw, 1.08rem);
+      line-height:1.8;
+      white-space:pre-line;
     }
 
     footer{
-      padding:12px 0 36px;
-      color:var(--muted);
+      padding:14px 0 36px;
       text-align:center;
+      color:var(--muted);
       font-size:.9rem;
-    }
-
-    @keyframes pulse{
-      0%,100%{transform:scale(1);opacity:1}
-      50%{transform:scale(1.15);opacity:.85}
     }
 
     @keyframes reveal{
       to{opacity:1;transform:translateY(0)}
+    }
+
+    @keyframes pulse{
+      0%,100%{transform:scale(1);opacity:1}
+      50%{transform:scale(1.16);opacity:.84}
     }
 
     @keyframes scan{
@@ -538,33 +620,43 @@
       100%{transform:translateY(100%)}
     }
 
-    @keyframes blink{
-      0%,49%{opacity:1}
-      50%,100%{opacity:0}
+    @keyframes drawEye{
+      to{stroke-dashoffset:0}
+    }
+
+    @keyframes pupilPulse{
+      0%{transform:scale(.25);opacity:0}
+      60%{transform:scale(1.15);opacity:1}
+      100%{transform:scale(1);opacity:1}
+    }
+
+    @keyframes beam{
+      from{stroke-dashoffset:0}
+      to{stroke-dashoffset:-60}
+    }
+
+    @keyframes floatGlow{
+      0%,100%{transform:translateY(0) scale(1)}
+      50%{transform:translateY(-8px) scale(1.02)}
     }
 
     @media (max-width: 980px){
-      .hero{
-        grid-template-columns:1fr;
-      }
-      .buttons-grid{
-        grid-template-columns:repeat(2, minmax(0,1fr));
-      }
+      .hero{grid-template-columns:1fr}
+      .players{grid-template-columns:repeat(2, minmax(0,1fr))}
     }
 
     @media (max-width: 640px){
       .topbar{
-        border-radius:22px;
+        flex-direction:column;
+        align-items:flex-start;
+        border-radius:24px;
+      }
+      .panel-head{
         flex-direction:column;
         align-items:flex-start;
       }
-      .buttons-grid{
-        grid-template-columns:1fr;
-      }
-      .panel-header{
-        flex-direction:column;
-        align-items:flex-start;
-      }
+      .players{grid-template-columns:1fr}
+      .anim-body{padding:24px 18px 26px}
     }
   </style>
 </head>
@@ -573,12 +665,19 @@
     <header class="reveal">
       <div class="topbar">
         <div class="brand">
-          <div class="brand-mark" aria-hidden="true"></div>
+          <div class="logo-wrap" aria-hidden="true">
+            <svg class="logo-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M32 8C20 8 11 18 11 31C11 44 20 54 32 54C44 54 53 44 53 31C53 18 44 8 32 8Z" stroke="#8AF7FF" stroke-width="3"/>
+              <path d="M18 31C22 23 28 19 32 19C36 19 42 23 46 31C42 39 36 43 32 43C28 43 22 39 18 31Z" stroke="#DFFCFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="32" cy="31" r="6" fill="#8AF7FF"/>
+            </svg>
+          </div>
           <div class="brand-copy">
-            <span class="eyebrow">Faction Control</span>
-            <strong>Feather Fang Pearl Panel</strong>
+            <small>Frosted Division</small>
+            <strong>Frosted Fang System</strong>
           </div>
         </div>
+
         <div class="status-pill" aria-live="polite">
           <span class="status-dot" aria-hidden="true"></span>
           <span id="backendStatus">Backend: checking...</span>
@@ -588,187 +687,152 @@
 
     <main>
       <section class="hero">
-        <article class="hero-copy reveal delay-1">
-          <span class="eyebrow">Command Surface</span>
-          <h1>Pull Pearls Fast.</h1>
+        <article class="glass hero-copy reveal d1">
+          <span class="eyebrow">Cryo Control Interface</span>
+          <h1>Frosted Fang</h1>
           <p class="lead">
-            Add teammates once, generate buttons automatically, and trigger the right player instantly.
-            Every activation opens a terminal-style confirmation window with a clean faction log.
+            Cold-glass control panel for instant pearl triggers. Add names, generate buttons automatically,
+            and fire a clean confirmation animation with the Frosted Fang eye system.
           </p>
-          <div class="hero-meta">
-            <span class="meta-chip">Auto-generated player buttons</span>
-            <span class="meta-chip">Backend trigger ready</span>
-            <span class="meta-chip">Terminal confirmation overlay</span>
+          <div class="hero-tags">
+            <span class="tag">Blue frosted cyan UI</span>
+            <span class="tag">Auto-generated player buttons</span>
+            <span class="tag">Animated eye confirmation</span>
           </div>
         </article>
 
-        <aside class="hero-side reveal delay-2">
-          <div>
-            <div class="mini-label">Live Console</div>
+        <aside class="glass hero-side reveal d2">
+          <div class="mini">System Console</div>
+
+          <div class="console">
+            <div class="console-bar">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="console-screen" id="consoleScreen">Frosted Fang System
+Awaiting command...</div>
           </div>
 
-          <div class="terminal" aria-label="Status terminal">
-            <div class="terminal-bar">
-              <span class="term-dot"></span>
-              <span class="term-dot"></span>
-              <span class="term-dot"></span>
-            </div>
-            <div class="terminal-screen" id="mainTerminal">
-Feather Fang
-System idle...
-            </div>
-          </div>
-
-          <div class="terminal-footer">
-            <span id="playerCountLabel">0 players loaded</span>
-            <span id="lastActionLabel">No action yet</span>
+          <div class="console-meta">
+            <span id="playerCountSmall">0 players loaded</span>
+            <span id="lastAction">No action yet</span>
           </div>
         </aside>
       </section>
 
       <section class="section">
-        <article class="panel reveal delay-3">
-          <div class="panel-header">
+        <article class="glass panel reveal d3">
+          <div class="panel-head">
             <div>
-              <span class="eyebrow">Player Actions</span>
-              <h2>Team Pull Buttons</h2>
+              <span class="eyebrow">Operator Grid</span>
+              <h2>Team Pearl Controls</h2>
               <p>
-                Add a new player below and a matching button appears automatically.
-                Every button sends that player's name to the backend.
+                Each player name creates its own button. Add a new teammate below and the interface updates instantly.
               </p>
             </div>
-            <div class="count" id="playerCountBig">0</div>
+            <div class="big-count" id="playerCountBig">0</div>
           </div>
 
-          <div class="buttons-grid" id="buttonsGrid"></div>
+          <div class="players" id="playersGrid"></div>
 
           <div class="toolbar">
-            <input
-              id="newPlayerInput"
-              class="tool-input"
-              type="text"
-              placeholder="Add new teammate name..."
-              maxlength="24"
-              aria-label="Add new teammate name"
-            />
+            <input id="newPlayerInput" class="input" type="text" maxlength="24" placeholder="Add a new player name..." />
             <button id="addPlayerBtn" class="add-btn" type="button">Add Player</button>
           </div>
 
-          <p class="inline-note">
-            Tip: the button text comes directly from the player name list in the script.
-            To make names stay forever after refresh, save the updated player list in your code or connect this list to your backend later.
+          <p class="hint">
+            To make names stay forever, keep them in the player list inside this file or later move them to your backend.
           </p>
         </article>
       </section>
     </main>
 
     <footer>
-      Feather Fang • Pearl trigger interface
+      Frosted Fang System • Cryo-linked pearl trigger interface
     </footer>
   </div>
 
-  <div class="term-overlay" id="overlay" aria-hidden="true">
-    <div class="term-window" role="dialog" aria-modal="true" aria-label="Pearl pulled terminal">
-      <div class="terminal-bar">
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="anim-panel">
+      <div class="anim-head">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
-      <div class="terminal-screen" id="overlayTerminal"></div>
+      <div class="anim-body">
+        <div class="eye-wrap" aria-hidden="true">
+          <svg class="eye-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+            <path class="eye-beam" d="M110 100H490"/>
+            <path class="eye-outline" d="M85 100C145 42 225 28 300 28C375 28 455 42 515 100C455 158 375 172 300 172C225 172 145 158 85 100Z"/>
+            <circle class="eye-pupil" cx="300" cy="100" r="24"/>
+          </svg>
+        </div>
+        <h3 class="anim-title">Frosted Fang System</h3>
+        <p class="anim-text" id="animText">Pulled User Pearl</p>
+      </div>
     </div>
   </div>
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
 
-    // Add or remove names here. A button is created for each one automatically.
+    // Add names here. Each one gets a button automatically.
     const players = [
       'Necrox',
       'Alice',
       'Feather Fang'
     ];
 
-    const buttonsGrid = document.getElementById('buttonsGrid');
-    const playerCountLabel = document.getElementById('playerCountLabel');
+    const playersGrid = document.getElementById('playersGrid');
+    const playerCountSmall = document.getElementById('playerCountSmall');
     const playerCountBig = document.getElementById('playerCountBig');
-    const lastActionLabel = document.getElementById('lastActionLabel');
     const backendStatus = document.getElementById('backendStatus');
-    const mainTerminal = document.getElementById('mainTerminal');
-    const overlay = document.getElementById('overlay');
-    const overlayTerminal = document.getElementById('overlayTerminal');
-    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const consoleScreen = document.getElementById('consoleScreen');
+    const lastAction = document.getElementById('lastAction');
     const newPlayerInput = document.getElementById('newPlayerInput');
+    const addPlayerBtn = document.getElementById('addPlayerBtn');
+    const overlay = document.getElementById('overlay');
+    const animText = document.getElementById('animText');
 
     function updateCounts() {
       const count = players.length;
-      playerCountLabel.textContent = `${count} player${count === 1 ? '' : 's'} loaded`;
+      playerCountSmall.textContent = `${count} player${count === 1 ? '' : 's'} loaded`;
       playerCountBig.textContent = count;
     }
 
-    function sanitizePlayerName(name) {
-      return name.replace(/\s+/g, ' ').trim();
+    function setConsole(text) {
+      consoleScreen.textContent = text;
     }
 
-    function setMainTerminal(text) {
-      mainTerminal.textContent = text;
+    function cleanName(name) {
+      return name.replace(/\s+/g, ' ').trim();
     }
 
     async function checkBackend() {
       try {
         const res = await fetch(`${API_BASE}/`, { method: 'GET' });
-        if (!res.ok) throw new Error('Backend unreachable');
+        if (!res.ok) throw new Error();
         backendStatus.textContent = 'Backend: online';
-      } catch (e) {
+      } catch {
         backendStatus.textContent = 'Backend: offline';
       }
     }
 
-    function showOverlayForPlayer(player) {
-      overlayTerminal.innerHTML = '';
+    function showAnimation(player) {
+      animText.textContent = `Pulled ${player} Pearl`;
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
 
-      const lines = [
-        'Feather Fang',
-        `Pearl Pulled on : ${player}`
-      ];
-
-      let lineIndex = 0;
-      let charIndex = 0;
-      let current = '';
-
-      function typeNext() {
-        if (lineIndex >= lines.length) {
-          overlayTerminal.innerHTML = current + '<span class="cursor">█</span>';
-          setTimeout(() => {
-            overlay.classList.remove('show');
-            overlay.setAttribute('aria-hidden', 'true');
-          }, 1200);
-          return;
-        }
-
-        const line = lines[lineIndex];
-        if (charIndex < line.length) {
-          current += line[charIndex];
-          charIndex++;
-          overlayTerminal.innerHTML = current + '<span class="cursor">█</span>';
-          setTimeout(typeNext, 28);
-        } else {
-          current += '\n';
-          lineIndex++;
-          charIndex = 0;
-          overlayTerminal.innerHTML = current + '<span class="cursor">█</span>';
-          setTimeout(typeNext, 180);
-        }
-      }
-
-      typeNext();
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+      }, 1900);
     }
 
     async function pullPearl(player, button) {
-      button.classList.remove('success', 'error');
       button.classList.add('loading');
-      setMainTerminal(`Feather Fang\nSending pull request...\nTarget: ${player}`);
+      setConsole(`Frosted Fang System\nSending command...\nTarget: ${player}`);
 
       try {
         const res = await fetch(`${API_BASE}/api/pull-pearl`, {
@@ -785,55 +849,51 @@ System idle...
           throw new Error(data.message || 'Request failed');
         }
 
-        button.classList.add('success');
-        lastActionLabel.textContent = `Last action: ${player}`;
-        setMainTerminal(`Feather Fang\nRequest accepted.\nPearl Pulled on : ${player}`);
-        showOverlayForPlayer(player);
+        lastAction.textContent = `Last action: ${player}`;
+        setConsole(`Frosted Fang System\nCommand accepted.\nPulled ${player} Pearl`);
+        showAnimation(player);
       } catch (err) {
-        button.classList.add('error');
-        setMainTerminal(`Feather Fang\nRequest failed.\n${err.message}`);
+        setConsole(`Frosted Fang System\nCommand failed.\n${err.message}`);
       } finally {
         button.classList.remove('loading');
-        setTimeout(() => button.classList.remove('success', 'error'), 1400);
       }
     }
 
-    function createButton(player) {
+    function createPlayerButton(player) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'player-btn';
       button.innerHTML = `
-        <span class="small">Pearl Trigger</span>
+        <span class="label">Pearl Trigger</span>
         <span class="name">${player}</span>
-        <span class="hint">Pull ${player}'s pearl</span>
+        <span class="sub">Pull ${player}'s pearl</span>
       `;
       button.addEventListener('click', () => pullPearl(player, button));
       return button;
     }
 
-    function renderButtons() {
-      buttonsGrid.innerHTML = '';
-      players.forEach((player) => {
-        buttonsGrid.appendChild(createButton(player));
+    function renderPlayers() {
+      playersGrid.innerHTML = '';
+      players.forEach(player => {
+        playersGrid.appendChild(createPlayerButton(player));
       });
       updateCounts();
     }
 
     function addPlayer() {
-      const raw = newPlayerInput.value;
-      const name = sanitizePlayerName(raw);
+      const name = cleanName(newPlayerInput.value);
       if (!name) return;
 
       const exists = players.some(p => p.toLowerCase() === name.toLowerCase());
       if (exists) {
-        setMainTerminal(`Feather Fang\nPlayer already exists.\n${name}`);
+        setConsole(`Frosted Fang System\nPlayer already exists.\n${name}`);
         newPlayerInput.value = '';
         return;
       }
 
       players.push(name);
-      renderButtons();
-      setMainTerminal(`Feather Fang\nPlayer added.\n${name}`);
+      renderPlayers();
+      setConsole(`Frosted Fang System\nRegistered new player.\n${name}`);
       newPlayerInput.value = '';
     }
 
@@ -842,15 +902,7 @@ System idle...
       if (e.key === 'Enter') addPlayer();
     });
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.style.animationPlayState = 'running';
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-    renderButtons();
+    renderPlayers();
     checkBackend();
   </script>
 </body>
