@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang System</title>
+  <title>Frosted Fang Pearl Pull System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,17 +12,19 @@
       --bg-1:#03131a;
       --bg-2:#072532;
       --bg-3:#0b3a4c;
-      --ice:#dffcff;
+      --ice:#e8fdff;
       --cyan:#8af7ff;
+      --cyan-2:#4de6ff;
       --line:rgba(138,247,255,.22);
       --line-strong:rgba(138,247,255,.42);
       --text:#ecfdff;
       --muted:#a7d8df;
       --success:#7fffd4;
-      --danger:#ff9ab2;
+      --danger:#ff8ca8;
+      --warning:#ffe08a;
       --shadow:0 24px 80px rgba(0,0,0,.35);
       --radius:26px;
-      --max:1220px;
+      --max:1240px;
     }
 
     *{box-sizing:border-box}
@@ -103,8 +105,8 @@
     }
 
     .logo-wrap{
-      width:56px;
-      height:56px;
+      width:58px;
+      height:58px;
       border-radius:16px;
       display:grid;
       place-items:center;
@@ -176,14 +178,14 @@
 
     .hero{
       display:grid;
-      grid-template-columns:1.15fr .85fr;
+      grid-template-columns:1.08fr .92fr;
       gap:22px;
       align-items:stretch;
     }
 
     .hero-copy{
-      padding:clamp(24px, 5vw, 52px);
-      min-height:420px;
+      padding:clamp(24px, 5vw, 56px);
+      min-height:430px;
       display:flex;
       flex-direction:column;
       justify-content:center;
@@ -198,7 +200,7 @@
       margin-bottom:14px;
     }
 
-    h1,h2{
+    h1,h2,h3{
       margin:0;
       font-family:"Orbitron", sans-serif;
       text-transform:uppercase;
@@ -207,32 +209,17 @@
     }
 
     h1{
-      font-size:clamp(2.8rem, 7vw, 5.8rem);
-      max-width:9ch;
+      font-size:clamp(2.7rem, 7vw, 5.6rem);
+      max-width:10ch;
       margin-bottom:18px;
     }
 
     .lead{
-      margin:0 0 24px;
-      max-width:58ch;
+      margin:0;
+      max-width:56ch;
       color:#d3f7fb;
-      line-height:1.75;
+      line-height:1.8;
       font-size:clamp(.98rem, 1.4vw, 1.05rem);
-    }
-
-    .hero-tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-    }
-
-    .tag{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.06);
-      color:var(--ice);
-      border-radius:999px;
-      padding:10px 14px;
-      font-size:.88rem;
     }
 
     .hero-side{
@@ -252,19 +239,19 @@
     .auth-box{
       display:flex;
       flex-wrap:wrap;
-      gap:10px;
+      gap:12px;
       align-items:center;
       justify-content:space-between;
       border:1px solid var(--line);
       border-radius:18px;
-      padding:12px 14px;
+      padding:14px;
       background:rgba(255,255,255,.05);
     }
 
     .auth-text{
       color:var(--ice);
       font-size:.92rem;
-      line-height:1.6;
+      line-height:1.65;
     }
 
     .btn{
@@ -274,11 +261,12 @@
       padding:12px 16px;
       font:inherit;
       font-weight:700;
-      transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+      transition:transform .18s ease, filter .18s ease, opacity .18s ease, border-color .18s ease;
     }
 
     .btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
     .btn:active{transform:translateY(0) scale(.985)}
+    .btn:disabled{cursor:not-allowed;opacity:.55;filter:none;transform:none}
 
     .btn-login{
       color:#03242d;
@@ -298,7 +286,7 @@
       background:
         linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)),
         linear-gradient(180deg, rgba(4,15,20,.92), rgba(3,11,15,.96));
-      min-height:250px;
+      min-height:270px;
       display:grid;
       grid-template-rows:auto 1fr;
     }
@@ -338,7 +326,6 @@
     }
 
     .section{margin-top:24px}
-
     .panel{padding:clamp(22px, 4vw, 34px)}
 
     .panel-head{
@@ -368,25 +355,22 @@
       gap:16px;
     }
 
-    .player-btn{
-      border:none;
-      cursor:pointer;
-      text-align:left;
-      padding:20px 18px;
-      min-height:140px;
+    .player-card{
+      border:1px solid rgba(138,247,255,.20);
       border-radius:22px;
-      color:var(--text);
       background:
         linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03)),
         linear-gradient(180deg, rgba(11,38,49,.78), rgba(6,21,29,.9));
-      border:1px solid rgba(138,247,255,.20);
       box-shadow:0 16px 28px rgba(0,0,0,.18);
-      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
       position:relative;
       overflow:hidden;
+      padding:18px;
+      display:grid;
+      gap:14px;
+      min-height:220px;
     }
 
-    .player-btn::before{
+    .player-card::before{
       content:"";
       position:absolute;
       inset:auto 0 0 0;
@@ -394,22 +378,7 @@
       background:linear-gradient(90deg, rgba(138,247,255,.9), transparent 78%);
     }
 
-    .player-btn:hover:not(:disabled){
-      transform:translateY(-4px);
-      border-color:var(--line-strong);
-      box-shadow:0 20px 34px rgba(0,0,0,.22);
-    }
-
-    .player-btn:active:not(:disabled){
-      transform:translateY(0) scale(.985);
-    }
-
-    .player-btn:disabled{
-      cursor:not-allowed;
-      opacity:.52;
-    }
-
-    .player-btn .label{
+    .player-top .label{
       display:block;
       color:var(--muted);
       text-transform:uppercase;
@@ -418,7 +387,7 @@
       margin-bottom:10px;
     }
 
-    .player-btn .name{
+    .player-top .name{
       display:block;
       font-family:"Orbitron", sans-serif;
       font-size:clamp(1.2rem, 2.3vw, 1.6rem);
@@ -427,11 +396,54 @@
       text-transform:uppercase;
     }
 
-    .player-btn .sub{
+    .player-top .sub{
       display:block;
       color:#d9fbff;
       font-size:.88rem;
       line-height:1.65;
+    }
+
+    .player-actions{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      align-items:center;
+      margin-top:auto;
+    }
+
+    .trigger-btn{
+      border:none;
+      cursor:pointer;
+      border-radius:14px;
+      padding:12px 14px;
+      font:inherit;
+      font-weight:700;
+      color:#03242d;
+      background:linear-gradient(180deg, #dffcff, #8af7ff);
+      transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+    }
+
+    .trigger-btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
+    .trigger-btn:active{transform:translateY(0) scale(.985)}
+    .trigger-btn:disabled{cursor:not-allowed;opacity:.55;filter:none;transform:none}
+
+    .pack-btn,.bite-btn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      min-width:82px;
+    }
+
+    .pack-btn.packed{
+      border-color:rgba(255,224,138,.5);
+      color:#fff0bf;
+      background:rgba(255,224,138,.12);
+    }
+
+    .bite-btn{
+      border-color:rgba(255,140,168,.36);
+      color:#ffd4df;
+      background:rgba(255,140,168,.10);
     }
 
     .admin-panel{
@@ -444,12 +456,12 @@
 
     .admin-grid{
       display:grid;
-      grid-template-columns:1.35fr .75fr .75fr 1fr;
+      grid-template-columns:1.2fr .7fr .7fr 1fr;
       gap:12px;
       margin-top:14px;
     }
 
-    .input, .select{
+    .input,.select{
       min-width:0;
       border-radius:16px;
       border:1px solid rgba(138,247,255,.22);
@@ -461,13 +473,10 @@
       width:100%;
     }
 
-    .select option{
-      color:#000;
-    }
-
+    .select option{color:#000}
     .input::placeholder{color:#b5e8ef}
 
-    .input:focus, .select:focus{
+    .input:focus,.select:focus{
       border-color:var(--line-strong);
       box-shadow:0 0 0 4px rgba(138,247,255,.08);
     }
@@ -476,13 +485,6 @@
       margin-top:12px;
       color:#03242d;
       background:linear-gradient(180deg, #dffcff, #8af7ff);
-    }
-
-    .admin-note{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.6;
     }
 
     .hint{
@@ -547,10 +549,7 @@
       text-align:center;
     }
 
-    .eye-wrap{
-      width:min(100%, 520px);
-    }
-
+    .eye-wrap{width:min(100%, 520px)}
     .eye-svg{
       width:100%;
       height:auto;
@@ -625,6 +624,8 @@
       }
       .players{grid-template-columns:1fr}
       .admin-grid{grid-template-columns:1fr}
+      .player-actions{grid-template-columns:1fr 1fr}
+      .trigger-btn{grid-column:1 / -1}
     }
   </style>
 </head>
@@ -639,7 +640,7 @@
           </div>
           <div class="brand-copy">
             <small>Frosted Division</small>
-            <strong>Frosted Fang System</strong>
+            <strong>Frosted Fang Pearl Pull System</strong>
           </div>
         </div>
 
@@ -653,16 +654,11 @@
     <main>
       <section class="hero">
         <article class="glass hero-copy">
-          <span class="eyebrow">Cryo Control Interface</span>
-          <h1>Frosted Fang</h1>
+          <span class="eyebrow">Frosted Fang Pearl Pull System</span>
+          <h1>0 MERCY. 0 MISFIRES.</h1>
           <p class="lead">
-            Secure role-based access, persistent login, channel-aware player configs, and a frosted cyan control panel for instant pearl pulls.
+            Run cold. Strike clean. Hold the line.
           </p>
-          <div class="hero-tags">
-            <span class="tag">Discord auth</span>
-            <span class="tag">Role restricted admin add</span>
-            <span class="tag">Signal • side • channel</span>
-          </div>
         </article>
 
         <aside class="glass hero-side">
@@ -698,20 +694,22 @@ Awaiting authorization...</div>
         <article class="glass panel">
           <div class="panel-head">
             <div>
-              <span class="eyebrow">Operator Grid</span>
-              <h2>Team Pearl Controls</h2>
+              <span class="eyebrow">Pack Control</span>
+              <h2>Operator Roster</h2>
               <p>
-                Each player carries its own signal, redstone side, and channel name. Only users with the admin Discord role can add new players.
+                Pearl controls stay hidden until authorized.
               </p>
             </div>
             <div class="big-count" id="playerCountBig">0</div>
           </div>
 
-          <div class="players" id="playersGrid"></div>
+          <div id="playersWrap" class="hidden">
+            <div class="players" id="playersGrid"></div>
+          </div>
 
           <div id="adminPanel" class="admin-panel hidden">
-            <span class="eyebrow">Admin Configuration</span>
-            <h2 style="font-size:clamp(1.3rem,2vw,1.7rem); margin-top:4px;">Add New Player</h2>
+            <span class="eyebrow">Alpha Controls</span>
+            <h3 style="font-size:clamp(1.2rem,2vw,1.6rem); margin-top:4px;">Add New Player</h3>
 
             <div class="admin-grid">
               <input id="newPlayerName" class="input" type="text" maxlength="24" placeholder="Player name" />
@@ -729,14 +727,10 @@ Awaiting authorization...</div>
 
             <button id="addPlayerBtn" class="btn add-btn" type="button">Add Player</button>
 
-            <p class="admin-note">
-              Admin role required: <strong>1556390847191322806</strong>
+            <p class="hint">
+              Only your admin role can add, bite, or pack players.
             </p>
           </div>
-
-          <p class="hint">
-            Put your real logo file next to this HTML as <strong>logo.png</strong>. If it is missing, a fallback FF icon appears.
-          </p>
         </article>
       </section>
     </main>
@@ -766,17 +760,13 @@ Awaiting authorization...</div>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
     const ADMIN_ROLE_ID = '1556390847191322806';
 
-    const players = [
-      { name: 'Necrox', signal: 15, side: 'back', channel: 'Oil Rig' },
-      { name: 'Alice', signal: 15, side: 'top', channel: 'Oil Rig' },
-      { name: 'Frosted Fang', signal: 15, side: 'left', channel: 'Oil Rig' }
-    ];
-
+    let players = [];
     let isLoggedIn = false;
     let currentUser = null;
     let canManagePlayers = false;
 
     const playersGrid = document.getElementById('playersGrid');
+    const playersWrap = document.getElementById('playersWrap');
     const playerCountSmall = document.getElementById('playerCountSmall');
     const playerCountBig = document.getElementById('playerCountBig');
     const backendStatus = document.getElementById('backendStatus');
@@ -811,27 +801,25 @@ Awaiting authorization...</div>
       consoleScreen.textContent = text;
     }
 
-    function cleanName(name) {
-      return name.replace(/\s+/g, ' ').trim();
+    function cleanText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
     }
 
     function updateAuthUI() {
-      const buttons = document.querySelectorAll('.player-btn');
-      buttons.forEach(btn => btn.disabled = !isLoggedIn);
-
+      playersWrap.classList.toggle('hidden', !isLoggedIn);
       adminPanel.classList.toggle('hidden', !canManagePlayers);
 
       if (isLoggedIn) {
         const name = currentUser?.global_name || currentUser?.username || 'Authorized User';
-        const adminText = canManagePlayers ? '\nAdmin role detected.' : '\nStandard operator access.';
         authText.textContent = `Logged in as ${name}`;
         loginBtn.classList.add('hidden');
         logoutBtn.classList.remove('hidden');
-        setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${name}${adminText}`);
+        setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${name}`);
       } else {
         authText.textContent = 'Not logged in';
         loginBtn.classList.remove('hidden');
         logoutBtn.classList.add('hidden');
+        playersWrap.classList.add('hidden');
         adminPanel.classList.add('hidden');
         setConsole('Frosted Fang System\nAwaiting authorization...');
       }
@@ -871,6 +859,27 @@ Awaiting authorization...</div>
       }
 
       updateAuthUI();
+
+      if (isLoggedIn) {
+        await loadPlayers();
+      }
+    }
+
+    async function loadPlayers() {
+      try {
+        const res = await fetch(`${API_BASE}/api/players`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await res.json();
+
+        players = Array.isArray(data.players) ? data.players : [];
+        renderPlayers();
+      } catch {
+        players = [];
+        renderPlayers();
+        setConsole('Frosted Fang System\nFailed to load player roster.');
+      }
     }
 
     function showAnimation(player) {
@@ -890,6 +899,11 @@ Awaiting authorization...</div>
         return;
       }
 
+      if (!player.active) {
+        setConsole(`Frosted Fang System\n${player.name} is inactive.`);
+        return;
+      }
+
       button.disabled = true;
       setConsole(`Frosted Fang System\nSending command...\nTarget: ${player.name}\nSide: ${player.side}\nChannel: ${player.channel}`);
 
@@ -898,7 +912,7 @@ Awaiting authorization...</div>
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify(player)
+          body: JSON.stringify({ name: player.name })
         });
 
         const data = await res.json().catch(() => ({}));
@@ -913,48 +927,139 @@ Awaiting authorization...</div>
       } catch (err) {
         setConsole(`Frosted Fang System\nCommand failed.\n${err.message}`);
       } finally {
-        button.disabled = !isLoggedIn;
+        button.disabled = false;
       }
     }
 
-    function createPlayerButton(player) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'player-btn';
-      button.disabled = !isLoggedIn;
-      button.innerHTML = `
-        <span class="label">Pearl Trigger</span>
+    async function togglePack(player) {
+      if (!canManagePlayers) {
+        setConsole('Frosted Fang System\nAdmin access required.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/toggle-pack`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name: player.name })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to toggle pack');
+        }
+
+        setConsole(`Frosted Fang System\n${player.name} pack state updated.\nLocked: ${data.player.locked ? 'YES' : 'NO'}`);
+        await loadPlayers();
+      } catch (err) {
+        setConsole(`Frosted Fang System\nPack failed.\n${err.message}`);
+      }
+    }
+
+    async function bitePlayer(player) {
+      if (!canManagePlayers) {
+        setConsole('Frosted Fang System\nAdmin access required.');
+        return;
+      }
+
+      if (player.locked) {
+        setConsole(`Frosted Fang System\n${player.name} is packed.\nUnpack before bite.`);
+        return;
+      }
+
+      const confirmBite = confirm(`Bite ${player.name}? This will deactivate them.`);
+      if (!confirmBite) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/bite-player`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name: player.name })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to bite player');
+        }
+
+        setConsole(`Frosted Fang System\n${player.name} has been bitten.\nAccess revoked.`);
+        await loadPlayers();
+      } catch (err) {
+        setConsole(`Frosted Fang System\nBite failed.\n${err.message}`);
+      }
+    }
+
+    function createPlayerCard(player) {
+      const card = document.createElement('article');
+      card.className = 'player-card';
+
+      const top = document.createElement('div');
+      top.className = 'player-top';
+      top.innerHTML = `
+        <span class="label">${player.active ? 'Pearl Trigger' : 'Inactive'}</span>
         <span class="name">${player.name}</span>
-        <span class="sub">Signal ${player.signal} • ${player.side} • ${player.channel}</span>
+        <span class="sub">
+          Signal ${player.signal} • ${player.side} • ${player.channel}<br>
+          ${player.locked ? 'Packed' : 'Unpacked'} • ${player.active ? 'Active' : 'Bitten'}
+        </span>
       `;
-      button.addEventListener('click', () => pullPearl(player, button));
-      return button;
+
+      const actions = document.createElement('div');
+      actions.className = 'player-actions';
+
+      const triggerBtn = document.createElement('button');
+      triggerBtn.className = 'trigger-btn';
+      triggerBtn.type = 'button';
+      triggerBtn.textContent = player.active ? 'Pull' : 'Offline';
+      triggerBtn.disabled = !player.active;
+      triggerBtn.addEventListener('click', () => pullPearl(player, triggerBtn));
+
+      actions.appendChild(triggerBtn);
+
+      if (canManagePlayers) {
+        const packBtn = document.createElement('button');
+        packBtn.className = `btn pack-btn ${player.locked ? 'packed' : ''}`;
+        packBtn.type = 'button';
+        packBtn.textContent = player.locked ? 'Packed' : 'Pack';
+        packBtn.addEventListener('click', () => togglePack(player));
+        actions.appendChild(packBtn);
+
+        const biteBtn = document.createElement('button');
+        biteBtn.className = 'btn bite-btn';
+        biteBtn.type = 'button';
+        biteBtn.textContent = 'Bite';
+        biteBtn.disabled = !!player.locked;
+        biteBtn.addEventListener('click', () => bitePlayer(player));
+        actions.appendChild(biteBtn);
+      }
+
+      card.appendChild(top);
+      card.appendChild(actions);
+      return card;
     }
 
     function renderPlayers() {
       playersGrid.innerHTML = '';
       players.forEach(player => {
-        playersGrid.appendChild(createPlayerButton(player));
+        playersGrid.appendChild(createPlayerCard(player));
       });
       updateCounts();
-      updateAuthUI();
     }
 
-    function addPlayer() {
-      if (!isLoggedIn) {
-        setConsole('Frosted Fang System\nAccess denied.\nPlease login first.');
-        return;
-      }
-
+    async function addPlayer() {
       if (!canManagePlayers) {
-        setConsole('Frosted Fang System\nAccess denied.\nAdmin role required to add players.');
+        setConsole('Frosted Fang System\nAdmin access required.');
         return;
       }
 
-      const name = cleanName(newPlayerName.value);
+      const name = cleanText(newPlayerName.value);
       const signal = Number(newPlayerSignal.value);
       const side = newPlayerSide.value;
-      const channel = cleanName(newPlayerChannel.value);
+      const channel = cleanText(newPlayerChannel.value);
 
       if (!name) {
         setConsole('Frosted Fang System\nMissing player name.');
@@ -971,20 +1076,29 @@ Awaiting authorization...</div>
         return;
       }
 
-      const exists = players.some(p => p.name.toLowerCase() === name.toLowerCase());
-      if (exists) {
-        setConsole(`Frosted Fang System\nPlayer already exists.\n${name}`);
-        return;
+      try {
+        const res = await fetch(`${API_BASE}/api/add-player`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name, signal, side, channel })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to add player');
+        }
+
+        setConsole(`Frosted Fang System\nRegistered ${name}.\nSignal ${signal} • ${side} • ${channel}`);
+        newPlayerName.value = '';
+        newPlayerSignal.value = '15';
+        newPlayerSide.value = 'back';
+        newPlayerChannel.value = 'Oil Rig';
+        await loadPlayers();
+      } catch (err) {
+        setConsole(`Frosted Fang System\nAdd failed.\n${err.message}`);
       }
-
-      players.push({ name, signal, side, channel });
-      renderPlayers();
-      setConsole(`Frosted Fang System\nRegistered new player.\n${name}\nSignal: ${signal} • Side: ${side} • Channel: ${channel}`);
-
-      newPlayerName.value = '';
-      newPlayerSignal.value = '15';
-      newPlayerSide.value = 'back';
-      newPlayerChannel.value = 'Oil Rig';
     }
 
     loginBtn.addEventListener('click', () => {
@@ -1001,13 +1115,13 @@ Awaiting authorization...</div>
       isLoggedIn = false;
       currentUser = null;
       canManagePlayers = false;
+      players = [];
+      renderPlayers();
       updateAuthUI();
     });
 
     addPlayerBtn.addEventListener('click', addPlayer);
 
-    renderPlayers();
-    updateAuthUI();
     checkBackend();
     checkLogin();
   </script>
