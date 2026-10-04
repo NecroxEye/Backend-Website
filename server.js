@@ -184,19 +184,20 @@ app.post('/api/pull-pearl', async (req, res) => {
   try {
     const { player } = req.body;
 
-    if (!req.session || !req.session.discordUser) {
-      return res.status(401).json({ message: 'Not logged in' });
-    }
-
     if (!player) {
       return res.status(400).json({ message: 'Missing player' });
     }
 
-    let signal = 0;
+    const PLAYER_SIGNALS = {
+      Necrox: 15,
+      Alice: 15
+    };
 
-    if (player === 'Necrox') signal = 15;
-    else if (player === 'Alice') signal = 15;
-    else return res.status(400).json({ message: 'Unknown player' });
+    const signal = PLAYER_SIGNALS[player];
+
+    if (signal === undefined) {
+      return res.status(400).json({ message: 'Unknown player' });
+    }
 
     latestSignal = {
       player,
