@@ -3,386 +3,452 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang Control</title>
-  <meta name="description" content="Directional pearl trigger control panel with persistent Supabase-backed player settings." />
+  <title>Frosted Fang Pearl Panel</title>
+  <meta name="description" content="Frosted cyan pearl control panel with terminal status, persistent player roster, and animated pull trigger." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #0c0d10;
-      --bg-soft: #12141a;
-      --panel: rgba(255,255,255,0.05);
-      --panel-strong: rgba(255,255,255,0.08);
-      --line: rgba(255,255,255,0.12);
-      --line-strong: rgba(255,255,255,0.18);
-      --text: #f4f1ea;
-      --muted: #bfb7aa;
-      --accent: #d6a85f;
-      --accent-2: #8d5b23;
-      --danger: #df6a6a;
-      --ok: #76d39b;
-      --shadow: 0 20px 60px rgba(0,0,0,0.45);
-      --radius: 22px;
-      --radius-sm: 14px;
-      --max: 1280px;
+      --bg:#071018;
+      --bg-2:#0b1621;
+      --panel:rgba(172, 238, 255, 0.08);
+      --panel-2:rgba(172, 238, 255, 0.05);
+      --line:rgba(163, 232, 255, 0.18);
+      --line-strong:rgba(163, 232, 255, 0.34);
+      --text:#eafcff;
+      --muted:#a9c7d0;
+      --cyan:#78ecff;
+      --cyan-2:#35cbe7;
+      --ice:#dffbff;
+      --danger:#ff7e9c;
+      --ok:#7dffc1;
+      --shadow:0 24px 90px rgba(0,0,0,0.35);
+      --radius:24px;
+      --radius-sm:16px;
+      --max:1320px;
     }
 
-    * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
-      color: var(--text);
+      min-height:100vh;
+      color:var(--text);
       background:
-        radial-gradient(circle at 20% 10%, rgba(214,168,95,0.12), transparent 30%),
-        radial-gradient(circle at 80% 15%, rgba(141,91,35,0.12), transparent 24%),
-        linear-gradient(180deg, #0b0c0f 0%, #0f1116 100%);
-      font-family: "Space Grotesk", sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
+        radial-gradient(circle at 12% 10%, rgba(120,236,255,0.17), transparent 24%),
+        radial-gradient(circle at 82% 14%, rgba(120,236,255,0.14), transparent 20%),
+        radial-gradient(circle at 50% 100%, rgba(65,150,196,0.16), transparent 34%),
+        linear-gradient(180deg, #061018 0%, #08131d 42%, #09141f 100%);
+      font-family:"Inter", sans-serif;
+      overflow-x:hidden;
     }
 
     body::before{
       content:"";
-      position: fixed;
+      position:fixed;
       inset:0;
       pointer-events:none;
       background:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.8));
-      opacity:.45;
+        linear-gradient(rgba(120,236,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120,236,255,0.025) 1px, transparent 1px);
+      background-size:38px 38px;
+      opacity:.55;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.75), rgba(0,0,0,.3));
+    }
+
+    .noise{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.06;
+      background-image:
+        radial-gradient(circle at 20% 20%, white 0 0.7px, transparent 1px),
+        radial-gradient(circle at 80% 60%, white 0 0.7px, transparent 1px),
+        radial-gradient(circle at 40% 80%, white 0 0.7px, transparent 1px);
+      background-size:22px 22px, 28px 28px, 34px 34px;
+      mix-blend-mode:screen;
     }
 
     .shell{
-      width:min(var(--max), calc(100% - 24px));
+      width:min(var(--max), calc(100% - 28px));
       margin-inline:auto;
     }
 
     .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(16px);
-      background: rgba(8,9,12,0.6);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(18px);
+      background:linear-gradient(180deg, rgba(5,11,18,.82), rgba(5,11,18,.58));
+      border-bottom:1px solid rgba(120,236,255,0.12);
     }
 
     .topbar-inner{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
-      padding: 14px 0;
+      gap:18px;
+      padding:14px 0;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:12px;
-      min-width: 0;
+      gap:14px;
+      min-width:0;
     }
 
-    .sigil{
-      width:44px;
-      height:44px;
-      border-radius: 14px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 35%),
-        linear-gradient(135deg, rgba(214,168,95,0.95), rgba(141,91,35,0.95));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        0 10px 30px rgba(141,91,35,0.3);
+    .brand-mark{
+      width:48px;
+      height:48px;
+      border-radius:16px;
       position:relative;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.58), transparent 25%),
+        linear-gradient(135deg, rgba(120,236,255,.35), rgba(53,203,231,.08));
+      border:1px solid rgba(163,232,255,.3);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 10px 30px rgba(53,203,231,.16);
       overflow:hidden;
     }
 
-    .sigil::after{
+    .brand-mark::before,
+    .brand-mark::after{
       content:"";
       position:absolute;
       inset:10px;
-      border:1px solid rgba(255,255,255,0.32);
-      border-radius: 10px;
-      transform: rotate(45deg);
+      border-radius:12px;
+      border:1px solid rgba(223,251,255,.45);
+      transform:rotate(45deg);
+    }
+
+    .brand-mark::after{
+      inset:16px;
+      opacity:.5;
     }
 
     .brand-copy h1{
       margin:0;
-      font-family:"Cormorant Garamond", serif;
-      font-size: clamp(1.35rem, 2.2vw, 2rem);
-      line-height: .95;
-      letter-spacing: .02em;
-      font-weight: 700;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.15rem, 2vw, 1.7rem);
+      line-height:1;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:800;
     }
 
     .brand-copy p{
-      margin:2px 0 0;
-      color: var(--muted);
-      font-size: .92rem;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:.9rem;
+      letter-spacing:.04em;
     }
 
-    .statusbar{
+    .status-cluster{
       display:flex;
-      align-items:center;
       gap:10px;
-      flex-wrap: wrap;
+      flex-wrap:wrap;
       justify-content:flex-end;
     }
 
-    .pill{
-      display:inline-flex;
+    .terminal-pill{
+      min-width:210px;
+      border-radius:999px;
+      border:1px solid rgba(120,236,255,0.18);
+      background:linear-gradient(180deg, rgba(12,26,37,.72), rgba(7,19,28,.72));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+      padding:10px 14px;
+      display:flex;
       align-items:center;
-      gap:8px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: .9rem;
-      color: var(--muted);
+      gap:10px;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.84rem;
+      color:#bfe9f1;
+      white-space:nowrap;
     }
 
-    .dot{
+    .prompt{
+      color:var(--cyan);
+    }
+
+    .blink{
       width:10px;
       height:10px;
       border-radius:50%;
-      background: #6d737f;
-      box-shadow: 0 0 0 0 rgba(109,115,127,0.35);
+      background:#4b6670;
+      box-shadow:0 0 0 0 rgba(75,102,112,.32);
     }
 
-    .dot.online{
-      background: var(--ok);
-      box-shadow: 0 0 0 8px rgba(118,211,155,0.12);
+    .blink.online{
+      background:var(--ok);
+      box-shadow:0 0 0 8px rgba(125,255,193,.1), 0 0 20px rgba(125,255,193,.22);
     }
 
-    .dot.offline{
-      background: var(--danger);
-      box-shadow: 0 0 0 8px rgba(223,106,106,0.10);
+    .blink.offline{
+      background:var(--danger);
+      box-shadow:0 0 0 8px rgba(255,126,156,.08), 0 0 16px rgba(255,126,156,.15);
     }
 
     main{
-      padding: 28px 0 52px;
+      padding:24px 0 56px;
     }
 
     .hero{
       display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 18px;
-      align-items: stretch;
-      margin-bottom: 18px;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
+      margin-bottom:18px;
     }
 
-    .hero-panel,
-    .side-panel,
-    .stage,
-    .roster-panel{
-      border: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-      box-shadow: var(--shadow);
-      border-radius: var(--radius);
+    .glass{
       position:relative;
       overflow:hidden;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(172,238,255,.085), rgba(172,238,255,.04));
+      backdrop-filter:blur(22px);
+      box-shadow:var(--shadow);
     }
 
-    .hero-panel{
-      padding: clamp(24px, 4vw, 42px);
-      min-height: 280px;
-    }
-
-    .hero-panel::before,
-    .side-panel::before,
-    .stage::before,
-    .roster-panel::before{
+    .glass::before{
       content:"";
       position:absolute;
       inset:0;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,0.06), transparent 38%),
-        radial-gradient(circle at top right, rgba(214,168,95,0.12), transparent 28%);
       pointer-events:none;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(120,236,255,.18), transparent 24%);
+    }
+
+    .hero-copy{
+      padding:clamp(24px, 4vw, 42px);
+      min-height:320px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
     }
 
     .eyebrow{
       display:inline-flex;
-      align-items:center;
       gap:10px;
-      color: var(--accent);
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      font-size: .77rem;
-      margin-bottom: 14px;
+      align-items:center;
+      color:var(--cyan);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.76rem;
+      margin-bottom:14px;
     }
 
     .eyebrow::before{
       content:"";
-      width: 34px;
+      width:32px;
       height:1px;
-      background: currentColor;
+      background:currentColor;
       opacity:.9;
     }
 
-    .hero h2{
-      margin: 0 0 12px;
-      max-width: 11ch;
-      font-family:"Cormorant Garamond", serif;
-      font-size: clamp(2.9rem, 8vw, 5.4rem);
-      line-height: .88;
-      font-weight: 700;
-      letter-spacing: -.03em;
+    .hero-copy h2{
+      margin:0 0 12px;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(2.4rem, 6vw, 5.1rem);
+      line-height:.92;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      max-width:10ch;
+      text-shadow:0 0 24px rgba(120,236,255,.12);
     }
 
-    .hero p{
+    .hero-copy p{
       margin:0;
-      color: var(--muted);
-      max-width: 58ch;
-      font-size: clamp(.98rem, 1.5vw, 1.05rem);
+      color:var(--muted);
+      max-width:58ch;
+      font-size:1rem;
+      line-height:1.65;
     }
 
-    .hero-meta{
+    .hero-metrics{
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      margin-top: 26px;
+      margin-top:26px;
     }
 
     .metric{
-      min-width: 150px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,0.18);
-      backdrop-filter: blur(10px);
+      min-width:154px;
+      padding:14px 16px;
+      border:1px solid rgba(120,236,255,0.16);
+      border-radius:18px;
+      background:rgba(8,20,30,0.38);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
     }
 
     .metric span{
       display:block;
-      color: var(--muted);
-      font-size: .8rem;
-      margin-bottom: 4px;
+      color:var(--muted);
+      font-size:.78rem;
+      margin-bottom:5px;
+      font-family:"JetBrains Mono", monospace;
+      text-transform:uppercase;
+      letter-spacing:.08em;
     }
 
     .metric strong{
-      font-size: 1.3rem;
+      font-size:1.28rem;
+      color:var(--ice);
       font-weight:700;
     }
 
-    .side-panel{
-      padding: 22px;
+    .hero-side{
+      padding:22px;
       display:grid;
-      align-content:space-between;
-      gap:18px;
-      min-height: 280px;
+      gap:16px;
+      align-content:stretch;
     }
 
-    .wireframe{
-      border:1px solid var(--line);
-      background:
-        radial-gradient(circle at 25% 25%, rgba(214,168,95,0.18), transparent 30%),
-        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-      border-radius: 18px;
-      min-height: 180px;
+    .terminal-box{
+      border-radius:20px;
+      border:1px solid rgba(120,236,255,0.16);
+      background:linear-gradient(180deg, rgba(6,17,26,.8), rgba(8,20,31,.62));
+      padding:14px;
+      min-height:170px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .terminal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+      color:#90dbe8;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.78rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .term-dots{
+      display:flex;
+      gap:6px;
+    }
+
+    .term-dots i{
+      display:block;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:rgba(255,255,255,.14);
+    }
+
+    .term-dots i:nth-child(1){background:#78ecff}
+    .term-dots i:nth-child(2){background:#8fffd4}
+    .term-dots i:nth-child(3){background:#ffd4ec}
+
+    .log{
+      font-family:"JetBrains Mono", monospace;
+      font-size:.86rem;
+      line-height:1.75;
+      color:#d7fbff;
+      white-space:pre-line;
+    }
+
+    .log .muted{color:#79aeb8}
+    .log .ok{color:#8fffd4}
+    .log .warn{color:#ffd4ec}
+    .log .cyan{color:var(--cyan)}
+
+    .wire-map{
       position:relative;
+      min-height:140px;
+      border-radius:18px;
+      border:1px solid rgba(120,236,255,.14);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(120,236,255,.08), transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
       overflow:hidden;
     }
 
-    .computer{
+    .core{
       position:absolute;
       left:50%;
       top:50%;
-      width:84px;
-      height:84px;
-      transform: translate(-50%, -50%);
-      border-radius: 20px;
-      border:1px solid rgba(255,255,255,0.16);
+      width:86px;
+      height:86px;
+      transform:translate(-50%, -50%);
+      border-radius:24px;
+      border:1px solid rgba(163,232,255,.24);
       background:
-        linear-gradient(180deg, rgba(18,20,26,1), rgba(10,12,16,1));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        0 18px 40px rgba(0,0,0,0.35);
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 26%),
+        linear-gradient(180deg, rgba(16,32,47,1), rgba(8,18,27,1));
+      box-shadow:0 16px 40px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06);
     }
 
-    .computer::before,
-    .computer::after{
-      content:"";
+    .wire{
       position:absolute;
       top:50%;
-      width:22px;
-      height:22px;
-      border-radius: 8px;
-      transform: translateY(-50%);
-      background:
-        linear-gradient(135deg, rgba(214,168,95,1), rgba(141,91,35,1));
-      box-shadow: 0 8px 20px rgba(141,91,35,0.25);
+      height:2px;
+      background:linear-gradient(90deg, rgba(120,236,255,.16), rgba(120,236,255,.8), rgba(120,236,255,.16));
+      box-shadow:0 0 18px rgba(120,236,255,.16);
     }
 
-    .computer::before{ left:-30px; }
-    .computer::after{ right:-30px; }
-
+    .wire.left{left:16px; width:34%; transform:translateY(-50%)}
+    .wire.right{right:16px; width:34%; transform:translateY(-50%)}
     .wire-label{
       position:absolute;
-      font-size: .76rem;
-      color: var(--muted);
-      letter-spacing: .12em;
-      text-transform: uppercase;
+      top:calc(50% - 18px);
+      font-family:"JetBrains Mono", monospace;
+      font-size:.75rem;
+      color:#9edbe6;
+      text-transform:uppercase;
+      letter-spacing:.14em;
     }
+    .wire-label.left{left:16px}
+    .wire-label.right{right:16px}
 
-    .wire-label.left{ left:14px; top:50%; transform: translateY(-50%); }
-    .wire-label.right{ right:14px; top:50%; transform: translateY(-50%); }
-
-    .note{
-      color: var(--muted);
-      font-size: .94rem;
-      line-height:1.55;
-      margin:0;
-    }
-
-    .grid{
+    .layout{
       display:grid;
-      grid-template-columns: 420px minmax(0, 1fr);
-      gap: 18px;
+      grid-template-columns:430px minmax(0, 1fr);
+      gap:18px;
       align-items:start;
     }
 
-    .stage{
-      padding: 22px;
+    .panel{
+      padding:22px;
     }
 
-    .section-head{
+    .panel-head{
       display:flex;
-      align-items:end;
+      align-items:flex-end;
       justify-content:space-between;
       gap:16px;
-      margin-bottom: 18px;
+      margin-bottom:18px;
       position:relative;
       z-index:1;
     }
 
-    .section-head h3{
+    .panel-head h3{
       margin:0;
-      font-family:"Cormorant Garamond", serif;
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
-      line-height: .95;
-      font-weight: 700;
-      letter-spacing: -.02em;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.3rem, 2.6vw, 2rem);
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
 
-    .section-head p{
-      margin:6px 0 0;
-      color: var(--muted);
-      font-size: .95rem;
-      max-width: 48ch;
+    .panel-head p{
+      margin:7px 0 0;
+      color:var(--muted);
+      font-size:.95rem;
+      max-width:46ch;
+      line-height:1.55;
     }
 
     .form-grid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
       position:relative;
       z-index:1;
     }
@@ -393,54 +459,61 @@
     }
 
     .field.full{
-      grid-column: 1 / -1;
+      grid-column:1 / -1;
     }
 
     label{
-      color: var(--muted);
-      font-size: .88rem;
-      letter-spacing: .03em;
+      color:#b9e5ec;
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-family:"JetBrains Mono", monospace;
     }
 
     input, select{
       width:100%;
+      appearance:none;
       border:none;
       outline:none;
-      color: var(--text);
-      background: rgba(0,0,0,0.22);
-      border:1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px 14px;
-      font: inherit;
-      transition: border-color .22s ease, transform .18s ease, background .22s ease;
+      color:var(--ice);
+      background:
+        linear-gradient(180deg, rgba(7,18,27,.86), rgba(8,22,33,.76));
+      border:1px solid rgba(120,236,255,0.14);
+      border-radius:16px;
+      padding:14px 14px;
+      font:inherit;
+      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
     }
 
+    input::placeholder{color:#7ea6af}
     input:focus, select:focus{
-      border-color: rgba(214,168,95,0.55);
-      background: rgba(0,0,0,0.28);
-      transform: translateY(-1px);
+      border-color:rgba(120,236,255,.38);
+      box-shadow:0 0 0 4px rgba(120,236,255,.08), 0 10px 24px rgba(53,203,231,.08);
+      transform:translateY(-1px);
     }
 
     .toggle{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:14px;
-      border:1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px 16px;
-      background: rgba(0,0,0,0.18);
+      gap:16px;
+      border:1px solid rgba(120,236,255,0.14);
+      border-radius:18px;
+      padding:14px 16px;
+      background:linear-gradient(180deg, rgba(7,18,27,.62), rgba(8,22,33,.42));
     }
 
     .toggle span{
-      color: var(--muted);
-      font-size: .93rem;
+      color:#c7ecf2;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.9rem;
     }
 
     .toggle input[type="checkbox"]{
-      width: 20px;
-      height: 20px;
-      accent-color: var(--accent);
+      width:20px;
+      height:20px;
+      accent-color:var(--cyan);
       cursor:pointer;
     }
 
@@ -448,7 +521,7 @@
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      margin-top: 18px;
+      margin-top:18px;
       position:relative;
       z-index:1;
     }
@@ -456,93 +529,137 @@
     button{
       border:none;
       cursor:pointer;
-      font: inherit;
-      transition: transform .18s ease, box-shadow .22s ease, background .22s ease, opacity .22s ease;
+      font:inherit;
+      transition:transform .18s ease, box-shadow .22s ease, background .22s ease, opacity .22s ease;
     }
 
     .btn-primary,
     .btn-secondary,
-    .btn-danger,
     .btn-ghost,
-    .trigger-btn{
-      border-radius: 999px;
-      padding: 13px 18px;
+    .mini,
+    .pull-btn{
+      border-radius:999px;
+      padding:13px 18px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:10px;
-      font-weight: 700;
-      letter-spacing: .02em;
+      font-weight:700;
+      letter-spacing:.03em;
     }
 
     .btn-primary{
-      color: #18120b;
-      background: linear-gradient(135deg, var(--accent), #f1c983);
-      box-shadow: 0 14px 28px rgba(214,168,95,0.24);
+      color:#021218;
+      background:linear-gradient(135deg, #aaf6ff, #65e8ff);
+      box-shadow:0 16px 28px rgba(101,232,255,.23);
     }
 
-    .btn-secondary{
-      color: var(--text);
-      background: rgba(255,255,255,0.07);
-      border:1px solid var(--line);
+    .btn-secondary,
+    .btn-ghost,
+    .mini{
+      color:var(--ice);
+      background:rgba(170,246,255,.06);
+      border:1px solid rgba(120,236,255,.16);
     }
 
-    .btn-danger{
-      color: white;
-      background: linear-gradient(135deg, #c85050, #943535);
-      box-shadow: 0 14px 28px rgba(148,53,53,0.25);
+    .mini.danger{
+      color:#ffdbe4;
+      background:rgba(255,126,156,.08);
+      border-color:rgba(255,126,156,.18);
     }
 
-    .btn-ghost{
-      color: var(--muted);
-      background: transparent;
-      border:1px solid var(--line);
+    .pull-btn{
+      position:relative;
+      overflow:hidden;
+      min-width:132px;
+      color:#031119;
+      background:linear-gradient(135deg, #dffbff, #7ceeff);
+      box-shadow:0 16px 28px rgba(101,232,255,.22);
+      isolation:isolate;
     }
 
-    .trigger-btn{
-      color: #17120b;
-      background: linear-gradient(135deg, #f0c175, #d79d46);
-      padding: 12px 16px;
-      min-width: 118px;
-      box-shadow: 0 12px 24px rgba(214,168,95,0.22);
+    .pull-btn .btn-label{
+      transition:transform .22s ease, opacity .2s ease;
+    }
+
+    .pull-btn .eye{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:44px;
+      height:44px;
+      transform:translate(-50%, -50%) scale(.6);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .24s ease, transform .28s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .pull-btn .eye svg{
+      width:100%;
+      height:100%;
+      display:block;
+      filter:drop-shadow(0 0 14px rgba(53,203,231,.35));
+    }
+
+    .pull-btn.reveal-eye .btn-label{
+      opacity:0;
+      transform:scale(.85);
+    }
+
+    .pull-btn.reveal-eye .eye{
+      opacity:1;
+      transform:translate(-50%, -50%) scale(1);
     }
 
     button:hover{
-      transform: translateY(-2px) scale(1.01);
+      transform:translateY(-2px) scale(1.01);
     }
 
     button:active{
-      transform: translateY(0) scale(.985);
+      transform:translateY(0) scale(.985);
     }
 
-    .roster-panel{
-      padding: 22px;
-      min-height: 500px;
+    .terminal-status{
+      margin-top:16px;
+      border-radius:18px;
+      border:1px solid rgba(120,236,255,.14);
+      background:linear-gradient(180deg, rgba(6,17,26,.72), rgba(8,20,31,.58));
+      min-height:64px;
+      padding:16px;
+      display:flex;
+      align-items:center;
+      color:#d7fbff;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.9rem;
+      line-height:1.6;
     }
 
-    .roster-list{
+    .terminal-status.ok{color:#dffff1;border-color:rgba(125,255,193,.18)}
+    .terminal-status.error{color:#ffe0ea;border-color:rgba(255,126,156,.18)}
+
+    .roster{
       display:grid;
-      gap: 12px;
+      gap:12px;
       position:relative;
       z-index:1;
     }
 
     .player-row{
       display:grid;
-      grid-template-columns: minmax(0, 1.2fr) auto;
+      grid-template-columns:minmax(0, 1.2fr) auto;
       gap:14px;
-      padding: 16px;
-      border:1px solid var(--line);
-      border-radius: 18px;
-      background: rgba(0,0,0,0.18);
       align-items:center;
-      transition: border-color .22s ease, transform .18s ease, background .22s ease;
+      padding:16px;
+      border-radius:20px;
+      border:1px solid rgba(120,236,255,.13);
+      background:linear-gradient(180deg, rgba(9,21,31,.66), rgba(8,19,28,.46));
+      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
     }
 
     .player-row:hover{
-      border-color: rgba(214,168,95,0.28);
-      background: rgba(0,0,0,0.22);
-      transform: translateY(-1px);
+      transform:translateY(-1px);
+      border-color:rgba(120,236,255,.26);
+      box-shadow:0 18px 32px rgba(0,0,0,.16);
     }
 
     .player-main{
@@ -554,180 +671,135 @@
     .player-top{
       display:flex;
       align-items:center;
-      gap:12px;
       flex-wrap:wrap;
+      gap:10px;
     }
 
     .player-name{
       margin:0;
-      font-size: 1.06rem;
-      font-weight: 700;
-      color: var(--text);
+      font-size:1.08rem;
+      color:var(--ice);
+      font-weight:700;
     }
 
-    .badge{
+    .chip{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      color: var(--muted);
-      font-size: .78rem;
-      letter-spacing: .05em;
-      text-transform: uppercase;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(120,236,255,.14);
+      background:rgba(170,246,255,.05);
+      color:#bdeaf1;
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-family:"JetBrains Mono", monospace;
     }
 
     .player-meta{
       display:flex;
-      flex-wrap:wrap;
       gap:8px;
+      flex-wrap:wrap;
     }
 
     .player-actions{
       display:flex;
-      align-items:center;
+      flex-wrap:wrap;
       justify-content:flex-end;
       gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .mini{
-      padding: 11px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border:1px solid var(--line);
-      font-weight: 700;
-    }
-
-    .mini.danger{
-      color: #ffdede;
-      background: rgba(200,80,80,0.12);
-      border-color: rgba(200,80,80,0.22);
-    }
-
-    .mini.edit{
-      color: #f6ddbb;
-      background: rgba(214,168,95,0.08);
-      border-color: rgba(214,168,95,0.22);
     }
 
     .empty{
-      padding: 28px 20px;
+      padding:28px 20px;
+      border-radius:20px;
+      border:1px dashed rgba(120,236,255,.2);
       text-align:center;
-      color: var(--muted);
-      border:1px dashed var(--line-strong);
-      border-radius: 18px;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .feedback{
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      color: var(--muted);
-      min-height: 52px;
-      display:flex;
-      align-items:center;
-    }
-
-    .feedback.ok{
-      color: #dff5e7;
-      border-color: rgba(118,211,155,0.25);
-      background: rgba(118,211,155,0.08);
-    }
-
-    .feedback.error{
-      color: #ffe2e2;
-      border-color: rgba(223,106,106,0.25);
-      background: rgba(223,106,106,0.08);
+      color:var(--muted);
+      background:rgba(170,246,255,.03);
+      font-family:"JetBrains Mono", monospace;
     }
 
     .reveal{
-      opacity: 0;
-      transform: translateY(16px);
-      animation: rise .7s cubic-bezier(.2,.7,.2,1) forwards;
+      opacity:0;
+      transform:translateY(16px);
+      animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;
     }
 
-    .delay-1{ animation-delay: .08s; }
-    .delay-2{ animation-delay: .16s; }
-    .delay-3{ animation-delay: .24s; }
-    .delay-4{ animation-delay: .32s; }
-
-    @keyframes rise{
-      to{
-        opacity:1;
-        transform: translateY(0);
-      }
-    }
+    .delay-1{animation-delay:.08s}
+    .delay-2{animation-delay:.16s}
+    .delay-3{animation-delay:.24s}
+    .delay-4{animation-delay:.32s}
 
     .fade-up{
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity .6s ease, transform .6s ease;
+      opacity:0;
+      transform:translateY(18px);
+      transition:opacity .6s ease, transform .6s ease;
     }
 
     .fade-up.in-view{
       opacity:1;
-      transform: translateY(0);
+      transform:translateY(0);
     }
 
-    @media (max-width: 1080px){
-      .grid{
-        grid-template-columns: 1fr;
-      }
-      .hero{
-        grid-template-columns: 1fr;
+    @keyframes rise{
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    @media (max-width:1080px){
+      .hero,
+      .layout{
+        grid-template-columns:1fr;
       }
     }
 
-    @media (max-width: 720px){
+    @media (max-width:720px){
       .topbar-inner{
-        align-items:flex-start;
         flex-direction:column;
+        align-items:flex-start;
       }
-      .statusbar{
+      .status-cluster{
         width:100%;
         justify-content:flex-start;
       }
       .form-grid{
-        grid-template-columns: 1fr;
+        grid-template-columns:1fr;
       }
       .player-row{
-        grid-template-columns: 1fr;
+        grid-template-columns:1fr;
       }
       .player-actions{
         justify-content:flex-start;
       }
-      .hero h2{
-        max-width: none;
+      .hero-copy h2{
+        max-width:none;
       }
     }
   </style>
 </head>
 <body>
+  <div class="noise" aria-hidden="true"></div>
+
   <header class="topbar">
     <div class="shell topbar-inner">
       <div class="brand">
-        <div class="sigil" aria-hidden="true"></div>
+        <div class="brand-mark" aria-hidden="true"></div>
         <div class="brand-copy">
           <h1>Frosted Fang</h1>
-          <p>Directional pearl trigger console</p>
+          <p>pearl routing command panel</p>
         </div>
       </div>
 
-      <div class="statusbar" aria-label="Connection status">
-        <div class="pill">
-          <span class="dot offline" id="backendDot"></span>
-          <span id="backendStatus">Backend: checking</span>
+      <div class="status-cluster" aria-label="system status">
+        <div class="terminal-pill">
+          <span class="prompt">$</span>
+          <span class="blink offline" id="backendDot"></span>
+          <span id="backendStatus">backend.check()</span>
         </div>
-        <div class="pill">
-          <span class="dot offline" id="wsDot"></span>
-          <span id="wsStatus">Computer link: waiting</span>
+        <div class="terminal-pill">
+          <span class="prompt">></span>
+          <span class="blink offline" id="wsDot"></span>
+          <span id="wsStatus">computer.link.wait()</span>
         </div>
       </div>
     </div>
@@ -735,15 +807,17 @@
 
   <main class="shell">
     <section class="hero">
-      <article class="hero-panel reveal delay-1">
-        <div class="eyebrow">Shared Computer • Left / Right Pulse Routing</div>
-        <h2>One computer, two links, exact side control.</h2>
-        <p>
-          Add players, store their redstone direction, keep the roster saved in Supabase,
-          and trigger only the correct side of the shared ComputerCraft machine when a pearl pull is requested.
-        </p>
+      <article class="glass hero-copy reveal delay-1">
+        <div>
+          <div class="eyebrow">Shared ComputerCraft • Frosted Control Surface</div>
+          <h2>Pull the right pearl through the right side.</h2>
+          <p>
+            Save players to Supabase, assign each one a direction, and send a clean trigger to the shared computer.
+            This panel is built for left and right routing, with terminal-style system feedback and fast operator control.
+          </p>
+        </div>
 
-        <div class="hero-meta">
+        <div class="hero-metrics">
           <div class="metric">
             <span>Backend</span>
             <strong id="backendMetric">Checking…</strong>
@@ -753,31 +827,39 @@
             <strong id="playerCount">0</strong>
           </div>
           <div class="metric">
-            <span>Trigger Route</span>
-            <strong>/trigger/:id</strong>
+            <span>Websocket</span>
+            <strong>/ws</strong>
           </div>
         </div>
       </article>
 
-      <aside class="side-panel reveal delay-2">
-        <div class="wireframe" aria-hidden="true">
-          <div class="wire-label left">Left Link</div>
-          <div class="computer"></div>
-          <div class="wire-label right">Right Link</div>
+      <aside class="glass hero-side reveal delay-2">
+        <div class="terminal-box">
+          <div class="terminal-head">
+            <span>Live System Output</span>
+            <div class="term-dots"><i></i><i></i><i></i></div>
+          </div>
+          <div class="log" id="heroLog"><span class="muted">boot</span> :: loading control surface
+<span class="muted">api</span> :: waiting for backend health
+<span class="muted">ws</span>  :: waiting for computer tunnel</div>
         </div>
-        <p class="note">
-          The website stores each player’s <strong>direction</strong>. When you trigger that player,
-          the backend sends the saved direction to the same shared computer, and the Lua script pulses only that side.
-        </p>
+
+        <div class="wire-map" aria-hidden="true">
+          <div class="wire left"></div>
+          <div class="wire right"></div>
+          <div class="wire-label left">left</div>
+          <div class="wire-label right">right</div>
+          <div class="core"></div>
+        </div>
       </aside>
     </section>
 
-    <section class="grid">
-      <section class="stage fade-up">
-        <div class="section-head">
+    <section class="layout">
+      <section class="glass panel fade-up">
+        <div class="panel-head">
           <div>
             <h3 id="formTitle">Add Player</h3>
-            <p>Create or edit saved entries for your shared pearl setup. Direction is the side of the computer to pulse.</p>
+            <p>Create persistent pearl routing entries. Each player stores name, signal strength, route direction, and machine labels.</p>
           </div>
         </div>
 
@@ -787,18 +869,18 @@
           <div class="form-grid">
             <div class="field">
               <label for="name">Player Name</label>
-              <input id="name" name="name" type="text" placeholder="Frosted Fang" required />
+              <input id="name" name="name" type="text" placeholder="FrostedFang" required />
             </div>
 
             <div class="field">
-              <label for="signal_strength">Redstone Signal</label>
+              <label for="signal_strength">Signal Strength</label>
               <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
             </div>
 
             <div class="field">
               <label for="direction">Direction</label>
               <select id="direction" name="direction" required>
-                <option value="">Select side</option>
+                <option value="">Select route</option>
                 <option value="left">Left</option>
                 <option value="right">Right</option>
                 <option value="top">Top</option>
@@ -832,21 +914,21 @@
           </div>
         </form>
 
-        <div class="feedback" id="feedback" role="status" aria-live="polite">
-          Ready.
+        <div class="terminal-status" id="feedback" role="status" aria-live="polite">
+          [ready] waiting for operator input
         </div>
       </section>
 
-      <aside class="roster-panel fade-up">
-        <div class="section-head">
+      <aside class="glass panel fade-up">
+        <div class="panel-head">
           <div>
             <h3>Saved Roster</h3>
-            <p>These entries are loaded from your backend and persisted through Supabase.</p>
+            <p>Persistent roster loaded from your Render backend and Supabase table.</p>
           </div>
           <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="roster-list" id="playerList">
+        <div class="roster" id="playerList">
           <div class="empty">Loading players…</div>
         </div>
       </aside>
@@ -855,7 +937,7 @@
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
-    const WS_BASE = 'wss://backend-website-syxe.onrender.com/ws';
+    const WS_URL = 'wss://backend-website-syxe.onrender.com/ws';
 
     const els = {
       backendDot: document.getElementById('backendDot'),
@@ -864,6 +946,7 @@
       wsStatus: document.getElementById('wsStatus'),
       backendMetric: document.getElementById('backendMetric'),
       playerCount: document.getElementById('playerCount'),
+      heroLog: document.getElementById('heroLog'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
@@ -882,21 +965,34 @@
 
     let players = [];
     let ws = null;
-    let wsReconnectTimer = null;
+    let reconnectTimer = null;
+
+    function logLines(lines) {
+      els.heroLog.innerHTML = lines.join('\n');
+    }
+
+    function setHeroLog(backendText, wsText, extra = 'system :: idle') {
+      logLines([
+        `<span class="muted">boot</span> :: control surface active`,
+        backendText,
+        wsText,
+        extra
+      ]);
+    }
 
     function setFeedback(message, type = '') {
       els.feedback.textContent = message;
-      els.feedback.className = 'feedback' + (type ? ' ' + type : '');
+      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
     }
 
     function setBackendStatus(ok, text) {
-      els.backendDot.className = 'dot ' + (ok ? 'online' : 'offline');
+      els.backendDot.className = 'blink ' + (ok ? 'online' : 'offline');
       els.backendStatus.textContent = text;
       els.backendMetric.textContent = ok ? 'Online' : 'Offline';
     }
 
     function setWsStatus(ok, text) {
-      els.wsDot.className = 'dot ' + (ok ? 'online' : 'offline');
+      els.wsDot.className = 'blink ' + (ok ? 'online' : 'offline');
       els.wsStatus.textContent = text;
     }
 
@@ -907,6 +1003,24 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      const text = await res.text();
+
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(`Expected JSON but received: ${text.slice(0, 80)}`);
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
+      return data;
     }
 
     function resetForm() {
@@ -931,42 +1045,56 @@
       els.is_admin.checked = !!player.is_admin;
       els.formTitle.textContent = 'Edit Player';
       els.saveBtn.textContent = 'Update Player';
-      window.scrollTo({ top: document.querySelector('.stage').offsetTop - 90, behavior: 'smooth' });
+      window.scrollTo({ top: document.querySelector('.panel').offsetTop - 90, behavior: 'smooth' });
     }
 
     function renderPlayers() {
       els.playerCount.textContent = players.length;
 
       if (!players.length) {
-        els.playerList.innerHTML = '<div class="empty">No saved players yet. Add one from the form.</div>';
+        els.playerList.innerHTML = '<div class="empty">No saved players yet. Add a routed player to begin.</div>';
         return;
       }
 
       els.playerList.innerHTML = players.map(player => {
         const signal = player.signal_strength ?? 15;
         const direction = player.direction || 'unknown';
-        const channel = player.channel_name || '—';
-        const computer = player.computer_name || '—';
-        const admin = player.is_admin ? '<span class="badge">Admin</span>' : '';
+        const adminChip = player.is_admin ? '<span class="chip">admin</span>' : '';
 
         return `
           <article class="player-row">
             <div class="player-main">
               <div class="player-top">
                 <h4 class="player-name">${escapeHtml(player.name)}</h4>
-                <span class="badge">Direction: ${escapeHtml(direction)}</span>
-                <span class="badge">Signal: ${escapeHtml(signal)}</span>
-                ${admin}
+                <span class="chip">dir ${escapeHtml(direction)}</span>
+                <span class="chip">sig ${escapeHtml(signal)}</span>
+                ${adminChip}
               </div>
               <div class="player-meta">
-                <span class="badge">Channel: ${escapeHtml(channel)}</span>
-                <span class="badge">Computer: ${escapeHtml(computer)}</span>
-                <span class="badge">ID: ${escapeHtml(player.id)}</span>
+                <span class="chip">channel ${escapeHtml(player.channel_name || '—')}</span>
+                <span class="chip">computer ${escapeHtml(player.computer_name || '—')}</span>
               </div>
             </div>
             <div class="player-actions">
-              <button class="trigger-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">Trigger</button>
-              <button class="mini edit" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>
+              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">
+                <span class="btn-label">Pull Pearl</span>
+                <span class="eye" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 32C12.5 21 21.5 15 32 15C42.5 15 51.5 21 58 32C51.5 43 42.5 49 32 49C21.5 49 12.5 43 6 32Z" stroke="#0A1B25" stroke-width="2.5"/>
+                    <path d="M6 32C12.5 21 21.5 15 32 15C42.5 15 51.5 21 58 32C51.5 43 42.5 49 32 49C21.5 49 12.5 43 6 32Z" fill="url(#g1)"/>
+                    <circle cx="32" cy="32" r="10" fill="#03161F"/>
+                    <circle cx="32" cy="32" r="6" fill="#8EFAFF"/>
+                    <circle cx="29.5" cy="29.5" r="2" fill="#EFFFFF"/>
+                    <defs>
+                      <linearGradient id="g1" x1="6" y1="15" x2="58" y2="49" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#E6FDFF"/>
+                        <stop offset="1" stop-color="#72EDFF"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </span>
+              </button>
+              <button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>
               <button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>
             </div>
           </article>
@@ -976,30 +1104,33 @@
 
     async function checkBackend() {
       try {
-        const res = await fetch(`${API_BASE}/health`, { method: 'GET' });
-        if (!res.ok) throw new Error(`Health check failed (${res.status})`);
-        setBackendStatus(true, 'Backend: online');
+        await fetchJson(`${API_BASE}/health`);
+        setBackendStatus(true, 'backend.online()');
+        setHeroLog(
+          '<span class="ok">api</span>  :: backend health passed',
+          '<span class="muted">ws</span>   :: waiting for computer tunnel',
+          '<span class="cyan">db</span>   :: supabase route available'
+        );
       } catch (err) {
-        setBackendStatus(false, 'Backend: offline');
+        setBackendStatus(false, 'backend.offline()');
+        setHeroLog(
+          `<span class="warn">api</span>  :: ${escapeHtml(err.message)}`,
+          '<span class="muted">ws</span>   :: tunnel unavailable',
+          '<span class="warn">db</span>   :: check render env and routes'
+        );
       }
     }
 
     async function loadPlayers() {
       try {
-        const res = await fetch(`${API_BASE}/players`);
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to load players');
-        }
-
+        const data = await fetchJson(`${API_BASE}/players`);
         players = Array.isArray(data) ? data : [];
         renderPlayers();
-        setFeedback(`Loaded ${players.length} player${players.length === 1 ? '' : 's'}.`, 'ok');
+        setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
       } catch (err) {
         players = [];
         renderPlayers();
-        setFeedback(`Failed to load players: ${err.message}`, 'error');
+        setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
@@ -1016,17 +1147,17 @@
       };
 
       if (!payload.name) {
-        setFeedback('Player name is required.', 'error');
+        setFeedback('[error] player name is required', 'error');
         return;
       }
 
       if (!payload.direction) {
-        setFeedback('Direction is required.', 'error');
+        setFeedback('[error] direction is required', 'error');
         return;
       }
 
       if (Number.isNaN(payload.signal_strength) || payload.signal_strength < 0 || payload.signal_strength > 15) {
-        setFeedback('Signal strength must be a number between 0 and 15.', 'error');
+        setFeedback('[error] signal strength must be between 0 and 15', 'error');
         return;
       }
 
@@ -1036,23 +1167,17 @@
       const method = isEdit ? 'PUT' : 'POST';
 
       try {
-        const res = await fetch(url, {
+        await fetchJson(url, {
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Save failed');
-        }
-
-        setFeedback(isEdit ? 'Player updated successfully.' : 'Player added successfully.', 'ok');
+        setFeedback(isEdit ? '[ok] player updated' : '[ok] player saved', 'ok');
         resetForm();
         await loadPlayers();
       } catch (err) {
-        setFeedback(`Save failed: ${err.message}`, 'error');
+        setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
@@ -1063,40 +1188,39 @@
       if (!confirm(`Remove ${label}?`)) return;
 
       try {
-        const res = await fetch(`${API_BASE}/players/${id}`, { method: 'DELETE' });
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Delete failed');
-        }
-
-        setFeedback(`Removed ${label}.`, 'ok');
+        await fetchJson(`${API_BASE}/players/${id}`, { method: 'DELETE' });
+        setFeedback(`[ok] removed ${label}`, 'ok');
         await loadPlayers();
       } catch (err) {
-        setFeedback(`Delete failed: ${err.message}`, 'error');
+        setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
-    async function triggerPlayer(id) {
+    async function triggerPlayer(id, button) {
       const player = players.find(p => p.id === id);
 
+      if (button) {
+        button.classList.add('reveal-eye');
+        setTimeout(() => button.classList.remove('reveal-eye'), 1100);
+      }
+
       try {
-        const res = await fetch(`${API_BASE}/trigger/${id}`, {
+        const data = await fetchJson(`${API_BASE}/trigger/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        const data = await res.json();
+        const who = data?.sent?.player || player?.name || 'player';
+        const dir = data?.sent?.direction || player?.direction || 'unknown';
+        setFeedback(`[ok] pull sent for ${who} -> ${dir}`, 'ok');
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Trigger failed');
-        }
-
-        const targetName = player?.name || data?.sent?.player || 'Player';
-        const targetDirection = data?.sent?.direction || player?.direction || 'unknown';
-        setFeedback(`Triggered ${targetName} on ${targetDirection}.`, 'ok');
+        setHeroLog(
+          '<span class="ok">api</span>  :: backend health passed',
+          '<span class="ok">ws</span>   :: trigger pushed to websocket',
+          `<span class="cyan">pull</span> :: ${escapeHtml(who)} routed to ${escapeHtml(dir)}`
+        );
       } catch (err) {
-        setFeedback(`Trigger failed: ${err.message}`, 'error');
+        setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
@@ -1104,15 +1228,15 @@
       if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
       try {
-        ws = new WebSocket(WS_BASE);
+        ws = new WebSocket(WS_URL);
       } catch (err) {
-        setWsStatus(false, 'Computer link: connect failed');
+        setWsStatus(false, 'computer.link.fail()');
         scheduleReconnect();
         return;
       }
 
       ws.addEventListener('open', () => {
-        setWsStatus(true, 'Computer link: connected');
+        setWsStatus(true, 'computer.link.open()');
       });
 
       ws.addEventListener('message', (event) => {
@@ -1120,31 +1244,29 @@
           const msg = JSON.parse(event.data);
 
           if (msg.type === 'welcome') {
-            setWsStatus(true, 'Computer link: backend ready');
-          }
-
-          if (msg.type === 'ping') {
-            setWsStatus(true, 'Computer link: alive');
+            setWsStatus(true, 'computer.link.ready()');
+          } else if (msg.type === 'ping') {
+            setWsStatus(true, 'computer.link.alive()');
           }
         } catch {
-          // ignore non-json
+          // ignore
         }
       });
 
       ws.addEventListener('close', () => {
-        setWsStatus(false, 'Computer link: disconnected');
+        setWsStatus(false, 'computer.link.closed()');
         scheduleReconnect();
       });
 
       ws.addEventListener('error', () => {
-        setWsStatus(false, 'Computer link: error');
+        setWsStatus(false, 'computer.link.error()');
       });
     }
 
     function scheduleReconnect() {
-      if (wsReconnectTimer) return;
-      wsReconnectTimer = setTimeout(() => {
-        wsReconnectTimer = null;
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
         connectWs();
       }, 5000);
     }
@@ -1153,7 +1275,7 @@
 
     els.resetBtn.addEventListener('click', () => {
       resetForm();
-      setFeedback('Form cleared.');
+      setFeedback('[ready] form cleared', 'ok');
     });
 
     els.refreshBtn.addEventListener('click', async () => {
@@ -1178,7 +1300,7 @@
       }
 
       if (action === 'trigger') {
-        await triggerPlayer(id);
+        await triggerPlayer(id, button);
       }
     });
 
