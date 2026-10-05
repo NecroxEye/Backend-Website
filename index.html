@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control Panel</title>
-  <meta name="description" content="Discord-auth gated pearl roster and trigger panel." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#06111a;
@@ -26,50 +22,21 @@
     }
 
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-
     body{
       margin:0;
       min-height:100vh;
       color:var(--text);
-      font-family:"Inter", sans-serif;
+      font-family:Arial, sans-serif;
       background:
         radial-gradient(circle at 10% 10%, rgba(124,236,255,.18), transparent 23%),
         radial-gradient(circle at 87% 14%, rgba(124,236,255,.11), transparent 18%),
-        radial-gradient(circle at 50% 100%, rgba(63,145,179,.16), transparent 28%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
       overflow-x:hidden;
     }
 
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(rgba(124,236,255,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(124,236,255,.025) 1px, transparent 1px);
-      background-size:36px 36px;
-      opacity:.55;
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.35));
-    }
-
-    .grain{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.05;
-      background-image:
-        radial-gradient(circle at 20% 20%, white 0 .7px, transparent 1px),
-        radial-gradient(circle at 80% 60%, white 0 .7px, transparent 1px),
-        radial-gradient(circle at 40% 80%, white 0 .7px, transparent 1px);
-      background-size:24px 24px, 30px 30px, 34px 34px;
-      mix-blend-mode:screen;
-    }
-
     .shell{
       width:min(var(--max), calc(100% - 28px));
-      margin-inline:auto;
+      margin:0 auto;
     }
 
     .glass{
@@ -82,25 +49,15 @@
       box-shadow:var(--shadow);
     }
 
-    .glass::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,.12), transparent 28%),
-        radial-gradient(circle at top right, rgba(124,236,255,.18), transparent 24%);
-    }
-
     .hide,[hidden]{display:none !important}
 
     .topbar{
       position:sticky;
       top:0;
       z-index:40;
-      backdrop-filter:blur(18px);
-      background:linear-gradient(180deg, rgba(5,11,17,.82), rgba(5,11,17,.58));
+      background:rgba(5,11,17,.82);
       border-bottom:1px solid rgba(124,236,255,.12);
+      backdrop-filter:blur(18px);
     }
 
     .topbar-inner{
@@ -115,42 +72,21 @@
       display:flex;
       align-items:center;
       gap:14px;
-      min-width:0;
     }
 
     .brand-mark{
       width:48px;
       height:48px;
       border-radius:16px;
-      position:relative;
       background:
         radial-gradient(circle at 34% 28%, rgba(255,255,255,.55), transparent 24%),
         linear-gradient(135deg, rgba(124,236,255,.34), rgba(69,216,238,.08));
       border:1px solid rgba(145,229,255,.28);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 12px 30px rgba(69,216,238,.15);
-      overflow:hidden;
-    }
-
-    .brand-mark::before,
-    .brand-mark::after{
-      content:"";
-      position:absolute;
-      inset:10px;
-      border:1px solid rgba(223,250,255,.42);
-      border-radius:12px;
-      transform:rotate(45deg);
-    }
-
-    .brand-mark::after{
-      inset:16px;
-      opacity:.5;
     }
 
     .brand-copy h1{
       margin:0;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(1rem, 1.8vw, 1.45rem);
-      line-height:1.05;
+      font-size:1.05rem;
       letter-spacing:.12em;
       text-transform:uppercase;
     }
@@ -159,34 +95,29 @@
       margin:4px 0 0;
       color:var(--muted);
       font-size:.88rem;
-      letter-spacing:.06em;
     }
 
     .status-row{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      justify-content:flex-end;
       align-items:center;
+      justify-content:flex-end;
     }
 
     .terminal-pill{
       min-width:220px;
       border-radius:999px;
       border:1px solid rgba(124,236,255,.18);
-      background:linear-gradient(180deg, rgba(11,24,35,.74), rgba(7,18,27,.72));
+      background:rgba(11,24,35,.74);
       padding:10px 14px;
       display:flex;
       align-items:center;
       gap:10px;
       color:#c8f4fb;
-      font-family:"JetBrains Mono", monospace;
       font-size:.84rem;
       white-space:nowrap;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
     }
-
-    .prompt{color:var(--cyan)}
 
     .dot{
       width:10px;
@@ -205,160 +136,104 @@
       box-shadow:0 0 0 8px rgba(255,136,176,.08), 0 0 16px rgba(255,136,176,.16);
     }
 
-    .discord-btn,
-    .logout-btn,
-    .btn-primary,
-    .btn-secondary,
-    .btn-ghost,
-    .mini,
-    .pull-btn{
+    button{
       border:none;
       cursor:pointer;
       border-radius:999px;
       font:inherit;
       font-weight:700;
       transition:.2s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
+    }
+
+    .discord-btn,.logout-btn,.btn-primary,.btn-secondary,.btn-ghost,.mini,.pull-btn{
+      padding:11px 16px;
     }
 
     .discord-btn{
-      padding:11px 16px;
       color:#041018;
       background:linear-gradient(135deg, #dffaff, #7cecff);
-      box-shadow:0 14px 24px rgba(124,236,255,.18);
     }
 
-    .logout-btn,
-    .btn-secondary,
-    .btn-ghost,
-    .mini{
-      padding:11px 16px;
+    .logout-btn,.btn-secondary,.btn-ghost,.mini{
       color:var(--ice);
       background:rgba(172,240,255,.06);
       border:1px solid rgba(124,236,255,.16);
     }
 
-    .btn-primary{
-      padding:13px 18px;
-      color:#021119;
-      background:linear-gradient(135deg, #dffaff, #7cecff);
-      box-shadow:0 16px 28px rgba(124,236,255,.22);
-    }
-
-    .pull-btn{
-      padding:13px 18px;
-      min-width:132px;
+    .btn-primary,.pull-btn{
       color:#031119;
       background:linear-gradient(135deg, #ecfdff, #7cecff);
-      box-shadow:0 16px 28px rgba(124,236,255,.22);
     }
-
-    .mini.danger{
-      color:#ffd8e5;
-      background:rgba(255,136,176,.08);
-      border-color:rgba(255,136,176,.18);
-    }
-
-    .discord-btn:hover,.logout-btn:hover,.btn-primary:hover,.btn-secondary:hover,.btn-ghost:hover,.mini:hover,.pull-btn:hover{
-      transform:translateY(-2px) scale(1.01);
-    }
-
-    button:active{transform:translateY(0) scale(.985)}
-    button[disabled]{opacity:.42;cursor:not-allowed;transform:none !important;box-shadow:none !important}
 
     main{padding:26px 0 56px}
 
     .hero{
       display:grid;
-      grid-template-columns:1fr;
       gap:18px;
       margin-bottom:18px;
     }
 
     .hero-copy{
-      padding:clamp(24px, 4vw, 42px);
-      min-height:260px;
+      padding:34px;
+      min-height:240px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
     }
 
     .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
       color:var(--cyan);
       text-transform:uppercase;
       letter-spacing:.18em;
-      font-family:"JetBrains Mono", monospace;
       font-size:.76rem;
       margin-bottom:14px;
     }
 
-    .eyebrow::before{
-      content:"";
-      width:34px;
-      height:1px;
-      background:currentColor;
-      opacity:.9;
-    }
-
     .hero-copy h2{
       margin:0 0 12px;
-      max-width:12ch;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(2rem, 5.8vw, 4rem);
+      font-size:clamp(2rem, 5vw, 4rem);
       line-height:1.02;
       letter-spacing:.04em;
       text-transform:uppercase;
-      text-shadow:0 0 24px rgba(124,236,255,.1);
     }
 
     .hero-copy p{
       margin:0;
-      max-width:56ch;
+      max-width:60ch;
       color:var(--muted);
       line-height:1.7;
-      font-size:1rem;
     }
 
     .metrics{
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      margin-top:26px;
+      margin-top:22px;
     }
 
     .metric{
-      min-width:152px;
+      min-width:150px;
       border-radius:18px;
       border:1px solid rgba(124,236,255,.16);
       background:rgba(10,22,33,.4);
       padding:14px 16px;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
     }
 
     .metric span{
       display:block;
       color:var(--muted);
-      font-family:"JetBrains Mono", monospace;
       font-size:.77rem;
       text-transform:uppercase;
-      letter-spacing:.08em;
       margin-bottom:5px;
     }
 
     .metric strong{
-      font-size:1.24rem;
+      font-size:1.18rem;
       color:var(--ice);
     }
 
     .main-grid{
       display:grid;
-      grid-template-columns:1fr;
       gap:18px;
     }
 
@@ -370,14 +245,11 @@
       justify-content:space-between;
       gap:16px;
       margin-bottom:18px;
-      position:relative;
-      z-index:1;
     }
 
     .panel-head h3{
       margin:0;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(1.1rem, 2.4vw, 1.7rem);
+      font-size:1.2rem;
       text-transform:uppercase;
       letter-spacing:.08em;
     }
@@ -385,9 +257,7 @@
     .panel-head p{
       margin:7px 0 0;
       color:var(--muted);
-      font-size:.95rem;
       line-height:1.6;
-      max-width:46ch;
     }
 
     .auth-lock{
@@ -397,8 +267,7 @@
 
     .auth-lock h3{
       margin:0 0 10px;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(1.2rem, 3vw, 2rem);
+      font-size:1.6rem;
       text-transform:uppercase;
       letter-spacing:.08em;
     }
@@ -418,8 +287,6 @@
     .roster{
       display:grid;
       gap:12px;
-      position:relative;
-      z-index:1;
     }
 
     .player-row{
@@ -430,20 +297,13 @@
       padding:16px;
       border-radius:20px;
       border:1px solid rgba(124,236,255,.13);
-      background:linear-gradient(180deg, rgba(9,21,31,.66), rgba(8,19,28,.46));
-      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
-    }
-
-    .player-row:hover{
-      transform:translateY(-1px);
-      border-color:rgba(124,236,255,.26);
-      box-shadow:0 18px 32px rgba(0,0,0,.16);
+      background:rgba(9,21,31,.66);
     }
 
     .player-main{
-      min-width:0;
       display:grid;
       gap:10px;
+      min-width:0;
     }
 
     .player-top{
@@ -455,7 +315,7 @@
 
     .player-name{
       margin:0;
-      font-size:1.08rem;
+      font-size:1.02rem;
       color:var(--ice);
       font-weight:700;
     }
@@ -472,7 +332,6 @@
       font-size:.76rem;
       text-transform:uppercase;
       letter-spacing:.08em;
-      font-family:"JetBrains Mono", monospace;
     }
 
     .player-meta{
@@ -495,13 +354,12 @@
       text-align:center;
       color:var(--muted);
       background:rgba(172,240,255,.03);
-      font-family:"JetBrains Mono", monospace;
     }
 
     .admin-panel{
       border-radius:20px;
       border:1px solid rgba(124,236,255,.14);
-      background:linear-gradient(180deg, rgba(6,17,26,.72), rgba(7,18,27,.58));
+      background:rgba(6,17,26,.72);
       padding:18px;
     }
 
@@ -520,38 +378,21 @@
 
     label{
       color:#bfeaf2;
-      font-family:"JetBrains Mono", monospace;
       font-size:.82rem;
       text-transform:uppercase;
       letter-spacing:.12em;
     }
 
-    input, select{
+    input{
       width:100%;
       border:none;
       outline:none;
-      appearance:none;
       color:var(--ice);
-      background:linear-gradient(180deg, rgba(7,18,27,.94), rgba(8,22,33,.86));
+      background:rgba(7,18,27,.94);
       border:1px solid rgba(124,236,255,.14);
       border-radius:16px;
       padding:14px 14px;
       font:inherit;
-      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
-    }
-
-    select option{
-      background:#0b1823;
-      color:#eafcff;
-    }
-
-    input::placeholder{color:#7fa7b1}
-
-    input:focus, select:focus{
-      transform:translateY(-1px);
-      border-color:rgba(124,236,255,.38);
-      box-shadow:0 0 0 4px rgba(124,236,255,.08), 0 10px 24px rgba(69,216,238,.08);
     }
 
     .toggle{
@@ -562,20 +403,13 @@
       border:1px solid rgba(124,236,255,.14);
       border-radius:18px;
       padding:14px 16px;
-      background:linear-gradient(180deg, rgba(7,18,27,.62), rgba(8,22,33,.42));
-    }
-
-    .toggle span{
-      color:#c8edf3;
-      font-family:"JetBrains Mono", monospace;
-      font-size:.9rem;
+      background:rgba(7,18,27,.62);
     }
 
     .toggle input[type="checkbox"]{
       width:20px;
       height:20px;
       accent-color:var(--cyan);
-      cursor:pointer;
     }
 
     .actions{
@@ -590,19 +424,14 @@
       min-height:66px;
       border-radius:18px;
       border:1px solid rgba(124,236,255,.14);
-      background:linear-gradient(180deg, rgba(6,17,26,.74), rgba(7,18,27,.58));
+      background:rgba(6,17,26,.74);
       padding:16px;
       display:flex;
       align-items:center;
       color:#d9fbff;
-      font-family:"JetBrains Mono", monospace;
       font-size:.9rem;
       line-height:1.6;
     }
-
-    .terminal-status.ok{color:#e3fff1;border-color:rgba(144,255,211,.18)}
-    .terminal-status.error{color:#ffe1ea;border-color:rgba(255,136,176,.2)}
-    .terminal-status.warn{color:#fff0cf;border-color:rgba(255,215,161,.2)}
 
     .eye-overlay{
       position:fixed;
@@ -627,13 +456,8 @@
       min-height:300px;
       border-radius:32px;
       border:1px solid rgba(124,236,255,.18);
-      background:
-        radial-gradient(circle at 50% 40%, rgba(124,236,255,.15), transparent 30%),
-        linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
-      backdrop-filter:blur(22px);
+      background:linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
       box-shadow:0 30px 90px rgba(0,0,0,.42);
-      position:relative;
-      overflow:hidden;
       display:grid;
       place-items:center;
       transform:translateY(16px) scale(.94);
@@ -650,13 +474,10 @@
       place-items:center;
       text-align:center;
       padding:32px;
-      position:relative;
-      z-index:1;
     }
 
     .eye-wrap svg{
       width:min(240px, 52vw);
-      height:auto;
       display:block;
       filter:drop-shadow(0 0 22px rgba(69,216,238,.24));
       animation:eyePulse 1s ease-in-out infinite alternate;
@@ -664,8 +485,7 @@
 
     .eye-wrap h4{
       margin:0;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(1rem, 2vw, 1.35rem);
+      font-size:1.05rem;
       text-transform:uppercase;
       letter-spacing:.1em;
       color:var(--ice);
@@ -674,37 +494,12 @@
     .eye-wrap p{
       margin:0;
       color:var(--muted);
-      font-family:"JetBrains Mono", monospace;
       font-size:.9rem;
-    }
-
-    .reveal{
-      opacity:0;
-      transform:translateY(16px);
-      animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;
-    }
-
-    .delay-1{animation-delay:.08s}
-    .delay-2{animation-delay:.16s}
-
-    .fade-up{
-      opacity:0;
-      transform:translateY(18px);
-      transition:opacity .6s ease, transform .6s ease;
-    }
-
-    .fade-up.in-view{
-      opacity:1;
-      transform:translateY(0);
     }
 
     @keyframes eyePulse{
       from{transform:scale(.98)}
       to{transform:scale(1.04)}
-    }
-
-    @keyframes rise{
-      to{opacity:1; transform:translateY(0)}
     }
 
     @media (max-width:720px){
@@ -719,13 +514,10 @@
       .form-grid{grid-template-columns:1fr}
       .player-row{grid-template-columns:1fr}
       .player-actions{justify-content:flex-start}
-      .hero-copy h2{max-width:none}
     }
   </style>
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
-
   <div class="eye-overlay" id="eyeOverlay" aria-hidden="true">
     <div class="eye-panel">
       <div class="eye-wrap">
@@ -759,12 +551,12 @@
 
       <div class="status-row">
         <div class="terminal-pill">
-          <span class="prompt">$</span>
+          <span>$</span>
           <span class="dot offline" id="backendDot"></span>
           <span id="backendStatus">backend.check()</span>
         </div>
         <div class="terminal-pill">
-          <span class="prompt">></span>
+          <span>&gt;</span>
           <span class="dot offline" id="authDot"></span>
           <span id="authStatus">auth.locked()</span>
         </div>
@@ -776,7 +568,7 @@
 
   <main class="shell">
     <section class="hero">
-      <article class="glass hero-copy reveal delay-1">
+      <article class="glass hero-copy">
         <div>
           <div class="eyebrow">Frosted Cyan Surface • Precision Under Pressure</div>
           <h2>Cold focus. Clean timing. No wasted motion.</h2>
@@ -803,7 +595,7 @@
     </section>
 
     <section class="main-grid">
-      <section class="glass panel reveal delay-2" id="lockedPanel">
+      <section class="glass panel" id="lockedPanel">
         <div class="auth-lock">
           <h3>Access Locked</h3>
           <p>
@@ -823,75 +615,58 @@
           <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="panel-stack">
-          <div class="terminal-status" id="liveStatus" role="status" aria-live="polite">
-            [ready] authenticated session required
+        <div class="terminal-status" id="liveStatus">[ready] authenticated session required</div>
+
+        <div class="roster" id="playerList"></div>
+
+        <section class="admin-panel hide" id="adminPanel" hidden aria-hidden="true">
+          <div class="panel-head" style="margin-bottom:14px;">
+            <div>
+              <h3 id="formTitle">Add Player</h3>
+              <p>Visible only to members with the admin role.</p>
+            </div>
           </div>
 
-          <div class="roster" id="playerList">
-            <div class="empty">Loading players…</div>
-          </div>
+          <form id="playerForm" novalidate>
+            <input type="hidden" id="playerId" />
 
-          <section class="admin-panel hide" id="adminPanel" hidden aria-hidden="true">
-            <div class="panel-head" style="margin-bottom:14px;">
-              <div>
-                <h3 id="formTitle">Add Player</h3>
-                <p>Visible only to members with the admin role.</p>
+            <div class="form-grid">
+              <div class="field">
+                <label for="name">Player Name</label>
+                <input id="name" name="name" type="text" placeholder="FrostedFang" required />
+              </div>
+
+              <div class="field">
+                <label for="signal_strength">Signal Strength</label>
+                <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
+              </div>
+
+              <div class="field">
+                <label for="channel_name">Channel Name</label>
+                <input id="channel_name" name="channel_name" type="text" placeholder="pearl-main" />
+              </div>
+
+              <div class="field">
+                <label for="computer_name">Computer Name</label>
+                <input id="computer_name" name="computer_name" type="text" placeholder="shared-pearl-computer" />
+              </div>
+
+              <div class="field full">
+                <div class="toggle">
+                  <span>Admin Permission</span>
+                  <input id="is_admin" name="is_admin" type="checkbox" />
+                </div>
               </div>
             </div>
 
-            <form id="playerForm" novalidate>
-              <input type="hidden" id="playerId" />
-
-              <div class="form-grid">
-                <div class="field">
-                  <label for="name">Player Name</label>
-                  <input id="name" name="name" type="text" placeholder="FrostedFang" required />
-                </div>
-
-                <div class="field">
-                  <label for="signal_strength">Signal Strength</label>
-                  <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
-                </div>
-
-                <div class="field">
-                  <label for="direction">Direction</label>
-                  <select id="direction" name="direction" required>
-                    <option value="">Select route</option>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label for="channel_name">Channel Name</label>
-                  <input id="channel_name" name="channel_name" type="text" placeholder="pearl-main" />
-                </div>
-
-                <div class="field full">
-                  <label for="computer_name">Computer Name</label>
-                  <input id="computer_name" name="computer_name" type="text" placeholder="shared-pearl-computer" />
-                </div>
-
-                <div class="field full">
-                  <div class="toggle">
-                    <span>Admin Permission</span>
-                    <input id="is_admin" name="is_admin" type="checkbox" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="actions">
-                <button type="submit" class="btn-primary" id="saveBtn">Save Player</button>
-                <button type="button" class="btn-secondary" id="resetBtn">Clear Form</button>
-              </div>
-            </form>
-
-            <div class="terminal-status" id="feedback">
-              [ready] admin tools locked
+            <div class="actions">
+              <button type="submit" class="btn-primary" id="saveBtn">Save Player</button>
+              <button type="button" class="btn-secondary" id="resetBtn">Clear Form</button>
             </div>
-          </section>
-        </div>
+          </form>
+
+          <div class="terminal-status" id="feedback">[ready] admin tools locked</div>
+        </section>
       </section>
     </section>
   </main>
@@ -928,7 +703,6 @@
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
       signal_strength: document.getElementById('signal_strength'),
-      direction: document.getElementById('direction'),
       channel_name: document.getElementById('channel_name'),
       computer_name: document.getElementById('computer_name'),
       is_admin: document.getElementById('is_admin'),
@@ -974,18 +748,8 @@
     function setVisible(el, visible) {
       if (!el) return;
       el.hidden = !visible;
-      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
       el.classList.toggle('hide', !visible);
-    }
-
-    function setFeedback(message, type = '') {
-      els.feedback.textContent = message;
-      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
-    }
-
-    function setLiveStatus(message, type = '') {
-      els.liveStatus.textContent = message;
-      els.liveStatus.className = 'terminal-status' + (type ? ' ' + type : '');
+      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
     }
 
     function setBackendStatus(ok, text) {
@@ -997,6 +761,16 @@
     function setAuthStatus(ok, text) {
       els.authDot.className = 'dot ' + (ok ? 'online' : 'offline');
       els.authStatus.textContent = text;
+    }
+
+    function setFeedback(message, type = '') {
+      els.feedback.textContent = message;
+      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
+    }
+
+    function setLiveStatus(message, type = '') {
+      els.liveStatus.textContent = message;
+      els.liveStatus.className = 'terminal-status' + (type ? ' ' + type : '');
     }
 
     function showEyePanel(title, text) {
@@ -1021,19 +795,12 @@
       const res = await fetch(url, {
         credentials: 'include',
         ...options,
-        headers: {
-          ...(options.headers || {})
-        }
+        headers: { ...(options.headers || {}) }
       });
 
       const text = await res.text();
-      let data;
-
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error(`Expected JSON but got: ${text.slice(0, 100)}`);
-      }
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch {}
 
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
       return data;
@@ -1047,7 +814,6 @@
       els.playerId.value = '';
       els.name.value = '';
       els.signal_strength.value = 15;
-      els.direction.value = '';
       els.channel_name.value = '';
       els.computer_name.value = '';
       els.is_admin.checked = false;
@@ -1060,7 +826,6 @@
       els.playerId.value = player.id || '';
       els.name.value = player.name || '';
       els.signal_strength.value = player.signal_strength ?? 15;
-      els.direction.value = player.direction || '';
       els.channel_name.value = player.channel_name || '';
       els.computer_name.value = player.computer_name || '';
       els.is_admin.checked = !!player.is_admin;
@@ -1098,7 +863,6 @@
       if (loggedIn && admin) {
         els.rosterSubtitle.textContent = 'Authenticated. Admin access active.';
         setLiveStatus('[ok] admin session verified', 'ok');
-        setFeedback('[ok] admin tools unlocked', 'ok');
       } else if (loggedIn && pull) {
         els.rosterSubtitle.textContent = 'Authenticated. Pull access active.';
         setLiveStatus('[ok] pull access verified', 'ok');
@@ -1106,7 +870,7 @@
         els.rosterSubtitle.textContent = 'Authenticated, but no valid pearl role found.';
         setLiveStatus('[warn] no valid pearl role found', 'warn');
       } else {
-        setLiveStatus('[ready] authenticated session required', '');
+        setLiveStatus('[ready] authenticated session required');
       }
     }
 
@@ -1131,7 +895,6 @@
           <div class="player-main">
             <div class="player-top">
               <h4 class="player-name">${escapeHtml(player.name)}</h4>
-              <span class="chip">dir ${escapeHtml(player.direction || 'unknown')}</span>
               <span class="chip">sig ${escapeHtml(player.signal_strength ?? 15)}</span>
               ${player.is_admin ? '<span class="chip">admin</span>' : ''}
             </div>
@@ -1180,38 +943,27 @@
         const data = await fetchJson(`${API_BASE}/players`);
         players = Array.isArray(data) ? data : [];
         renderPlayers();
-        if (canAdmin()) {
-          setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
-        }
+        if (canAdmin()) setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
       } catch (err) {
         players = [];
         renderPlayers();
-        if (canAdmin()) {
-          setFeedback(`[error] ${err.message}`, 'error');
-        } else {
-          setLiveStatus(`[error] ${err.message}`, 'error');
-        }
+        setLiveStatus(`[error] ${err.message}`, 'error');
       }
     }
 
     async function savePlayer(event) {
       event.preventDefault();
-      if (!canAdmin()) {
-        setFeedback('[warn] admin role required', 'warn');
-        return;
-      }
+      if (!canAdmin()) return;
 
       const payload = {
         name: els.name.value.trim(),
         signal_strength: Number(els.signal_strength.value),
-        direction: els.direction.value,
         channel_name: els.channel_name.value.trim(),
         computer_name: els.computer_name.value.trim(),
         is_admin: els.is_admin.checked
       };
 
       if (!payload.name) return setFeedback('[error] player name is required', 'error');
-      if (!payload.direction) return setFeedback('[error] direction is required', 'error');
       if (Number.isNaN(payload.signal_strength) || payload.signal_strength < 0 || payload.signal_strength > 15) {
         return setFeedback('[error] signal strength must be between 0 and 15', 'error');
       }
@@ -1278,9 +1030,7 @@
     els.heroLoginBtn.addEventListener('click', goLogin);
 
     els.logoutBtn.addEventListener('click', async () => {
-      try {
-        await fetchJson(CONFIG.logoutUrl, { method: 'POST' });
-      } catch {}
+      try { await fetchJson(CONFIG.logoutUrl, { method: 'POST' }); } catch {}
       currentUser = null;
       players = [];
       setVisible(els.adminPanel, false);
@@ -1292,19 +1042,9 @@
     });
 
     els.eyeOverlay.addEventListener('click', hideEyePanel);
-
     els.playerForm.addEventListener('submit', savePlayer);
-
-    els.resetBtn.addEventListener('click', () => {
-      resetForm();
-      setFeedback('[ready] form cleared', 'ok');
-    });
-
-    els.refreshBtn.addEventListener('click', async () => {
-      await checkBackend();
-      await checkAuth();
-      await loadPlayers();
-    });
+    els.resetBtn.addEventListener('click', () => { resetForm(); setFeedback('[ready] form cleared', 'ok'); });
+    els.refreshBtn.addEventListener('click', async () => { await checkBackend(); await checkAuth(); await loadPlayers(); });
 
     els.playerList.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-action]');
@@ -1318,22 +1058,9 @@
         if (player) fillForm(player);
       }
 
-      if (action === 'delete') {
-        await deletePlayer(id);
-      }
-
-      if (action === 'trigger') {
-        await triggerPlayer(id);
-      }
+      if (action === 'delete') await deletePlayer(id);
+      if (action === 'trigger') await triggerPlayer(id);
     });
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('in-view');
-      });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
     async function init() {
       setVisible(els.lockedPanel, true);
