@@ -1,7 +1,12 @@
 require('dotenv').config();
 
 const fs = require('fs');
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const {
+  Client,
+  GatewayIntentBits,
+  EmbedBuilder,
+  PermissionsBitField
+} = require('discord.js');
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
@@ -42,13 +47,13 @@ function saveMessageId(messageId) {
   }
 }
 
-async function fetchBackendStatus() {
+async function fetchStatus() {
   const res = await fetch(BACKEND_URL, {
     headers: { Accept: 'application/json' }
   });
 
   const text = await res.text();
-  let data;
+  let data = {};
 
   try {
     data = text ? JSON.parse(text) : {};
@@ -71,7 +76,7 @@ function normalizeState(data) {
       : [];
 
   return {
-    status: String(data.status || data.backend_status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
+    status: String(data.status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
     backendStatus: String(data.backend_status || data.backend || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
     computer: String(data.computer || data.computer_name || 'N/A'),
     oilRig: String(data.oilRig || data.oil_rig || 'Offline'),
@@ -83,41 +88,33 @@ function normalizeState(data) {
 function buildEmbed(state) {
   const statusEmoji = state.status === 'ON' ? '🟢' : '🔴';
   const backendEmoji = state.backendStatus === 'ON' ? '🟢' : '🔴';
-  const oilRigWorking = String(state.oilRig).toLowerCase() === 'working';
-
-  const playersText = state.players.length
-    ? state.players.map(p => `• ${p}`).join('\n')
-    : 'None';
+  const oilRigOk = String(state.oilRig).toLowerCase() === 'working';
 
   return new EmbedBuilder()
     .setTitle('System Status Panel')
     .setColor(state.status === 'ON' ? 0x2ecc71 : 0xe74c3c)
     .addFields(
       { name: 'Status', value: `${statusEmoji} ${state.status}`, inline: true },
+      { name: 'Players Added', value: state.players.length ? state.players.map(p => `• ${p}`).join('\n') : 'None', inline: false },
       { name: 'Backend Status', value: `${backendEmoji} ${state.backendStatus}`, inline: true },
       { name: 'Computer', value: state.computer, inline: true },
-      { name: 'Oil Rig', value: oilRigWorking ? '🟢 Working' : '🔴 Offline', inline: true },
-      { name: 'Website', value: '🟢 Working', inline: true },
-      { name: 'Players Added', value: playersText, inline: false }
+      { name: 'Oil Rig', value: oilRigOk ? '🟢 Working' : '🔴 Offline', inline: true },
+      { name: 'Website', value: '🟢 Working', inline: true }
     )
     .setFooter({ text: 'Auto-updating status panel' })
     .setTimestamp();
 }
 
-async function getStatusMessage(channel) {
-  if (!cachedMessageId) {
-    cachedMessageId = loadSavedMessageId();
-  }
+async function getExistingMessage(channel) {
+  if (!cachedMessageId) cachedMessageId = loadSavedMessageId();
+  if (!cachedMessageId) return null;
 
-  if (cachedMessageId) {
-    try {
-      return await channel.messages.fetch(cachedMessageId);
-    } catch {
-      cachedMessageId = null;
-    }
+  try {
+    return await channel.messages.fetch(cachedMessageId);
+  } catch {
+    cachedMessageId = null;
+    return null;
   }
-
-  return null;
 }
 
 async function updatePanel() {
@@ -125,14 +122,11 @@ async function updatePanel() {
   updateRunning = true;
 
   try {
-    const raw = await fetchBackendStatus();
+    const raw = await fetchStatus();
     const state = normalizeState(raw);
     const snapshot = JSON.stringify(state);
 
-    // If nothing changed, do nothing
-    if (snapshot === lastSnapshot) {
-      return;
-    }
+    if (snapshot === lastSnapshot) return;
     lastSnapshot = snapshot;
 
     const channel = await client.channels.fetch(CHANNEL_ID);
@@ -142,10 +136,10 @@ async function updatePanel() {
     }
 
     const embed = buildEmbed(state);
-    const existingMessage = await getStatusMessage(channel);
+    const existing = await getExistingMessage(channel);
 
-    if (existingMessage) {
-      await existingMessage.edit({ embeds: [embed] });
+    if (existing) {
+      await existing.edit({ embeds: [embed] });
     } else {
       const sent = await channel.send({ embeds: [embed] });
       cachedMessageId = sent.id;
