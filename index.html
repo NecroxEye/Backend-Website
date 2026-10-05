@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control Panel</title>
-  <meta name="description" content="Frosted cyan pearl routing panel with terminal status log, persistent roster, and animated pull trigger." />
+  <meta name="description" content="Frosted cyan pearl routing panel with Discord auth, role-gated controls, and animated pull triggers." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,9 +13,7 @@
       --bg:#06111a;
       --bg2:#091723;
       --glass:rgba(172, 240, 255, 0.09);
-      --glass-2:rgba(172, 240, 255, 0.05);
       --stroke:rgba(145, 229, 255, 0.18);
-      --stroke-strong:rgba(145, 229, 255, 0.32);
       --text:#ebfcff;
       --muted:#a5c9d3;
       --cyan:#7cecff;
@@ -23,8 +21,8 @@
       --ice:#dffaff;
       --ok:#90ffd3;
       --danger:#ff88b0;
+      --warn:#ffd7a1;
       --radius:24px;
-      --radius-sm:16px;
       --shadow:0 22px 70px rgba(0,0,0,0.35);
       --max:1320px;
     }
@@ -81,8 +79,7 @@
       overflow:hidden;
       border-radius:var(--radius);
       border:1px solid var(--stroke);
-      background:
-        linear-gradient(180deg, rgba(172,240,255,.09), rgba(172,240,255,.045));
+      background:linear-gradient(180deg, rgba(172,240,255,.09), rgba(172,240,255,.045));
       backdrop-filter:blur(20px);
       box-shadow:var(--shadow);
     }
@@ -130,9 +127,7 @@
         radial-gradient(circle at 34% 28%, rgba(255,255,255,.55), transparent 24%),
         linear-gradient(135deg, rgba(124,236,255,.34), rgba(69,216,238,.08));
       border:1px solid rgba(145,229,255,.28);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.16),
-        0 12px 30px rgba(69,216,238,.15);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 12px 30px rgba(69,216,238,.15);
       overflow:hidden;
     }
 
@@ -172,6 +167,7 @@
       gap:10px;
       flex-wrap:wrap;
       justify-content:flex-end;
+      align-items:center;
     }
 
     .terminal-pill{
@@ -197,7 +193,6 @@
       height:10px;
       border-radius:50%;
       background:#54707a;
-      box-shadow:0 0 0 0 rgba(84,112,122,.32);
     }
 
     .dot.online{
@@ -209,6 +204,32 @@
       background:var(--danger);
       box-shadow:0 0 0 8px rgba(255,136,176,.08), 0 0 16px rgba(255,136,176,.16);
     }
+
+    .discord-btn,
+    .logout-btn{
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:11px 16px;
+      font:inherit;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .discord-btn{
+      color:#041018;
+      background:linear-gradient(135deg, #dffaff, #7cecff);
+      box-shadow:0 14px 24px rgba(124,236,255,.18);
+    }
+
+    .logout-btn{
+      color:var(--ice);
+      background:rgba(172,240,255,.06);
+      border:1px solid rgba(124,236,255,.16);
+    }
+
+    .discord-btn:hover,.logout-btn:hover{transform:translateY(-2px)}
+    .discord-btn:active,.logout-btn:active{transform:translateY(0)}
 
     main{padding:26px 0 56px}
 
@@ -298,13 +319,13 @@
     }
 
     .hero-side{
-      padding:22px;
+      padding:18px;
       display:grid;
-      gap:16px;
+      gap:14px;
       align-content:start;
     }
 
-    .terminal-box{
+    .server-roster-box{
       border-radius:20px;
       border:1px solid rgba(124,236,255,.16);
       background:linear-gradient(180deg, rgba(6,17,26,.82), rgba(7,18,27,.64));
@@ -313,7 +334,7 @@
       box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
     }
 
-    .terminal-head{
+    .box-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -325,39 +346,41 @@
       letter-spacing:.08em;
     }
 
-    .term-dots{
+    .mini-list{
+      display:grid;
+      gap:8px;
+      max-height:210px;
+      overflow:auto;
+      padding-right:4px;
+    }
+
+    .mini-item{
       display:flex;
-      gap:6px;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(124,236,255,.12);
+      background:rgba(172,240,255,.04);
+      font-size:.88rem;
     }
 
-    .term-dots i{
-      display:block;
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:rgba(255,255,255,.14);
+    .mini-item strong{
+      font-weight:600;
+      color:var(--ice);
     }
 
-    .term-dots i:nth-child(1){background:#7cecff}
-    .term-dots i:nth-child(2){background:#90ffd3}
-    .term-dots i:nth-child(3){background:#ffd0e1}
-
-    .log{
-      color:#dafbff;
+    .mini-item span{
+      color:var(--muted);
       font-family:"JetBrains Mono", monospace;
-      font-size:.86rem;
-      line-height:1.8;
-      white-space:pre-line;
+      font-size:.75rem;
+      text-transform:uppercase;
     }
-
-    .log .muted{color:#78aebb}
-    .log .ok{color:#90ffd3}
-    .log .warn{color:#ffd0e1}
-    .log .cyan{color:var(--cyan)}
 
     .wire-map{
       position:relative;
-      min-height:140px;
+      min-height:116px;
       border-radius:20px;
       border:1px solid rgba(124,236,255,.14);
       background:
@@ -370,10 +393,10 @@
       position:absolute;
       left:50%;
       top:50%;
-      width:88px;
-      height:88px;
+      width:78px;
+      height:78px;
       transform:translate(-50%, -50%);
-      border-radius:24px;
+      border-radius:22px;
       border:1px solid rgba(145,229,255,.24);
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 26%),
@@ -438,6 +461,18 @@
       max-width:46ch;
     }
 
+    .auth-guard{
+      border:1px solid rgba(255,215,161,.18);
+      background:rgba(255,215,161,.05);
+      color:#ffe9c9;
+      border-radius:18px;
+      padding:14px 16px;
+      margin-bottom:14px;
+      font-family:"JetBrains Mono", monospace;
+      font-size:.86rem;
+      line-height:1.6;
+    }
+
     .form-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -467,13 +502,18 @@
       outline:none;
       appearance:none;
       color:var(--ice);
-      background:linear-gradient(180deg, rgba(7,18,27,.86), rgba(8,22,33,.76));
+      background:linear-gradient(180deg, rgba(7,18,27,.94), rgba(8,22,33,.86));
       border:1px solid rgba(124,236,255,.14);
       border-radius:16px;
       padding:14px 14px;
       font:inherit;
       transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
       box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    select option{
+      background:#0b1823;
+      color:#eafcff;
     }
 
     input::placeholder{color:#7fa7b1}
@@ -519,7 +559,7 @@
       border:none;
       cursor:pointer;
       font:inherit;
-      transition:transform .18s ease, box-shadow .22s ease, background .22s ease;
+      transition:transform .18s ease, box-shadow .22s ease, background .22s ease, opacity .22s ease;
     }
 
     .btn-primary,
@@ -602,6 +642,12 @@
 
     button:hover{transform:translateY(-2px) scale(1.01)}
     button:active{transform:translateY(0) scale(.985)}
+    button[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none !important;
+      box-shadow:none !important;
+    }
 
     .terminal-status{
       margin-top:16px;
@@ -618,15 +664,9 @@
       line-height:1.6;
     }
 
-    .terminal-status.ok{
-      color:#e3fff1;
-      border-color:rgba(144,255,211,.18);
-    }
-
-    .terminal-status.error{
-      color:#ffe1ea;
-      border-color:rgba(255,136,176,.2);
-    }
+    .terminal-status.ok{color:#e3fff1;border-color:rgba(144,255,211,.18)}
+    .terminal-status.error{color:#ffe1ea;border-color:rgba(255,136,176,.2)}
+    .terminal-status.warn{color:#fff0cf;border-color:rgba(255,215,161,.2)}
 
     .roster{
       display:grid;
@@ -711,6 +751,8 @@
       font-family:"JetBrains Mono", monospace;
     }
 
+    .hide{display:none !important}
+
     .reveal{
       opacity:0;
       transform:translateY(16px);
@@ -719,9 +761,6 @@
 
     .delay-1{animation-delay:.08s}
     .delay-2{animation-delay:.16s}
-    .delay-3{animation-delay:.24s}
-    .delay-4{animation-delay:.32s}
-
     .fade-up{
       opacity:0;
       transform:translateY(18px);
@@ -778,9 +817,11 @@
         </div>
         <div class="terminal-pill">
           <span class="prompt">></span>
-          <span class="dot offline" id="wsDot"></span>
-          <span id="wsStatus">system.link.wait()</span>
+          <span class="dot offline" id="authDot"></span>
+          <span id="authStatus">auth.locked()</span>
         </div>
+        <button class="discord-btn" id="loginBtn" type="button">Login with Discord</button>
+        <button class="logout-btn hide" id="logoutBtn" type="button">Logout</button>
       </div>
     </div>
   </header>
@@ -807,22 +848,21 @@
             <strong id="playerCount">0</strong>
           </div>
           <div class="metric">
-            <span>Status</span>
-            <strong>Live Sync</strong>
+            <span>Access</span>
+            <strong id="accessMetric">Locked</strong>
           </div>
         </div>
       </article>
 
       <aside class="glass hero-side reveal delay-2">
-        <div class="terminal-box">
-          <div class="terminal-head">
-            <span>Live Status Log</span>
-            <div class="term-dots"><i></i><i></i><i></i></div>
+        <div class="server-roster-box">
+          <div class="box-head">
+            <span>Server Roster</span>
+            <span id="miniRosterCount">0 entries</span>
           </div>
-          <div class="log" id="heroLog"><span class="muted">boot</span> :: loading frosted control panel
-<span class="muted">api</span>  :: waiting for backend health
-<span class="muted">ws</span>   :: waiting for websocket tunnel
-<span class="muted">db</span>   :: waiting for player roster</div>
+          <div class="mini-list" id="miniRoster">
+            <div class="empty" style="padding:18px;">Loading roster…</div>
+          </div>
         </div>
 
         <div class="wire-map" aria-hidden="true">
@@ -840,8 +880,12 @@
         <div class="panel-head">
           <div>
             <h3 id="formTitle">Add Player</h3>
-            <p>Store a player with direction, signal strength, and machine details. Edit existing players without leaving the panel.</p>
+            <p>Manage the routing list with role-gated controls. Only authorized members can modify the roster.</p>
           </div>
+        </div>
+
+        <div class="auth-guard" id="authGuard">
+          Login with Discord to unlock controls. Pull access and admin access are granted by your server roles.
         </div>
 
         <form id="playerForm" novalidate>
@@ -896,7 +940,7 @@
         </form>
 
         <div class="terminal-status" id="feedback" role="status" aria-live="polite">
-          [ready] waiting for operator input
+          [ready] authentication required before controls unlock
         </div>
       </section>
 
@@ -904,7 +948,7 @@
         <div class="panel-head">
           <div>
             <h3>Saved Roster</h3>
-            <p>Persistent player entries loaded from your Render backend and Supabase table.</p>
+            <p>Role-based actions. Pull access is separate from admin access.</p>
           </div>
           <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -918,16 +962,25 @@
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
-    const WS_URL = 'wss://backend-website-syxe.onrender.com/ws';
+
+    const CONFIG = {
+      adminRoleId: '1556390847191322806',
+      pullRoleId: '1553856941204181162',
+      discordLoginUrl: `${API_BASE}/auth/discord/login`,
+      authMeUrl: `${API_BASE}/auth/me`,
+      logoutUrl: `${API_BASE}/auth/logout`
+    };
 
     const els = {
       backendDot: document.getElementById('backendDot'),
-      wsDot: document.getElementById('wsDot'),
+      authDot: document.getElementById('authDot'),
       backendStatus: document.getElementById('backendStatus'),
-      wsStatus: document.getElementById('wsStatus'),
+      authStatus: document.getElementById('authStatus'),
       backendMetric: document.getElementById('backendMetric'),
+      accessMetric: document.getElementById('accessMetric'),
       playerCount: document.getElementById('playerCount'),
-      heroLog: document.getElementById('heroLog'),
+      miniRosterCount: document.getElementById('miniRosterCount'),
+      miniRoster: document.getElementById('miniRoster'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
@@ -941,12 +994,14 @@
       refreshBtn: document.getElementById('refreshBtn'),
       playerList: document.getElementById('playerList'),
       feedback: document.getElementById('feedback'),
-      formTitle: document.getElementById('formTitle')
+      formTitle: document.getElementById('formTitle'),
+      authGuard: document.getElementById('authGuard'),
+      loginBtn: document.getElementById('loginBtn'),
+      logoutBtn: document.getElementById('logoutBtn')
     };
 
     let players = [];
-    let ws = null;
-    let reconnectTimer = null;
+    let currentUser = null;
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -957,8 +1012,16 @@
         .replaceAll("'", '&#039;');
     }
 
-    function setLog(lines) {
-      els.heroLog.innerHTML = lines.join('\n');
+    function hasRole(roleId) {
+      return !!currentUser?.roles?.includes(roleId);
+    }
+
+    function canPull() {
+      return hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId);
+    }
+
+    function canAdmin() {
+      return hasRole(CONFIG.adminRoleId);
     }
 
     function setFeedback(message, type = '') {
@@ -972,16 +1035,23 @@
       els.backendMetric.textContent = ok ? 'Online' : 'Offline';
     }
 
-    function setWsStatus(ok, text) {
-      els.wsDot.className = 'dot ' + (ok ? 'online' : 'offline');
-      els.wsStatus.textContent = text;
+    function setAuthStatus(ok, text) {
+      els.authDot.className = 'dot ' + (ok ? 'online' : 'offline');
+      els.authStatus.textContent = text;
     }
 
     async function fetchJson(url, options = {}) {
-      const res = await fetch(url, options);
-      const text = await res.text();
+      const res = await fetch(url, {
+        credentials: 'include',
+        ...options,
+        headers: {
+          ...(options.headers || {})
+        }
+      });
 
+      const text = await res.text();
       let data;
+
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
@@ -1005,6 +1075,11 @@
     }
 
     function fillForm(player) {
+      if (!canAdmin()) {
+        setFeedback('[warn] admin role required to edit players', 'warn');
+        return;
+      }
+
       els.playerId.value = player.id || '';
       els.name.value = player.name || '';
       els.signal_strength.value = player.signal_strength ?? 15;
@@ -1017,13 +1092,68 @@
       window.scrollTo({ top: document.querySelector('.panel').offsetTop - 90, behavior: 'smooth' });
     }
 
+    function updateAuthUi() {
+      const loggedIn = !!currentUser;
+      const admin = canAdmin();
+      const pull = canPull();
+
+      els.loginBtn.classList.toggle('hide', loggedIn);
+      els.logoutBtn.classList.toggle('hide', !loggedIn);
+
+      if (!loggedIn) {
+        setAuthStatus(false, 'auth.locked()');
+        els.accessMetric.textContent = 'Locked';
+        els.authGuard.textContent = 'Login with Discord to unlock controls. Pull access and admin access are granted by your server roles.';
+      } else if (admin) {
+        setAuthStatus(true, 'auth.admin()');
+        els.accessMetric.textContent = 'Admin';
+        els.authGuard.textContent = `Logged in as ${currentUser.username}. Admin role detected. You can add, edit, remove, and pull.`;
+      } else if (pull) {
+        setAuthStatus(true, 'auth.pull()');
+        els.accessMetric.textContent = 'Pull Only';
+        els.authGuard.textContent = `Logged in as ${currentUser.username}. Pull role detected. You can trigger pulls but cannot edit the roster.`;
+      } else {
+        setAuthStatus(false, 'auth.denied()');
+        els.accessMetric.textContent = 'Denied';
+        els.authGuard.textContent = `Logged in as ${currentUser.username}, but no valid pearl role was found.`;
+      }
+
+      const formControls = [
+        els.name, els.signal_strength, els.direction,
+        els.channel_name, els.computer_name, els.is_admin,
+        els.saveBtn, els.resetBtn
+      ];
+
+      formControls.forEach(el => el.disabled = !admin);
+    }
+
+    function renderMiniRoster() {
+      els.miniRosterCount.textContent = `${players.length} entr${players.length === 1 ? 'y' : 'ies'}`;
+
+      if (!players.length) {
+        els.miniRoster.innerHTML = '<div class="empty" style="padding:18px;">No roster entries.</div>';
+        return;
+      }
+
+      els.miniRoster.innerHTML = players.slice(0, 8).map(player => `
+        <div class="mini-item">
+          <strong>${escapeHtml(player.name)}</strong>
+          <span>${escapeHtml(player.direction || 'unknown')}</span>
+        </div>
+      `).join('');
+    }
+
     function renderPlayers() {
       els.playerCount.textContent = players.length;
+      renderMiniRoster();
 
       if (!players.length) {
         els.playerList.innerHTML = '<div class="empty">No players saved yet. Add one to start routing.</div>';
         return;
       }
+
+      const admin = canAdmin();
+      const pull = canPull();
 
       els.playerList.innerHTML = players.map(player => `
         <article class="player-row">
@@ -1040,7 +1170,7 @@
             </div>
           </div>
           <div class="player-actions">
-            <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">
+            <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}" ${pull ? '' : 'disabled'}>
               <span class="btn-label">Pull Pearl</span>
               <span class="eye" aria-hidden="true">
                 <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1057,8 +1187,8 @@
                 </svg>
               </span>
             </button>
-            <button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>
-            <button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>
+            <button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}" ${admin ? '' : 'disabled'}>Edit</button>
+            <button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}" ${admin ? '' : 'disabled'}>Remove</button>
           </div>
         </article>
       `).join('');
@@ -1068,21 +1198,21 @@
       try {
         await fetchJson(`${API_BASE}/health`);
         setBackendStatus(true, 'backend.online()');
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend health passed',
-          '<span class="muted">ws</span>   :: waiting for websocket tunnel',
-          '<span class="cyan">db</span>   :: supabase route reachable'
-        ]);
       } catch (err) {
         setBackendStatus(false, 'backend.offline()');
-        setLog([
-          '<span class="warn">boot</span> :: control surface degraded',
-          `<span class="warn">api</span>  :: ${escapeHtml(err.message)}`,
-          '<span class="muted">ws</span>   :: tunnel unavailable',
-          '<span class="warn">db</span>   :: check render env and routes'
-        ]);
+        setFeedback(`[error] ${err.message}`, 'error');
       }
+    }
+
+    async function checkAuth() {
+      try {
+        const data = await fetchJson(CONFIG.authMeUrl);
+        currentUser = data.user || null;
+      } catch {
+        currentUser = null;
+      }
+      updateAuthUi();
+      renderPlayers();
     }
 
     async function loadPlayers() {
@@ -1100,6 +1230,11 @@
 
     async function savePlayer(event) {
       event.preventDefault();
+
+      if (!canAdmin()) {
+        setFeedback('[warn] admin role required to save players', 'warn');
+        return;
+      }
 
       const payload = {
         name: els.name.value.trim(),
@@ -1137,6 +1272,11 @@
     }
 
     async function deletePlayer(id) {
+      if (!canAdmin()) {
+        setFeedback('[warn] admin role required to remove players', 'warn');
+        return;
+      }
+
       const player = players.find(p => p.id === id);
       const label = player?.name || 'this player';
 
@@ -1152,6 +1292,11 @@
     }
 
     async function triggerPlayer(id, button) {
+      if (!canPull()) {
+        setFeedback('[warn] pull role required to trigger pearls', 'warn');
+        return;
+      }
+
       const player = players.find(p => p.id === id);
 
       if (button) {
@@ -1166,63 +1311,25 @@
         });
 
         const who = data?.sent?.player || player?.name || 'player';
-        const dir = data?.sent?.direction || player?.direction || 'unknown';
-
-        setFeedback(`[ok] pull sent for ${who} -> ${dir}`, 'ok');
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend health passed',
-          '<span class="ok">ws</span>   :: trigger pushed to websocket',
-          `<span class="cyan">pull</span> :: ${escapeHtml(who)} routed successfully`
-        ]);
+        setFeedback(`[ok] pull sent for ${who}`, 'ok');
       } catch (err) {
         setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
-    function connectWs() {
-      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+    els.loginBtn.addEventListener('click', () => {
+      window.location.href = CONFIG.discordLoginUrl;
+    });
 
+    els.logoutBtn.addEventListener('click', async () => {
       try {
-        ws = new WebSocket(WS_URL);
-      } catch {
-        setWsStatus(false, 'system.link.fail()');
-        scheduleReconnect();
-        return;
-      }
-
-      ws.addEventListener('open', () => {
-        setWsStatus(true, 'system.link.open()');
-      });
-
-      ws.addEventListener('message', (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === 'welcome') {
-            setWsStatus(true, 'system.link.ready()');
-          } else if (msg.type === 'ping') {
-            setWsStatus(true, 'system.link.alive()');
-          }
-        } catch {}
-      });
-
-      ws.addEventListener('close', () => {
-        setWsStatus(false, 'system.link.closed()');
-        scheduleReconnect();
-      });
-
-      ws.addEventListener('error', () => {
-        setWsStatus(false, 'system.link.error()');
-      });
-    }
-
-    function scheduleReconnect() {
-      if (reconnectTimer) return;
-      reconnectTimer = setTimeout(() => {
-        reconnectTimer = null;
-        connectWs();
-      }, 5000);
-    }
+        await fetchJson(CONFIG.logoutUrl, { method: 'POST' });
+      } catch {}
+      currentUser = null;
+      updateAuthUi();
+      renderPlayers();
+      setFeedback('[ok] logged out', 'ok');
+    });
 
     els.playerForm.addEventListener('submit', savePlayer);
 
@@ -1233,6 +1340,7 @@
 
     els.refreshBtn.addEventListener('click', async () => {
       await checkBackend();
+      await checkAuth();
       await loadPlayers();
     });
 
@@ -1268,8 +1376,8 @@
     async function init() {
       resetForm();
       await checkBackend();
+      await checkAuth();
       await loadPlayers();
-      connectWs();
     }
 
     init();
