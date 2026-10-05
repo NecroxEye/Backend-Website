@@ -94,7 +94,9 @@
         radial-gradient(circle at top right, rgba(124,236,255,.18), transparent 24%);
     }
 
-    .hide{display:none !important}
+    .hide{
+      display:none !important;
+    }
 
     .topbar{
       position:sticky;
@@ -426,53 +428,42 @@
       text-transform:uppercase;
     }
 
-    .wire-map{
-      position:relative;
+    .orb-stage{
       min-height:140px;
       border-radius:20px;
       border:1px solid rgba(124,236,255,.14);
       background:
-        radial-gradient(circle at 50% 50%, rgba(124,236,255,.08), transparent 36%),
+        radial-gradient(circle at 50% 50%, rgba(124,236,255,.12), transparent 34%),
         linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      display:grid;
+      place-items:center;
       overflow:hidden;
+      position:relative;
     }
 
-    .core{
+    .orb-stage::before{
+      content:"";
       position:absolute;
-      left:50%;
-      top:50%;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(124,236,255,.15), transparent 62%);
+      filter:blur(4px);
+      animation:floatGlow 4s ease-in-out infinite alternate;
+    }
+
+    .orb-core{
       width:88px;
       height:88px;
-      transform:translate(-50%, -50%);
       border-radius:24px;
       border:1px solid rgba(145,229,255,.24);
       background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), transparent 26%),
         linear-gradient(180deg, rgba(16,32,47,1), rgba(8,18,27,1));
       box-shadow:0 16px 40px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+      position:relative;
+      z-index:1;
     }
-
-    .wire{
-      position:absolute;
-      top:50%;
-      height:2px;
-      background:linear-gradient(90deg, rgba(124,236,255,.16), rgba(124,236,255,.84), rgba(124,236,255,.16));
-      box-shadow:0 0 18px rgba(124,236,255,.16);
-    }
-
-    .wire.left{left:16px; width:34%; transform:translateY(-50%)}
-    .wire.right{right:16px; width:34%; transform:translateY(-50%)}
-    .wire-label{
-      position:absolute;
-      top:calc(50% - 18px);
-      color:#9edee9;
-      font-family:"JetBrains Mono", monospace;
-      font-size:.75rem;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-    }
-    .wire-label.left{left:16px}
-    .wire-label.right{right:16px}
 
     .layout{
       display:grid;
@@ -814,6 +805,11 @@
       to{transform:scale(1.04)}
     }
 
+    @keyframes floatGlow{
+      from{transform:translateY(-6px) scale(.96)}
+      to{transform:translateY(8px) scale(1.04)}
+    }
+
     @keyframes rise{
       to{opacity:1; transform:translateY(0)}
     }
@@ -928,18 +924,14 @@
           </div>
         </div>
 
-        <div class="wire-map" aria-hidden="true">
-          <div class="wire left"></div>
-          <div class="wire right"></div>
-          <div class="wire-label left">left link</div>
-          <div class="wire-label right">right link</div>
-          <div class="core"></div>
+        <div class="orb-stage" aria-hidden="true">
+          <div class="orb-core"></div>
         </div>
       </aside>
     </section>
 
     <section class="layout">
-      <section class="glass panel hide fade-up" id="adminPanel">
+      <section class="glass panel hide" id="adminPanel" hidden aria-hidden="true">
         <div class="panel-head">
           <div>
             <h3 id="formTitle">Add Player</h3>
@@ -1082,15 +1074,23 @@
     }
 
     function canAdmin() {
-      return hasRole(CONFIG.adminRoleId);
+      return !!currentUser && hasRole(CONFIG.adminRoleId);
     }
 
     function canPull() {
-      return hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId);
+      return !!currentUser && (hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId));
     }
 
-    function isLoggedIn() {
-      return !!currentUser;
+    function setAdminPanelVisible(visible) {
+      if (visible) {
+        els.adminPanel.hidden = false;
+        els.adminPanel.setAttribute('aria-hidden', 'false');
+        els.adminPanel.classList.remove('hide');
+      } else {
+        els.adminPanel.hidden = true;
+        els.adminPanel.setAttribute('aria-hidden', 'true');
+        els.adminPanel.classList.add('hide');
+      }
     }
 
     function setFeedback(message, type = '') {
@@ -1177,13 +1177,13 @@
     }
 
     function updateAuthUi() {
-      const loggedIn = isLoggedIn();
+      const loggedIn = !!currentUser;
       const admin = canAdmin();
       const pull = canPull();
 
       els.loginBtn.classList.toggle('hide', loggedIn);
       els.logoutBtn.classList.toggle('hide', !loggedIn);
-      els.adminPanel.classList.toggle('hide', !admin);
+      setAdminPanelVisible(loggedIn && admin);
 
       if (!loggedIn) {
         setAuthStatus(false, 'auth.locked()');
@@ -1200,8 +1200,8 @@
       } else if (pull) {
         setAuthStatus(true, 'auth.pull()');
         els.accessMetric.textContent = 'Pull';
-        els.authGuard.textContent = `Logged in as ${currentUser.username}. Pull role detected. You can see and use pull controls only.`;
-        els.rosterSubtitle.textContent = 'Pull access active. Admin controls remain hidden.';
+        els.authGuard.textContent = `Logged in as ${currentUser.username}. Pull role detected. You can use pull controls only.`;
+        els.rosterSubtitle.textContent = 'Pull access active. Admin panel remains hidden.';
       } else {
         setAuthStatus(false, 'auth.denied()');
         els.accessMetric.textContent = 'Denied';
@@ -1254,7 +1254,7 @@
           </div>
           <div class="player-actions">
             ${showPull ? `
-              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}" data-name="${escapeHtml(player.name)}">
+              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">
                 Pull Pearl
               </button>
             ` : ''}
@@ -1269,7 +1269,7 @@
       try {
         await fetchJson(`${API_BASE}/health`);
         setBackendStatus(true, 'backend.online()');
-      } catch (err) {
+      } catch {
         setBackendStatus(false, 'backend.offline()');
       }
     }
@@ -1362,7 +1362,7 @@
       }
     }
 
-    async function triggerPlayer(id, button) {
+    async function triggerPlayer(id) {
       if (!canPull()) return;
 
       const player = players.find(p => p.id === id);
@@ -1396,6 +1396,7 @@
       currentUser = null;
       updateAuthUi();
       renderPlayers();
+      setAdminPanelVisible(false);
       hideEyePanel();
     });
 
@@ -1431,7 +1432,7 @@
       }
 
       if (action === 'trigger') {
-        await triggerPlayer(id, button);
+        await triggerPlayer(id);
       }
     });
 
@@ -1444,6 +1445,7 @@
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
     async function init() {
+      setAdminPanelVisible(false);
       resetForm();
       await checkBackend();
       await checkAuth();
