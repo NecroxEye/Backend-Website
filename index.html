@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control Panel</title>
-  <meta name="description" content="Frosted cyan pearl routing panel with Discord auth, role-gated controls, and animated pull triggers." />
+  <meta name="description" content="Frosted cyan pearl routing panel with Discord auth, role-gated access, and cinematic pull feedback." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,7 @@
       --text:#ebfcff;
       --muted:#a5c9d3;
       --cyan:#7cecff;
+      --cyan-2:#45d8ee;
       --ice:#dffaff;
       --ok:#90ffd3;
       --danger:#ff88b0;
@@ -93,10 +94,12 @@
         radial-gradient(circle at top right, rgba(124,236,255,.18), transparent 24%);
     }
 
+    .hide{display:none !important}
+
     .topbar{
       position:sticky;
       top:0;
-      z-index:50;
+      z-index:40;
       backdrop-filter:blur(18px);
       background:linear-gradient(180deg, rgba(5,11,17,.82), rgba(5,11,17,.58));
       border-bottom:1px solid rgba(124,236,255,.12);
@@ -205,30 +208,76 @@
     }
 
     .discord-btn,
-    .logout-btn{
+    .logout-btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-ghost,
+    .mini,
+    .pull-btn{
       border:none;
       cursor:pointer;
       border-radius:999px;
-      padding:11px 16px;
       font:inherit;
       font-weight:700;
       transition:.2s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
     }
 
     .discord-btn{
+      padding:11px 16px;
       color:#041018;
       background:linear-gradient(135deg, #dffaff, #7cecff);
       box-shadow:0 14px 24px rgba(124,236,255,.18);
     }
 
-    .logout-btn{
+    .logout-btn,
+    .btn-secondary,
+    .btn-ghost,
+    .mini{
+      padding:11px 16px;
       color:var(--ice);
       background:rgba(172,240,255,.06);
       border:1px solid rgba(124,236,255,.16);
     }
 
-    .discord-btn:hover,.logout-btn:hover{transform:translateY(-2px)}
-    .discord-btn:active,.logout-btn:active{transform:translateY(0)}
+    .btn-primary{
+      padding:13px 18px;
+      color:#021119;
+      background:linear-gradient(135deg, #dffaff, #7cecff);
+      box-shadow:0 16px 28px rgba(124,236,255,.22);
+    }
+
+    .pull-btn{
+      padding:13px 18px;
+      min-width:132px;
+      color:#031119;
+      background:linear-gradient(135deg, #ecfdff, #7cecff);
+      box-shadow:0 16px 28px rgba(124,236,255,.22);
+    }
+
+    .mini.danger{
+      color:#ffd8e5;
+      background:rgba(255,136,176,.08);
+      border-color:rgba(255,136,176,.18);
+    }
+
+    .discord-btn:hover,.logout-btn:hover,.btn-primary:hover,.btn-secondary:hover,.btn-ghost:hover,.mini:hover,.pull-btn:hover{
+      transform:translateY(-2px) scale(1.01);
+    }
+
+    button:active{
+      transform:translateY(0) scale(.985);
+    }
+
+    button[disabled]{
+      opacity:.42;
+      cursor:not-allowed;
+      transform:none !important;
+      box-shadow:none !important;
+    }
 
     main{padding:26px 0 56px}
 
@@ -324,8 +373,7 @@
       align-content:start;
     }
 
-    .terminal-box,
-    .server-roster-box{
+    .panel-box{
       border-radius:20px;
       border:1px solid rgba(124,236,255,.16);
       background:linear-gradient(180deg, rgba(6,17,26,.82), rgba(7,18,27,.64));
@@ -345,36 +393,6 @@
       text-transform:uppercase;
       letter-spacing:.08em;
     }
-
-    .term-dots{
-      display:flex;
-      gap:6px;
-    }
-
-    .term-dots i{
-      display:block;
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:rgba(255,255,255,.14);
-    }
-
-    .term-dots i:nth-child(1){background:#7cecff}
-    .term-dots i:nth-child(2){background:#90ffd3}
-    .term-dots i:nth-child(3){background:#ffd0e1}
-
-    .log{
-      color:#dafbff;
-      font-family:"JetBrains Mono", monospace;
-      font-size:.86rem;
-      line-height:1.8;
-      white-space:pre-line;
-    }
-
-    .log .muted{color:#78aebb}
-    .log .ok{color:#90ffd3}
-    .log .warn{color:#ffd0e1}
-    .log .cyan{color:var(--cyan)}
 
     .mini-list{
       display:grid;
@@ -585,100 +603,6 @@
       margin-top:18px;
     }
 
-    button{
-      border:none;
-      cursor:pointer;
-      font:inherit;
-      transition:transform .18s ease, box-shadow .22s ease, background .22s ease, opacity .22s ease;
-    }
-
-    .btn-primary,
-    .btn-secondary,
-    .btn-ghost,
-    .mini,
-    .pull-btn{
-      border-radius:999px;
-      padding:13px 18px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      font-weight:700;
-      letter-spacing:.03em;
-    }
-
-    .btn-primary{
-      color:#021119;
-      background:linear-gradient(135deg, #dffaff, #7cecff);
-      box-shadow:0 16px 28px rgba(124,236,255,.22);
-    }
-
-    .btn-secondary,
-    .btn-ghost,
-    .mini{
-      color:var(--ice);
-      background:rgba(172,240,255,.06);
-      border:1px solid rgba(124,236,255,.16);
-    }
-
-    .mini.danger{
-      color:#ffd8e5;
-      background:rgba(255,136,176,.08);
-      border-color:rgba(255,136,176,.18);
-    }
-
-    .pull-btn{
-      position:relative;
-      overflow:hidden;
-      min-width:132px;
-      color:#031119;
-      background:linear-gradient(135deg, #ecfdff, #7cecff);
-      box-shadow:0 16px 28px rgba(124,236,255,.22);
-      isolation:isolate;
-    }
-
-    .pull-btn .btn-label{
-      transition:transform .22s ease, opacity .2s ease;
-    }
-
-    .pull-btn .eye{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:44px;
-      height:44px;
-      transform:translate(-50%, -50%) scale(.6);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .24s ease, transform .28s cubic-bezier(.2,.7,.2,1);
-    }
-
-    .pull-btn .eye svg{
-      width:100%;
-      height:100%;
-      display:block;
-      filter:drop-shadow(0 0 14px rgba(69,216,238,.35));
-    }
-
-    .pull-btn.reveal-eye .btn-label{
-      opacity:0;
-      transform:scale(.85);
-    }
-
-    .pull-btn.reveal-eye .eye{
-      opacity:1;
-      transform:translate(-50%, -50%) scale(1);
-    }
-
-    button:hover{transform:translateY(-2px) scale(1.01)}
-    button:active{transform:translateY(0) scale(.985)}
-    button[disabled]{
-      opacity:.42;
-      cursor:not-allowed;
-      transform:none !important;
-      box-shadow:none !important;
-    }
-
     .terminal-status{
       margin-top:16px;
       min-height:66px;
@@ -781,8 +705,6 @@
       font-family:"JetBrains Mono", monospace;
     }
 
-    .hide{display:none !important}
-
     .reveal{
       opacity:0;
       transform:translateY(16px);
@@ -801,6 +723,95 @@
     .fade-up.in-view{
       opacity:1;
       transform:translateY(0);
+    }
+
+    .eye-overlay{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      display:grid;
+      place-items:center;
+      background:rgba(3, 10, 16, 0.34);
+      backdrop-filter:blur(10px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .24s ease;
+    }
+
+    .eye-overlay.active{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .eye-panel{
+      width:min(560px, calc(100% - 36px));
+      min-height:300px;
+      border-radius:32px;
+      border:1px solid rgba(124,236,255,.18);
+      background:
+        radial-gradient(circle at 50% 40%, rgba(124,236,255,.15), transparent 30%),
+        linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
+      backdrop-filter:blur(22px);
+      box-shadow:0 30px 90px rgba(0,0,0,.42);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      transform:translateY(16px) scale(.94);
+      transition:transform .28s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .eye-overlay.active .eye-panel{
+      transform:translateY(0) scale(1);
+    }
+
+    .eye-panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(124,236,255,.14), transparent 26%);
+      pointer-events:none;
+    }
+
+    .eye-wrap{
+      display:grid;
+      gap:18px;
+      place-items:center;
+      text-align:center;
+      padding:32px;
+      position:relative;
+      z-index:1;
+    }
+
+    .eye-wrap svg{
+      width:min(240px, 52vw);
+      height:auto;
+      display:block;
+      filter:drop-shadow(0 0 22px rgba(69,216,238,.24));
+      animation:eyePulse 1s ease-in-out infinite alternate;
+    }
+
+    .eye-wrap h4{
+      margin:0;
+      font-family:"Michroma", sans-serif;
+      font-size:clamp(1rem, 2vw, 1.35rem);
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      color:var(--ice);
+    }
+
+    .eye-wrap p{
+      margin:0;
+      color:var(--muted);
+      font-family:"JetBrains Mono", monospace;
+      font-size:.9rem;
+    }
+
+    @keyframes eyePulse{
+      from{transform:scale(.98)}
+      to{transform:scale(1.04)}
     }
 
     @keyframes rise{
@@ -829,6 +840,27 @@
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
+
+  <div class="eye-overlay" id="eyeOverlay" aria-hidden="true">
+    <div class="eye-panel">
+      <div class="eye-wrap">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 32C12.5 21 21.5 15 32 15C42.5 15 51.5 21 58 32C51.5 43 42.5 49 32 49C21.5 49 12.5 43 6 32Z" fill="url(#g1)" stroke="#071821" stroke-width="2.5"/>
+          <circle cx="32" cy="32" r="10" fill="#04141D"/>
+          <circle cx="32" cy="32" r="6" fill="#91F6FF"/>
+          <circle cx="29.5" cy="29.5" r="2" fill="#F2FFFF"/>
+          <defs>
+            <linearGradient id="g1" x1="6" y1="15" x2="58" y2="49" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#EDFDFF"/>
+              <stop offset="1" stop-color="#7CEEFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <h4 id="eyeTitle">Routing Pearl</h4>
+        <p id="eyeText">Stand by for trigger.</p>
+      </div>
+    </div>
+  </div>
 
   <header class="topbar">
     <div class="shell topbar-inner">
@@ -886,7 +918,7 @@
       </article>
 
       <aside class="glass hero-side reveal delay-2">
-        <div class="server-roster-box">
+        <div class="panel-box">
           <div class="box-head">
             <span>Saved Roster</span>
             <span id="miniRosterCount">0 entries</span>
@@ -907,16 +939,12 @@
     </section>
 
     <section class="layout">
-      <section class="glass panel fade-up">
+      <section class="glass panel hide fade-up" id="adminPanel">
         <div class="panel-head">
           <div>
             <h3 id="formTitle">Add Player</h3>
-            <p>Only members with the admin role can add, edit, or remove roster entries.</p>
+            <p>Only authenticated members with the admin role can see and use this panel.</p>
           </div>
-        </div>
-
-        <div class="auth-guard" id="authGuard">
-          Login with Discord to continue. Members without the required pull role will not see pull controls.
         </div>
 
         <form id="playerForm" novalidate>
@@ -967,7 +995,7 @@
         </form>
 
         <div class="terminal-status" id="feedback" role="status" aria-live="polite">
-          [ready] authentication required before controls unlock
+          [ready] admin panel locked
         </div>
       </section>
 
@@ -975,23 +1003,16 @@
         <div class="panel-head">
           <div>
             <h3>Control Roster</h3>
-            <p>Pull buttons are only shown to members with the pull role. Admin controls are hidden unless you have the admin role.</p>
+            <p id="rosterSubtitle">Login with Discord to unlock team-based access.</p>
           </div>
           <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="terminal-box">
-          <div class="box-head">
-            <span>Live Status Log</span>
-            <div class="term-dots"><i></i><i></i><i></i></div>
-          </div>
-          <div class="log" id="heroLog"><span class="muted">boot</span> :: loading frosted control panel
-<span class="muted">api</span>  :: waiting for backend health
-<span class="muted">auth</span> :: waiting for discord session
-<span class="muted">roles</span> :: checking pull and admin access</div>
+        <div class="auth-guard" id="authGuard">
+          You must be logged in with Discord to access protected controls.
         </div>
 
-        <div class="roster" id="playerList" style="margin-top:12px;">
+        <div class="roster" id="playerList">
           <div class="empty">Loading players…</div>
         </div>
       </aside>
@@ -1019,7 +1040,6 @@
       playerCount: document.getElementById('playerCount'),
       miniRosterCount: document.getElementById('miniRosterCount'),
       miniRoster: document.getElementById('miniRoster'),
-      heroLog: document.getElementById('heroLog'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
@@ -1036,11 +1056,17 @@
       formTitle: document.getElementById('formTitle'),
       authGuard: document.getElementById('authGuard'),
       loginBtn: document.getElementById('loginBtn'),
-      logoutBtn: document.getElementById('logoutBtn')
+      logoutBtn: document.getElementById('logoutBtn'),
+      adminPanel: document.getElementById('adminPanel'),
+      rosterSubtitle: document.getElementById('rosterSubtitle'),
+      eyeOverlay: document.getElementById('eyeOverlay'),
+      eyeTitle: document.getElementById('eyeTitle'),
+      eyeText: document.getElementById('eyeText')
     };
 
     let players = [];
     let currentUser = null;
+    let eyeTimer = null;
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -1051,20 +1077,20 @@
         .replaceAll("'", '&#039;');
     }
 
-    function setLog(lines) {
-      els.heroLog.innerHTML = lines.join('\n');
-    }
-
     function hasRole(roleId) {
       return !!currentUser?.roles?.includes(roleId);
+    }
+
+    function canAdmin() {
+      return hasRole(CONFIG.adminRoleId);
     }
 
     function canPull() {
       return hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId);
     }
 
-    function canAdmin() {
-      return hasRole(CONFIG.adminRoleId);
+    function isLoggedIn() {
+      return !!currentUser;
     }
 
     function setFeedback(message, type = '') {
@@ -1081,6 +1107,24 @@
     function setAuthStatus(ok, text) {
       els.authDot.className = 'dot ' + (ok ? 'online' : 'offline');
       els.authStatus.textContent = text;
+    }
+
+    function showEyePanel(title, text) {
+      clearTimeout(eyeTimer);
+      els.eyeTitle.textContent = title;
+      els.eyeText.textContent = text;
+      els.eyeOverlay.classList.add('active');
+      els.eyeOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideEyePanel() {
+      els.eyeOverlay.classList.remove('active');
+      els.eyeOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function pulseEyePanel(title, text, duration = 1200) {
+      showEyePanel(title, text);
+      eyeTimer = setTimeout(hideEyePanel, duration);
     }
 
     async function fetchJson(url, options = {}) {
@@ -1118,10 +1162,7 @@
     }
 
     function fillForm(player) {
-      if (!canAdmin()) {
-        setFeedback('[warn] admin role required to edit players', 'warn');
-        return;
-      }
+      if (!canAdmin()) return;
 
       els.playerId.value = player.id || '';
       els.name.value = player.name || '';
@@ -1132,66 +1173,41 @@
       els.is_admin.checked = !!player.is_admin;
       els.formTitle.textContent = 'Edit Player';
       els.saveBtn.textContent = 'Update Player';
-      window.scrollTo({ top: document.querySelector('.panel').offsetTop - 90, behavior: 'smooth' });
+      window.scrollTo({ top: els.adminPanel.offsetTop - 90, behavior: 'smooth' });
     }
 
     function updateAuthUi() {
-      const loggedIn = !!currentUser;
+      const loggedIn = isLoggedIn();
       const admin = canAdmin();
       const pull = canPull();
 
       els.loginBtn.classList.toggle('hide', loggedIn);
       els.logoutBtn.classList.toggle('hide', !loggedIn);
+      els.adminPanel.classList.toggle('hide', !admin);
 
       if (!loggedIn) {
         setAuthStatus(false, 'auth.locked()');
         els.accessMetric.textContent = 'Locked';
-        els.authGuard.textContent = 'Login with Discord to continue. Members without the required pull role will not see pull controls.';
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend reachable',
-          '<span class="warn">auth</span> :: no discord session',
-          '<span class="warn">roles</span> :: controls hidden until login'
-        ]);
+        els.authGuard.textContent = 'You must be logged in with Discord to access protected controls.';
+        els.rosterSubtitle.textContent = 'Login with Discord to unlock team-based access.';
+        setFeedback('[ready] admin panel locked', 'warn');
       } else if (admin) {
         setAuthStatus(true, 'auth.admin()');
         els.accessMetric.textContent = 'Admin';
-        els.authGuard.textContent = `Logged in as ${currentUser.username}. Admin role detected. You can add, edit, remove, and pull.`;
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend reachable',
-          `<span class="ok">auth</span> :: ${escapeHtml(currentUser.username)} authenticated`,
-          '<span class="cyan">roles</span> :: admin + pull access granted'
-        ]);
+        els.authGuard.textContent = `Logged in as ${currentUser.username}. Admin role detected. You can pull pearls and manage players.`;
+        els.rosterSubtitle.textContent = 'Admin access active. Full roster controls unlocked.';
+        setFeedback('[ok] admin access granted', 'ok');
       } else if (pull) {
         setAuthStatus(true, 'auth.pull()');
         els.accessMetric.textContent = 'Pull';
-        els.authGuard.textContent = `Logged in as ${currentUser.username}. Pull role detected. You can see and use pull controls, but cannot modify the roster.`;
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend reachable',
-          `<span class="ok">auth</span> :: ${escapeHtml(currentUser.username)} authenticated`,
-          '<span class="cyan">roles</span> :: pull access granted, admin locked'
-        ]);
+        els.authGuard.textContent = `Logged in as ${currentUser.username}. Pull role detected. You can see and use pull controls only.`;
+        els.rosterSubtitle.textContent = 'Pull access active. Admin controls remain hidden.';
       } else {
         setAuthStatus(false, 'auth.denied()');
         els.accessMetric.textContent = 'Denied';
         els.authGuard.textContent = `Logged in as ${currentUser.username}, but you do not have the required pearl role. Pull controls are hidden.`;
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend reachable',
-          `<span class="ok">auth</span> :: ${escapeHtml(currentUser.username)} authenticated`,
-          '<span class="warn">roles</span> :: no valid pearl role found'
-        ]);
+        els.rosterSubtitle.textContent = 'No valid pearl role found. Controls remain restricted.';
       }
-
-      const formControls = [
-        els.name, els.signal_strength, els.direction,
-        els.channel_name, els.computer_name, els.is_admin,
-        els.saveBtn, els.resetBtn
-      ];
-
-      formControls.forEach(el => el.disabled = !admin);
     }
 
     function renderMiniRoster() {
@@ -1215,12 +1231,12 @@
       renderMiniRoster();
 
       if (!players.length) {
-        els.playerList.innerHTML = '<div class="empty">No players saved yet. Add one to start routing.</div>';
+        els.playerList.innerHTML = '<div class="empty">No players saved yet.</div>';
         return;
       }
 
-      const admin = canAdmin();
-      const pull = canPull();
+      const showPull = canPull();
+      const showAdmin = canAdmin();
 
       els.playerList.innerHTML = players.map(player => `
         <article class="player-row">
@@ -1237,28 +1253,13 @@
             </div>
           </div>
           <div class="player-actions">
-            ${pull ? `
-              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">
-                <span class="btn-label">Pull Pearl</span>
-                <span class="eye" aria-hidden="true">
-                  <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 32C12.5 21 21.5 15 32 15C42.5 15 51.5 21 58 32C51.5 43 42.5 49 32 49C21.5 49 12.5 43 6 32Z" fill="url(#g1)" stroke="#071821" stroke-width="2.5"/>
-                    <circle cx="32" cy="32" r="10" fill="#04141D"/>
-                    <circle cx="32" cy="32" r="6" fill="#91F6FF"/>
-                    <circle cx="29.5" cy="29.5" r="2" fill="#F2FFFF"/>
-                    <defs>
-                      <linearGradient id="g1" x1="6" y1="15" x2="58" y2="49" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#EDFDFF"/>
-                        <stop offset="1" stop-color="#7CEEFF"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </span>
+            ${showPull ? `
+              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}" data-name="${escapeHtml(player.name)}">
+                Pull Pearl
               </button>
             ` : ''}
-
-            ${admin ? `<button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>` : ''}
-            ${admin ? `<button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>` : ''}
+            ${showAdmin ? `<button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>` : ''}
+            ${showAdmin ? `<button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>` : ''}
           </div>
         </article>
       `).join('');
@@ -1270,7 +1271,6 @@
         setBackendStatus(true, 'backend.online()');
       } catch (err) {
         setBackendStatus(false, 'backend.offline()');
-        setFeedback(`[error] ${err.message}`, 'error');
       }
     }
 
@@ -1290,11 +1290,15 @@
         const data = await fetchJson(`${API_BASE}/players`);
         players = Array.isArray(data) ? data : [];
         renderPlayers();
-        setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
+        if (canAdmin()) {
+          setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
+        }
       } catch (err) {
         players = [];
         renderPlayers();
-        setFeedback(`[error] ${err.message}`, 'error');
+        if (canAdmin()) {
+          setFeedback(`[error] ${err.message}`, 'error');
+        }
       }
     }
 
@@ -1302,7 +1306,7 @@
       event.preventDefault();
 
       if (!canAdmin()) {
-        setFeedback('[warn] admin role required to save players', 'warn');
+        setFeedback('[warn] admin role required', 'warn');
         return;
       }
 
@@ -1342,10 +1346,7 @@
     }
 
     async function deletePlayer(id) {
-      if (!canAdmin()) {
-        setFeedback('[warn] admin role required to remove players', 'warn');
-        return;
-      }
+      if (!canAdmin()) return;
 
       const player = players.find(p => p.id === id);
       const label = player?.name || 'this player';
@@ -1362,34 +1363,25 @@
     }
 
     async function triggerPlayer(id, button) {
-      if (!canPull()) {
-        setFeedback('[warn] pull role required to trigger pearls', 'warn');
-        return;
-      }
+      if (!canPull()) return;
 
       const player = players.find(p => p.id === id);
+      const label = player?.name || 'Player';
 
-      if (button) {
-        button.classList.add('reveal-eye');
-        setTimeout(() => button.classList.remove('reveal-eye'), 1100);
-      }
+      pulseEyePanel('Routing Pearl', `${label} :: stand by`);
 
       try {
-        const data = await fetchJson(`${API_BASE}/trigger/${id}`, {
+        await fetchJson(`${API_BASE}/trigger/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
 
-        const who = data?.sent?.player || player?.name || 'player';
-        setFeedback(`[ok] pull sent for ${who}`, 'ok');
-        setLog([
-          '<span class="ok">boot</span> :: frosted control panel ready',
-          '<span class="ok">api</span>  :: backend reachable',
-          currentUser ? `<span class="ok">auth</span> :: ${escapeHtml(currentUser.username)} authenticated` : '<span class="warn">auth</span> :: no discord session',
-          `<span class="cyan">pull</span> :: ${escapeHtml(who)} triggered successfully`
-        ]);
+        pulseEyePanel('Pearl Triggered', `${label} :: signal sent`, 1400);
       } catch (err) {
-        setFeedback(`[error] ${err.message}`, 'error');
+        pulseEyePanel('Trigger Failed', err.message, 1800);
+        if (canAdmin()) {
+          setFeedback(`[error] ${err.message}`, 'error');
+        }
       }
     }
 
@@ -1404,8 +1396,10 @@
       currentUser = null;
       updateAuthUi();
       renderPlayers();
-      setFeedback('[ok] logged out', 'ok');
+      hideEyePanel();
     });
+
+    els.eyeOverlay.addEventListener('click', hideEyePanel);
 
     els.playerForm.addEventListener('submit', savePlayer);
 
