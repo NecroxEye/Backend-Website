@@ -5,7 +5,7 @@ const {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  ActivityType,
+  ActivityType
 } = require('discord.js');
 
 const app = express();
@@ -13,8 +13,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const GUILD_ID = process.env.GUILD_ID;
+const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const STATUS_LOG_CHANNEL_ID = process.env.STATUS_LOG_CHANNEL_ID;
 const STATUS_GENERAL_CHANNEL_ID = process.env.STATUS_GENERAL_CHANNEL_ID;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -24,7 +23,7 @@ const GAME_OVER_IMAGE_URL =
   'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg';
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds]
 });
 
 let statusMessageId = null;
@@ -34,7 +33,7 @@ const systemState = {
   website: 'Off',
   minecraftComputer: 'Off',
   oilRig: 'Off',
-  name: 'Off',
+  name: 'Off'
 };
 
 function isAuthorized(req) {
@@ -51,7 +50,7 @@ function buildStatusEmbed() {
         `Website: ${systemState.website}`,
         `Minecraft Computer: ${systemState.minecraftComputer}`,
         `Oil Rig: ${systemState.oilRig}`,
-        `Name: ${systemState.name}`,
+        `Name: ${systemState.name}`
       ].join('\n')
     )
     .setFooter({ text: 'Live status monitor' })
@@ -59,6 +58,7 @@ function buildStatusEmbed() {
 }
 
 async function getChannel(channelId) {
+  if (!channelId) return null;
   try {
     return await client.channels.fetch(channelId);
   } catch (err) {
@@ -114,10 +114,10 @@ client.once('ready', async () => {
     activities: [
       {
         name: 'Frosted Fang System',
-        type: ActivityType.Watching,
-      },
+        type: ActivityType.Watching
+      }
     ],
-    status: 'online',
+    status: 'online'
   });
 
   systemState.backend = 'On';
@@ -135,7 +135,7 @@ app.get('/health', (req, res) => {
   res.json({
     ok: true,
     systemState,
-    statusMessageId,
+    statusMessageId
   });
 });
 
@@ -224,25 +224,11 @@ app.post('/api/status', async (req, res) => {
   try {
     const { backend, website, minecraftComputer, oilRig, name } = req.body;
 
-    if (typeof backend !== 'undefined') {
-      systemState.backend = backend ? 'On' : 'Off';
-    }
-
-    if (typeof website !== 'undefined') {
-      systemState.website = website ? 'Working' : 'Off';
-    }
-
-    if (typeof minecraftComputer !== 'undefined') {
-      systemState.minecraftComputer = minecraftComputer ? 'On' : 'Off';
-    }
-
-    if (typeof oilRig !== 'undefined') {
-      systemState.oilRig = oilRig ? 'On' : 'Off';
-    }
-
-    if (typeof name !== 'undefined') {
-      systemState.name = name ? 'On' : 'Off';
-    }
+    if (typeof backend !== 'undefined') systemState.backend = backend ? 'On' : 'Off';
+    if (typeof website !== 'undefined') systemState.website = website ? 'Working' : 'Off';
+    if (typeof minecraftComputer !== 'undefined') systemState.minecraftComputer = minecraftComputer ? 'On' : 'Off';
+    if (typeof oilRig !== 'undefined') systemState.oilRig = oilRig ? 'On' : 'Off';
+    if (typeof name !== 'undefined') systemState.name = name ? 'On' : 'Off';
 
     await updateStatusMessage();
     return res.json({ ok: true, systemState });
@@ -263,14 +249,8 @@ app.post('/api/computer-heartbeat', async (req, res) => {
       return res.status(400).json({ ok: false, message: 'Missing computerName' });
     }
 
-    if (computerName === 'Oil Rig') {
-      systemState.oilRig = 'On';
-    }
-
-    if (computerName === 'Name') {
-      systemState.name = 'On';
-    }
-
+    if (computerName === 'Oil Rig') systemState.oilRig = 'On';
+    if (computerName === 'Name') systemState.name = 'On';
     systemState.minecraftComputer = 'On';
 
     await updateStatusMessage();
