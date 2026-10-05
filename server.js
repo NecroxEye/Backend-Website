@@ -16,6 +16,7 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 const DISCORD_CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 const ADMIN_ROLE_ID = '1556390847191322806';
 const PULL_ROLE_ID = '1553856941204181162';
@@ -25,7 +26,14 @@ if (!SESSION_SECRET) {
   process.exit(1);
 }
 
-if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL || !FRONTEND_URL || !DISCORD_GUILD_ID) {
+if (
+  !DISCORD_CLIENT_ID ||
+  !DISCORD_CLIENT_SECRET ||
+  !DISCORD_CALLBACK_URL ||
+  !FRONTEND_URL ||
+  !DISCORD_GUILD_ID ||
+  !DISCORD_BOT_TOKEN
+) {
   console.error('Missing required environment variables');
   process.exit(1);
 }
@@ -66,16 +74,38 @@ passport.use(new DiscordStrategy(
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const memberRes = await fetch(`https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`, {
+      const userGuildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
 
       let roles = [];
-      if (memberRes.ok) {
-        const memberData = await memberRes.json();
-        roles = Array.isArray(memberData.roles) ? memberData.roles : [];
+
+      if (userGuildsRes.ok) {
+        const guilds = await userGuildsRes.json();
+        const inGuild = guilds.some(g => g.id === DISCORD_GUILD_ID);
+
+        if (inGuild) {
+          const memberRes = await fetch(
+            `https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${profile.id}`,
+            {
+              headers: {
+                Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+          if (memberRes.ok) {
+            const memberData = await memberRes.json();
+            roles = Array.isArray(memberData.roles) ? memberData.roles : [];
+          } else {
+            console.error('Failed to fetch guild member:', await memberRes.text());
+          }
+        }
+      } else {
+        console.error('Failed to fetch user guilds:', await userGuildsRes.text());
       }
 
       return done(null, {
@@ -85,6 +115,7 @@ passport.use(new DiscordStrategy(
         roles
       });
     } catch (err) {
+      console.error('Discord strategy error:', err);
       return done(err);
     }
   }
