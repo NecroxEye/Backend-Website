@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control Panel</title>
-  <meta name="description" content="Frosted cyan pearl routing panel with Discord auth, role-gated access, and cinematic pull feedback." />
+  <meta name="description" content="Discord-auth gated pearl roster and trigger panel." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,19 +12,17 @@
     :root{
       --bg:#06111a;
       --bg2:#091723;
-      --glass:rgba(172, 240, 255, 0.09);
-      --stroke:rgba(145, 229, 255, 0.18);
+      --stroke:rgba(145,229,255,.18);
       --text:#ebfcff;
       --muted:#a5c9d3;
       --cyan:#7cecff;
-      --cyan-2:#45d8ee;
       --ice:#dffaff;
       --ok:#90ffd3;
       --danger:#ff88b0;
       --warn:#ffd7a1;
       --radius:24px;
-      --shadow:0 22px 70px rgba(0,0,0,0.35);
-      --max:1320px;
+      --shadow:0 22px 70px rgba(0,0,0,.35);
+      --max:1200px;
     }
 
     *{box-sizing:border-box}
@@ -94,9 +92,7 @@
         radial-gradient(circle at top right, rgba(124,236,255,.18), transparent 24%);
     }
 
-    .hide{display:none !important}
-
-    [hidden]{display:none !important}
+    .hide,[hidden]{display:none !important}
 
     .topbar{
       position:sticky;
@@ -277,14 +273,14 @@
 
     .hero{
       display:grid;
-      grid-template-columns:1.12fr .88fr;
+      grid-template-columns:1fr;
       gap:18px;
       margin-bottom:18px;
     }
 
     .hero-copy{
       padding:clamp(24px, 4vw, 42px);
-      min-height:320px;
+      min-height:260px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -312,9 +308,9 @@
 
     .hero-copy h2{
       margin:0 0 12px;
-      max-width:11ch;
+      max-width:12ch;
       font-family:"Michroma", sans-serif;
-      font-size:clamp(2rem, 5.8vw, 4.3rem);
+      font-size:clamp(2rem, 5.8vw, 4rem);
       line-height:1.02;
       letter-spacing:.04em;
       text-transform:uppercase;
@@ -360,71 +356,10 @@
       color:var(--ice);
     }
 
-    .hero-side{
-      padding:22px;
+    .main-grid{
       display:grid;
-      gap:16px;
-      align-content:start;
-    }
-
-    .panel-box{
-      border-radius:20px;
-      border:1px solid rgba(124,236,255,.16);
-      background:linear-gradient(180deg, rgba(6,17,26,.82), rgba(7,18,27,.64));
-      padding:14px;
-      min-height:180px;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
-    }
-
-    .box-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:12px;
-      color:#95dcea;
-      font-family:"JetBrains Mono", monospace;
-      font-size:.78rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-
-    .mini-list{
-      display:grid;
-      gap:8px;
-      max-height:240px;
-      overflow:auto;
-      padding-right:4px;
-    }
-
-    .mini-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(124,236,255,.12);
-      background:rgba(172,240,255,.04);
-      font-size:.88rem;
-    }
-
-    .mini-item strong{
-      font-weight:600;
-      color:var(--ice);
-    }
-
-    .mini-item span{
-      color:var(--muted);
-      font-family:"JetBrains Mono", monospace;
-      font-size:.75rem;
-      text-transform:uppercase;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:minmax(0, 1fr);
+      grid-template-columns:1fr;
       gap:18px;
-      align-items:start;
     }
 
     .panel{padding:22px}
@@ -455,12 +390,125 @@
       max-width:46ch;
     }
 
+    .auth-lock{
+      padding:34px 26px;
+      text-align:center;
+    }
+
+    .auth-lock h3{
+      margin:0 0 10px;
+      font-family:"Michroma", sans-serif;
+      font-size:clamp(1.2rem, 3vw, 2rem);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .auth-lock p{
+      margin:0 auto 18px;
+      max-width:44ch;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .panel-stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .roster{
+      display:grid;
+      gap:12px;
+      position:relative;
+      z-index:1;
+    }
+
+    .player-row{
+      display:grid;
+      grid-template-columns:minmax(0, 1.2fr) auto;
+      gap:14px;
+      align-items:center;
+      padding:16px;
+      border-radius:20px;
+      border:1px solid rgba(124,236,255,.13);
+      background:linear-gradient(180deg, rgba(9,21,31,.66), rgba(8,19,28,.46));
+      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .player-row:hover{
+      transform:translateY(-1px);
+      border-color:rgba(124,236,255,.26);
+      box-shadow:0 18px 32px rgba(0,0,0,.16);
+    }
+
+    .player-main{
+      min-width:0;
+      display:grid;
+      gap:10px;
+    }
+
+    .player-top{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .player-name{
+      margin:0;
+      font-size:1.08rem;
+      color:var(--ice);
+      font-weight:700;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(124,236,255,.14);
+      background:rgba(172,240,255,.05);
+      color:#bdeaf1;
+      font-size:.76rem;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-family:"JetBrains Mono", monospace;
+    }
+
+    .player-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .player-actions{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+    }
+
+    .empty{
+      padding:28px 20px;
+      border-radius:20px;
+      border:1px dashed rgba(124,236,255,.2);
+      text-align:center;
+      color:var(--muted);
+      background:rgba(172,240,255,.03);
+      font-family:"JetBrains Mono", monospace;
+    }
+
+    .admin-panel{
+      border-radius:20px;
+      border:1px solid rgba(124,236,255,.14);
+      background:linear-gradient(180deg, rgba(6,17,26,.72), rgba(7,18,27,.58));
+      padding:18px;
+    }
+
     .form-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
-      position:relative;
-      z-index:1;
     }
 
     .field{
@@ -556,129 +604,6 @@
     .terminal-status.error{color:#ffe1ea;border-color:rgba(255,136,176,.2)}
     .terminal-status.warn{color:#fff0cf;border-color:rgba(255,215,161,.2)}
 
-    .auth-lock{
-      padding:28px;
-      text-align:center;
-    }
-
-    .auth-lock h3{
-      margin:0 0 10px;
-      font-family:"Michroma", sans-serif;
-      font-size:clamp(1.2rem, 3vw, 2rem);
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-
-    .auth-lock p{
-      margin:0 auto 18px;
-      max-width:44ch;
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .roster{
-      display:grid;
-      gap:12px;
-      position:relative;
-      z-index:1;
-    }
-
-    .player-row{
-      display:grid;
-      grid-template-columns:minmax(0, 1.2fr) auto;
-      gap:14px;
-      align-items:center;
-      padding:16px;
-      border-radius:20px;
-      border:1px solid rgba(124,236,255,.13);
-      background:linear-gradient(180deg, rgba(9,21,31,.66), rgba(8,19,28,.46));
-      transition:transform .18s ease, border-color .22s ease, box-shadow .22s ease;
-    }
-
-    .player-row:hover{
-      transform:translateY(-1px);
-      border-color:rgba(124,236,255,.26);
-      box-shadow:0 18px 32px rgba(0,0,0,.16);
-    }
-
-    .player-main{
-      min-width:0;
-      display:grid;
-      gap:10px;
-    }
-
-    .player-top{
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-
-    .player-name{
-      margin:0;
-      font-size:1.08rem;
-      color:var(--ice);
-      font-weight:700;
-    }
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(124,236,255,.14);
-      background:rgba(172,240,255,.05);
-      color:#bdeaf1;
-      font-size:.76rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-family:"JetBrains Mono", monospace;
-    }
-
-    .player-meta{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .player-actions{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      gap:8px;
-    }
-
-    .empty{
-      padding:28px 20px;
-      border-radius:20px;
-      border:1px dashed rgba(124,236,255,.2);
-      text-align:center;
-      color:var(--muted);
-      background:rgba(172,240,255,.03);
-      font-family:"JetBrains Mono", monospace;
-    }
-
-    .reveal{
-      opacity:0;
-      transform:translateY(16px);
-      animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;
-    }
-
-    .delay-1{animation-delay:.08s}
-    .delay-2{animation-delay:.16s}
-
-    .fade-up{
-      opacity:0;
-      transform:translateY(18px);
-      transition:opacity .6s ease, transform .6s ease;
-    }
-
-    .fade-up.in-view{
-      opacity:1;
-      transform:translateY(0);
-    }
-
     .eye-overlay{
       position:fixed;
       inset:0;
@@ -719,16 +644,6 @@
       transform:translateY(0) scale(1);
     }
 
-    .eye-panel::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,.12), transparent 26%),
-        radial-gradient(circle at top right, rgba(124,236,255,.14), transparent 26%);
-      pointer-events:none;
-    }
-
     .eye-wrap{
       display:grid;
       gap:18px;
@@ -763,6 +678,26 @@
       font-size:.9rem;
     }
 
+    .reveal{
+      opacity:0;
+      transform:translateY(16px);
+      animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+
+    .delay-1{animation-delay:.08s}
+    .delay-2{animation-delay:.16s}
+
+    .fade-up{
+      opacity:0;
+      transform:translateY(18px);
+      transition:opacity .6s ease, transform .6s ease;
+    }
+
+    .fade-up.in-view{
+      opacity:1;
+      transform:translateY(0);
+    }
+
     @keyframes eyePulse{
       from{transform:scale(.98)}
       to{transform:scale(1.04)}
@@ -770,10 +705,6 @@
 
     @keyframes rise{
       to{opacity:1; transform:translateY(0)}
-    }
-
-    @media (max-width:900px){
-      .hero{grid-template-columns:1fr}
     }
 
     @media (max-width:720px){
@@ -850,8 +781,7 @@
           <div class="eyebrow">Frosted Cyan Surface • Precision Under Pressure</div>
           <h2>Cold focus. Clean timing. No wasted motion.</h2>
           <p>
-            Built for quick calls, calm control, and instant action when the moment matters.
-            A sharp command surface designed to feel fast, clear, and locked in.
+            Login first. The roster, live status, and pull controls stay hidden until your Discord session is verified.
           </p>
         </div>
 
@@ -870,100 +800,99 @@
           </div>
         </div>
       </article>
-
-      <aside class="glass hero-side reveal delay-2">
-        <div class="panel-box">
-          <div class="box-head">
-            <span>Saved Roster</span>
-            <span id="miniRosterCount">0 entries</span>
-          </div>
-          <div class="mini-list" id="miniRoster">
-            <div class="empty" style="padding:18px;">Loading roster…</div>
-          </div>
-        </div>
-      </aside>
     </section>
 
-    <section class="layout">
-      <section class="glass panel hide" id="adminPanel" hidden aria-hidden="true">
-        <div class="panel-head">
-          <div>
-            <h3 id="formTitle">Add Player</h3>
-            <p>Only authenticated members with the admin role can see and use this panel.</p>
-          </div>
-        </div>
-
-        <form id="playerForm" novalidate>
-          <input type="hidden" id="playerId" />
-
-          <div class="form-grid">
-            <div class="field">
-              <label for="name">Player Name</label>
-              <input id="name" name="name" type="text" placeholder="FrostedFang" required />
-            </div>
-
-            <div class="field">
-              <label for="signal_strength">Signal Strength</label>
-              <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
-            </div>
-
-            <div class="field">
-              <label for="direction">Direction</label>
-              <select id="direction" name="direction" required>
-                <option value="">Select route</option>
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="channel_name">Channel Name</label>
-              <input id="channel_name" name="channel_name" type="text" placeholder="pearl-main" />
-            </div>
-
-            <div class="field full">
-              <label for="computer_name">Computer Name</label>
-              <input id="computer_name" name="computer_name" type="text" placeholder="shared-pearl-computer" />
-            </div>
-
-            <div class="field full">
-              <div class="toggle">
-                <span>Admin Permission</span>
-                <input id="is_admin" name="is_admin" type="checkbox" />
-              </div>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button type="submit" class="btn-primary" id="saveBtn">Save Player</button>
-            <button type="button" class="btn-secondary" id="resetBtn">Clear Form</button>
-          </div>
-        </form>
-
-        <div class="terminal-status" id="feedback" role="status" aria-live="polite">
-          [ready] admin panel locked
+    <section class="main-grid">
+      <section class="glass panel reveal delay-2" id="lockedPanel">
+        <div class="auth-lock">
+          <h3>Access Locked</h3>
+          <p>
+            Only authenticated Discord members can view the roster, status, and pearl controls.
+            Admin tools appear only for accounts with the admin role.
+          </p>
+          <button class="discord-btn" id="heroLoginBtn" type="button">Login with Discord</button>
         </div>
       </section>
 
-      <aside class="glass panel fade-up">
+      <section class="glass panel hide" id="authedPanel" hidden aria-hidden="true">
         <div class="panel-head">
           <div>
-            <h3>Control Roster</h3>
-            <p id="rosterSubtitle">Login with Discord to unlock team-based access.</p>
+            <h3>Roster & Controls</h3>
+            <p id="rosterSubtitle">Authenticated session active.</p>
           </div>
           <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="auth-lock" id="authLock">
-          <h3>Access Locked</h3>
-          <p>You must log in with Discord before protected controls become visible. Admin tools stay hidden unless your account has the admin role.</p>
-          <button class="discord-btn" id="heroLoginBtn" type="button">Login with Discord</button>
-        </div>
+        <div class="panel-stack">
+          <div class="terminal-status" id="liveStatus" role="status" aria-live="polite">
+            [ready] authenticated session required
+          </div>
 
-        <div class="roster" id="playerList">
-          <div class="empty">Loading players…</div>
+          <div class="roster" id="playerList">
+            <div class="empty">Loading players…</div>
+          </div>
+
+          <section class="admin-panel hide" id="adminPanel" hidden aria-hidden="true">
+            <div class="panel-head" style="margin-bottom:14px;">
+              <div>
+                <h3 id="formTitle">Add Player</h3>
+                <p>Visible only to members with the admin role.</p>
+              </div>
+            </div>
+
+            <form id="playerForm" novalidate>
+              <input type="hidden" id="playerId" />
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="name">Player Name</label>
+                  <input id="name" name="name" type="text" placeholder="FrostedFang" required />
+                </div>
+
+                <div class="field">
+                  <label for="signal_strength">Signal Strength</label>
+                  <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
+                </div>
+
+                <div class="field">
+                  <label for="direction">Direction</label>
+                  <select id="direction" name="direction" required>
+                    <option value="">Select route</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="channel_name">Channel Name</label>
+                  <input id="channel_name" name="channel_name" type="text" placeholder="pearl-main" />
+                </div>
+
+                <div class="field full">
+                  <label for="computer_name">Computer Name</label>
+                  <input id="computer_name" name="computer_name" type="text" placeholder="shared-pearl-computer" />
+                </div>
+
+                <div class="field full">
+                  <div class="toggle">
+                    <span>Admin Permission</span>
+                    <input id="is_admin" name="is_admin" type="checkbox" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn-primary" id="saveBtn">Save Player</button>
+                <button type="button" class="btn-secondary" id="resetBtn">Clear Form</button>
+              </div>
+            </form>
+
+            <div class="terminal-status" id="feedback">
+              [ready] admin tools locked
+            </div>
+          </section>
         </div>
-      </aside>
+      </section>
     </section>
   </main>
 
@@ -986,8 +915,15 @@
       backendMetric: document.getElementById('backendMetric'),
       accessMetric: document.getElementById('accessMetric'),
       playerCount: document.getElementById('playerCount'),
-      miniRosterCount: document.getElementById('miniRosterCount'),
-      miniRoster: document.getElementById('miniRoster'),
+      loginBtn: document.getElementById('loginBtn'),
+      heroLoginBtn: document.getElementById('heroLoginBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      lockedPanel: document.getElementById('lockedPanel'),
+      authedPanel: document.getElementById('authedPanel'),
+      rosterSubtitle: document.getElementById('rosterSubtitle'),
+      playerList: document.getElementById('playerList'),
+      liveStatus: document.getElementById('liveStatus'),
+      adminPanel: document.getElementById('adminPanel'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
@@ -998,23 +934,16 @@
       is_admin: document.getElementById('is_admin'),
       saveBtn: document.getElementById('saveBtn'),
       resetBtn: document.getElementById('resetBtn'),
-      refreshBtn: document.getElementById('refreshBtn'),
-      playerList: document.getElementById('playerList'),
       feedback: document.getElementById('feedback'),
       formTitle: document.getElementById('formTitle'),
-      loginBtn: document.getElementById('loginBtn'),
-      heroLoginBtn: document.getElementById('heroLoginBtn'),
-      logoutBtn: document.getElementById('logoutBtn'),
-      adminPanel: document.getElementById('adminPanel'),
-      rosterSubtitle: document.getElementById('rosterSubtitle'),
-      authLock: document.getElementById('authLock'),
+      refreshBtn: document.getElementById('refreshBtn'),
       eyeOverlay: document.getElementById('eyeOverlay'),
       eyeTitle: document.getElementById('eyeTitle'),
       eyeText: document.getElementById('eyeText')
     };
 
-    let players = [];
     let currentUser = null;
+    let players = [];
     let eyeTimer = null;
 
     function escapeHtml(value) {
@@ -1030,30 +959,33 @@
       return !!currentUser?.roles?.includes(roleId);
     }
 
+    function isLoggedIn() {
+      return !!currentUser;
+    }
+
     function canAdmin() {
-      return !!currentUser && hasRole(CONFIG.adminRoleId);
+      return isLoggedIn() && hasRole(CONFIG.adminRoleId);
     }
 
     function canPull() {
-      return !!currentUser && (hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId));
+      return isLoggedIn() && (hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId));
     }
 
-    function setAdminPanelVisible(visible) {
-      if (visible) {
-        els.adminPanel.hidden = false;
-        els.adminPanel.setAttribute('aria-hidden', 'false');
-        els.adminPanel.classList.remove('hide');
-      } else {
-        els.adminPanel.hidden = true;
-        els.adminPanel.setAttribute('aria-hidden', 'true');
-        els.adminPanel.classList.add('hide');
-      }
+    function setVisible(el, visible) {
+      if (!el) return;
+      el.hidden = !visible;
+      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      el.classList.toggle('hide', !visible);
     }
 
     function setFeedback(message, type = '') {
-      if (!els.feedback) return;
       els.feedback.textContent = message;
       els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
+    }
+
+    function setLiveStatus(message, type = '') {
+      els.liveStatus.textContent = message;
+      els.liveStatus.className = 'terminal-status' + (type ? ' ' + type : '');
     }
 
     function setBackendStatus(ok, text) {
@@ -1080,7 +1012,7 @@
       els.eyeOverlay.setAttribute('aria-hidden', 'true');
     }
 
-    function pulseEyePanel(title, text, duration = 1200) {
+    function pulseEyePanel(title, text, duration = 1300) {
       showEyePanel(title, text);
       eyeTimer = setTimeout(hideEyePanel, duration);
     }
@@ -1100,15 +1032,18 @@
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
-        throw new Error(`Expected JSON but got: ${text.slice(0, 80)}`);
+        throw new Error(`Expected JSON but got: ${text.slice(0, 100)}`);
       }
 
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
       return data;
     }
 
+    function goLogin() {
+      window.location.href = CONFIG.discordLoginUrl;
+    }
+
     function resetForm() {
-      if (!els.playerForm) return;
       els.playerId.value = '';
       els.name.value = '';
       els.signal_strength.value = 15;
@@ -1122,7 +1057,6 @@
 
     function fillForm(player) {
       if (!canAdmin()) return;
-
       els.playerId.value = player.id || '';
       els.name.value = player.name || '';
       els.signal_strength.value = player.signal_strength ?? 15;
@@ -1132,60 +1066,57 @@
       els.is_admin.checked = !!player.is_admin;
       els.formTitle.textContent = 'Edit Player';
       els.saveBtn.textContent = 'Update Player';
-      window.scrollTo({ top: els.adminPanel.offsetTop - 90, behavior: 'smooth' });
+      window.scrollTo({ top: els.adminPanel.offsetTop - 80, behavior: 'smooth' });
     }
 
-    function updateAuthUi() {
-      const loggedIn = !!currentUser;
+    function updateUiState() {
+      const loggedIn = isLoggedIn();
       const admin = canAdmin();
       const pull = canPull();
 
       els.loginBtn.classList.toggle('hide', loggedIn);
       els.logoutBtn.classList.toggle('hide', !loggedIn);
 
-      setAdminPanelVisible(loggedIn && admin);
-      els.authLock.classList.toggle('hide', loggedIn);
+      setVisible(els.lockedPanel, !loggedIn);
+      setVisible(els.authedPanel, loggedIn);
+      setVisible(els.adminPanel, loggedIn && admin);
 
       if (!loggedIn) {
         setAuthStatus(false, 'auth.locked()');
         els.accessMetric.textContent = 'Locked';
-        els.rosterSubtitle.textContent = 'Login with Discord to unlock team-based access.';
-        setFeedback('[ready] admin panel locked', 'warn');
       } else if (admin) {
         setAuthStatus(true, 'auth.admin()');
         els.accessMetric.textContent = 'Admin';
-        els.rosterSubtitle.textContent = 'Admin access active. Full roster controls unlocked.';
-        setFeedback('[ok] admin access granted', 'ok');
       } else if (pull) {
         setAuthStatus(true, 'auth.pull()');
         els.accessMetric.textContent = 'Pull';
-        els.rosterSubtitle.textContent = 'Pull access active. Admin panel remains hidden.';
       } else {
         setAuthStatus(false, 'auth.denied()');
         els.accessMetric.textContent = 'Denied';
-        els.rosterSubtitle.textContent = 'No valid pearl role found. Controls remain restricted.';
-      }
-    }
-
-    function renderMiniRoster() {
-      els.miniRosterCount.textContent = `${players.length} entr${players.length === 1 ? 'y' : 'ies'}`;
-
-      if (!players.length) {
-        els.miniRoster.innerHTML = '<div class="empty" style="padding:18px;">No roster entries.</div>';
-        return;
       }
 
-      els.miniRoster.innerHTML = players.slice(0, 8).map(player => `
-        <div class="mini-item">
-          <strong>${escapeHtml(player.name)}</strong>
-          <span>${escapeHtml(player.direction || 'unknown')}</span>
-        </div>
-      `).join('');
+      if (loggedIn && admin) {
+        els.rosterSubtitle.textContent = 'Authenticated. Admin access active.';
+        setLiveStatus('[ok] admin session verified', 'ok');
+        setFeedback('[ok] admin tools unlocked', 'ok');
+      } else if (loggedIn && pull) {
+        els.rosterSubtitle.textContent = 'Authenticated. Pull access active.';
+        setLiveStatus('[ok] pull access verified', 'ok');
+      } else if (loggedIn) {
+        els.rosterSubtitle.textContent = 'Authenticated, but no valid pearl role found.';
+        setLiveStatus('[warn] no valid pearl role found', 'warn');
+      } else {
+        setLiveStatus('[ready] authenticated session required', '');
+      }
     }
 
     function renderPlayers() {
       els.playerCount.textContent = players.length;
-      renderMiniRoster();
+
+      if (!isLoggedIn()) {
+        els.playerList.innerHTML = '';
+        return;
+      }
 
       if (!players.length) {
         els.playerList.innerHTML = '<div class="empty">No players saved yet.</div>';
@@ -1210,11 +1141,7 @@
             </div>
           </div>
           <div class="player-actions">
-            ${showPull ? `
-              <button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">
-                Pull Pearl
-              </button>
-            ` : ''}
+            ${showPull ? `<button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">Pull Pearl</button>` : ''}
             ${showAdmin ? `<button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>` : ''}
             ${showAdmin ? `<button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>` : ''}
           </div>
@@ -1238,11 +1165,17 @@
       } catch {
         currentUser = null;
       }
-      updateAuthUi();
+      updateUiState();
       renderPlayers();
     }
 
     async function loadPlayers() {
+      if (!isLoggedIn()) {
+        players = [];
+        renderPlayers();
+        return;
+      }
+
       try {
         const data = await fetchJson(`${API_BASE}/players`);
         players = Array.isArray(data) ? data : [];
@@ -1255,6 +1188,8 @@
         renderPlayers();
         if (canAdmin()) {
           setFeedback(`[error] ${err.message}`, 'error');
+        } else {
+          setLiveStatus(`[error] ${err.message}`, 'error');
         }
       }
     }
@@ -1332,16 +1267,11 @@
         });
 
         pulseEyePanel('Pearl Triggered', `${label} :: signal sent`, 1400);
+        setLiveStatus(`[ok] pull sent for ${label}`, 'ok');
       } catch (err) {
         pulseEyePanel('Trigger Failed', err.message, 1800);
-        if (canAdmin()) {
-          setFeedback(`[error] ${err.message}`, 'error');
-        }
+        setLiveStatus(`[error] ${err.message}`, 'error');
       }
-    }
-
-    function goLogin() {
-      window.location.href = CONFIG.discordLoginUrl;
     }
 
     els.loginBtn.addEventListener('click', goLogin);
@@ -1352,17 +1282,18 @@
         await fetchJson(CONFIG.logoutUrl, { method: 'POST' });
       } catch {}
       currentUser = null;
-      setAdminPanelVisible(false);
-      updateAuthUi();
+      players = [];
+      setVisible(els.adminPanel, false);
+      setVisible(els.authedPanel, false);
+      setVisible(els.lockedPanel, true);
+      updateUiState();
       renderPlayers();
       hideEyePanel();
     });
 
     els.eyeOverlay.addEventListener('click', hideEyePanel);
 
-    if (els.playerForm) {
-      els.playerForm.addEventListener('submit', savePlayer);
-    }
+    els.playerForm.addEventListener('submit', savePlayer);
 
     els.resetBtn.addEventListener('click', () => {
       resetForm();
@@ -1405,7 +1336,9 @@
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
     async function init() {
-      setAdminPanelVisible(false);
+      setVisible(els.lockedPanel, true);
+      setVisible(els.authedPanel, false);
+      setVisible(els.adminPanel, false);
       resetForm();
       await checkBackend();
       await checkAuth();
