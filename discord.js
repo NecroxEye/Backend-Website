@@ -1,276 +1,173 @@
 require('dotenv').config();
 
-const express = require('express');
-const {
-  Client,
-  GatewayIntentBits,
-  EmbedBuilder,
-  ActivityType
-} = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 
-const app = express();
-app.use(express.json());
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID;
+const BACKEND_URL = process.env.BACKEND_URL;
+const STATUS_MESSAGE_FILE = process.env.STATUS_MESSAGE_FILE || './status_message_id.json';
+const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 15000);
 
-const PORT = process.env.PORT || 3001;
-
-const DISCORD_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const STATUS_LOG_CHANNEL_ID = process.env.STATUS_LOG_CHANNEL_ID;
-const STATUS_GENERAL_CHANNEL_ID = process.env.STATUS_GENERAL_CHANNEL_ID;
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-
-const GAME_OVER_IMAGE_URL =
-  process.env.GAME_OVER_IMAGE_URL ||
-  'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg';
+if (!DISCORD_TOKEN || !CHANNEL_ID || !BACKEND_URL) {
+  console.error('Missing DISCORD_TOKEN, CHANNEL_ID, or BACKEND_URL in .env');
+  process.exit(1);
+}
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-let statusMessageId = null;
+let lastSnapshot = null;
+let cachedMessageId = null;
+let updateRunning = false;
 
-const systemState = {
-  backend: 'Off',
-  website: 'Off',
-  minecraftComputer: 'Off',
-  oilRig: 'Off',
-  name: 'Off'
-};
-
-function isAuthorized(req) {
-  return req.headers['x-bot-secret'] === WEBHOOK_SECRET;
-}
-
-function buildStatusEmbed() {
-  return new EmbedBuilder()
-    .setTitle('System Status')
-    .setColor(0x8af7ff)
-    .setDescription(
-      [
-        `Backend: ${systemState.backend}`,
-        `Website: ${systemState.website}`,
-        `Minecraft Computer: ${systemState.minecraftComputer}`,
-        `Oil Rig: ${systemState.oilRig}`,
-        `Name: ${systemState.name}`
-      ].join('\n')
-    )
-    .setFooter({ text: 'Live status monitor' })
-    .setTimestamp(new Date());
-}
-
-async function getChannel(channelId) {
-  if (!channelId) return null;
+function loadSavedMessageId() {
   try {
-    return await client.channels.fetch(channelId);
-  } catch (err) {
-    console.error(`Failed to fetch channel ${channelId}:`, err.message);
+    if (!fs.existsSync(STATUS_MESSAGE_FILE)) return null;
+    const raw = fs.readFileSync(STATUS_MESSAGE_FILE, 'utf8');
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    return parsed.messageId || null;
+  } catch {
     return null;
   }
 }
 
-async function logStatus(content) {
-  const channel = await getChannel(STATUS_LOG_CHANNEL_ID);
-  if (!channel) return;
-  await channel.send({ content });
+function saveMessageId(messageId) {
+  try {
+    fs.writeFileSync(STATUS_MESSAGE_FILE, JSON.stringify({ messageId }, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save message ID:', err.message);
+  }
 }
 
-async function sendGameOverEmbed(playerName) {
-  const channel = await getChannel(STATUS_LOG_CHANNEL_ID);
-  if (!channel) return;
+async function fetchBackendStatus() {
+  const res = await fetch(BACKEND_URL, {
+    headers: { 'Accept': 'application/json' }
+  });
 
-  const embed = new EmbedBuilder()
-    .setTitle('GAME OVER')
-    .setDescription(`Player **${playerName}** was kicked from the pearl pull system.`)
-    .setColor(0x111111)
-    .setImage(GAME_OVER_IMAGE_URL)
-    .setTimestamp(new Date());
+  const text = await res.text();
 
-  await channel.send({ embeds: [embed] });
-}
-
-async function ensureStatusMessage() {
-  const channel = await getChannel(STATUS_GENERAL_CHANNEL_ID);
-  if (!channel) return null;
-
-  if (statusMessageId) {
-    const existing = await channel.messages.fetch(statusMessageId).catch(() => null);
-    if (existing) return existing;
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Backend did not return JSON: ${text.slice(0, 120)}`);
   }
 
-  const msg = await channel.send({ embeds: [buildStatusEmbed()] });
-  statusMessageId = msg.id;
-  return msg;
+  if (!res.ok) {
+    throw new Error(data.error || `Backend error ${res.status}`);
+  }
+
+  return data;
 }
 
-async function updateStatusMessage() {
-  const msg = await ensureStatusMessage();
-  if (!msg) return;
-  await msg.edit({ embeds: [buildStatusEmbed()] });
+function normalizeStatus(data) {
+  const players = Array.isArray(data.players)
+    ? data.players
+    : Array.isArray(data.players_added)
+      ? data.players_added
+      : [];
+
+  return {
+    status: String(data.status || data.backend_status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
+    backendStatus: String(data.backend_status || data.backend || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
+    computer: String(data.computer || data.computer_name || 'N/A'),
+    oilRig: String(data.oilRig || data.oil_rig || 'Offline'),
+    website: String(data.website || 'Working'),
+    players
+  };
+}
+
+function buildEmbed(state) {
+  const isOn = state.status === 'ON';
+  const isBackendOn = state.backendStatus === 'ON';
+  const oilRigOk = String(state.oilRig).toLowerCase() === 'working';
+
+  const playersText = state.players.length
+    ? state.players.map(p => `• ${p}`).join('\n')
+    : 'None';
+
+  return new EmbedBuilder()
+    .setTitle('System Status Panel')
+    .setColor(isOn ? 0x2ecc71 : 0xe74c3c)
+    .addFields(
+      { name: 'Status', value: isOn ? '🟢 ON' : '🔴 OFF', inline: true },
+      { name: 'Backend Status', value: isBackendOn ? '🟢 ON' : '🔴 OFF', inline: true },
+      { name: 'Computer', value: state.computer, inline: true },
+      { name: 'Oil Rig', value: oilRigOk ? '🟢 Working' : '🔴 Offline', inline: true },
+      { name: 'Website', value: '🟢 Working', inline: true },
+      { name: 'Players Added', value: playersText, inline: false }
+    )
+    .setFooter({ text: 'Auto-updating status panel' })
+    .setTimestamp();
+}
+
+async function getStatusMessage(channel) {
+  if (!cachedMessageId) {
+    cachedMessageId = loadSavedMessageId();
+  }
+
+  if (cachedMessageId) {
+    try {
+      return await channel.messages.fetch(cachedMessageId);
+    } catch {
+      cachedMessageId = null;
+    }
+  }
+
+  return null;
+}
+
+async function updatePanel() {
+  if (updateRunning) return;
+  updateRunning = true;
+
+  try {
+    const rawData = await fetchBackendStatus();
+    const state = normalizeStatus(rawData);
+    const snapshot = JSON.stringify(state);
+
+    // Do nothing if nothing changed
+    if (snapshot === lastSnapshot) {
+      return;
+    }
+    lastSnapshot = snapshot;
+
+    const channel = await client.channels.fetch(CHANNEL_ID);
+    if (!channel) {
+      console.error('Channel not found');
+      return;
+    }
+
+    const embed = buildEmbed(state);
+    const existingMessage = await getStatusMessage(channel);
+
+    if (existingMessage) {
+      await existingMessage.edit({ embeds: [embed] });
+    } else {
+      const sent = await channel.send({ embeds: [embed] });
+      cachedMessageId = sent.id;
+      saveMessageId(sent.id);
+    }
+  } catch (err) {
+    console.error('Panel update error:', err.message);
+  } finally {
+    updateRunning = false;
+  }
 }
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  client.user.setPresence({
-    activities: [
-      {
-        name: 'Frosted Fang System',
-        type: ActivityType.Watching
-      }
-    ],
-    status: 'online'
-  });
+  // First update immediately
+  await updatePanel();
 
-  systemState.backend = 'On';
-  systemState.website = 'Working';
-
-  await updateStatusMessage();
-  await logStatus('Bot is online.');
+  // Then poll for changes
+  setInterval(updatePanel, POLL_INTERVAL_MS);
 });
-
-app.get('/', (req, res) => {
-  res.json({ ok: true, bot: 'online' });
-});
-
-app.get('/health', (req, res) => {
-  res.json({
-    ok: true,
-    systemState,
-    statusMessageId
-  });
-});
-
-app.post('/api/log', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { message } = req.body;
-    if (!message) {
-      return res.status(400).json({ ok: false, message: 'Missing message' });
-    }
-
-    await logStatus(String(message));
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('/api/log error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-app.post('/api/pearl-pulled', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { playerName } = req.body;
-    if (!playerName) {
-      return res.status(400).json({ ok: false, message: 'Missing playerName' });
-    }
-
-    await logStatus(`Pearl Pulled on: ${playerName}`);
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('/api/pearl-pulled error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-app.post('/api/player-added', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { playerName } = req.body;
-    if (!playerName) {
-      return res.status(400).json({ ok: false, message: 'Missing playerName' });
-    }
-
-    await logStatus(`Player ${playerName} was added`);
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('/api/player-added error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-app.post('/api/player-kicked', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { playerName } = req.body;
-    if (!playerName) {
-      return res.status(400).json({ ok: false, message: 'Missing playerName' });
-    }
-
-    await logStatus(`Player ${playerName} was kicked`);
-    await sendGameOverEmbed(playerName);
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('/api/player-kicked error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-app.post('/api/status', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { backend, website, minecraftComputer, oilRig, name } = req.body;
-
-    if (typeof backend !== 'undefined') systemState.backend = backend ? 'On' : 'Off';
-    if (typeof website !== 'undefined') systemState.website = website ? 'Working' : 'Off';
-    if (typeof minecraftComputer !== 'undefined') systemState.minecraftComputer = minecraftComputer ? 'On' : 'Off';
-    if (typeof oilRig !== 'undefined') systemState.oilRig = oilRig ? 'On' : 'Off';
-    if (typeof name !== 'undefined') systemState.name = name ? 'On' : 'Off';
-
-    await updateStatusMessage();
-    return res.json({ ok: true, systemState });
-  } catch (err) {
-    console.error('/api/status error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-app.post('/api/computer-heartbeat', async (req, res) => {
-  if (!isAuthorized(req)) {
-    return res.status(403).json({ ok: false, message: 'Unauthorized' });
-  }
-
-  try {
-    const { computerName } = req.body;
-    if (!computerName) {
-      return res.status(400).json({ ok: false, message: 'Missing computerName' });
-    }
-
-    if (computerName === 'Oil Rig') systemState.oilRig = 'On';
-    if (computerName === 'Name') systemState.name = 'On';
-    systemState.minecraftComputer = 'On';
-
-    await updateStatusMessage();
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error('/api/computer-heartbeat error:', err);
-    return res.status(500).json({ ok: false, message: 'Internal error' });
-  }
-});
-
-setInterval(async () => {
-  try {
-    await updateStatusMessage();
-  } catch (err) {
-    console.error('Status refresh error:', err.message);
-  }
-}, 60000);
 
 client.login(DISCORD_TOKEN);
-
-app.listen(PORT, () => {
-  console.log(`Bot API server running on port ${PORT}`);
-});
