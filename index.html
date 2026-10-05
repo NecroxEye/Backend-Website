@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang Control Panel</title>
+  <title>Frosted Fang Control</title>
+  <meta name="description" content="Discord-auth gated roster and pull controls." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#06111a;
       --bg2:#091723;
+      --panel:rgba(172,240,255,.07);
+      --panel-2:rgba(172,240,255,.04);
       --stroke:rgba(145,229,255,.18);
+      --stroke-2:rgba(145,229,255,.10);
       --text:#ebfcff;
       --muted:#a5c9d3;
       --cyan:#7cecff;
@@ -17,36 +24,58 @@
       --danger:#ff88b0;
       --warn:#ffd7a1;
       --radius:24px;
-      --shadow:0 22px 70px rgba(0,0,0,.35);
-      --max:1200px;
+      --shadow:0 24px 70px rgba(0,0,0,.35);
+      --max:1120px;
     }
 
     *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
     body{
-      margin:0;
       min-height:100vh;
       color:var(--text);
-      font-family:Arial, sans-serif;
+      font-family:"Inter",sans-serif;
       background:
-        radial-gradient(circle at 10% 10%, rgba(124,236,255,.18), transparent 23%),
-        radial-gradient(circle at 87% 14%, rgba(124,236,255,.11), transparent 18%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+        radial-gradient(circle at 12% 12%, rgba(124,236,255,.16), transparent 22%),
+        radial-gradient(circle at 88% 10%, rgba(124,236,255,.10), transparent 18%),
+        linear-gradient(180deg,var(--bg),var(--bg2));
       overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.32;
+      background:
+        linear-gradient(rgba(124,236,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,236,255,.025) 1px, transparent 1px);
+      background-size:34px 34px;
     }
 
     .shell{
       width:min(var(--max), calc(100% - 28px));
-      margin:0 auto;
+      margin-inline:auto;
     }
 
     .glass{
       position:relative;
-      overflow:hidden;
-      border-radius:var(--radius);
       border:1px solid var(--stroke);
-      background:linear-gradient(180deg, rgba(172,240,255,.09), rgba(172,240,255,.045));
-      backdrop-filter:blur(20px);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg,var(--panel),var(--panel-2));
+      backdrop-filter:blur(18px);
       box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .glass::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(124,236,255,.12), transparent 24%);
     }
 
     .hide,[hidden]{display:none !important}
@@ -54,13 +83,14 @@
     .topbar{
       position:sticky;
       top:0;
-      z-index:40;
-      background:rgba(5,11,17,.82);
+      z-index:20;
+      background:linear-gradient(180deg, rgba(5,11,17,.86), rgba(5,11,17,.62));
       border-bottom:1px solid rgba(124,236,255,.12);
-      backdrop-filter:blur(18px);
+      backdrop-filter:blur(14px);
     }
 
     .topbar-inner{
+      min-height:76px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -72,50 +102,56 @@
       display:flex;
       align-items:center;
       gap:14px;
+      min-width:0;
     }
 
     .brand-mark{
-      width:48px;
-      height:48px;
-      border-radius:16px;
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      border:1px solid rgba(145,229,255,.24);
       background:
-        radial-gradient(circle at 34% 28%, rgba(255,255,255,.55), transparent 24%),
-        linear-gradient(135deg, rgba(124,236,255,.34), rgba(69,216,238,.08));
-      border:1px solid rgba(145,229,255,.28);
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), transparent 22%),
+        linear-gradient(135deg, rgba(124,236,255,.26), rgba(69,216,238,.05));
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 14px 24px rgba(69,216,238,.10);
     }
 
     .brand-copy h1{
       margin:0;
-      font-size:1.05rem;
+      font-family:"Michroma",sans-serif;
+      font-size:clamp(.95rem,2vw,1.2rem);
       letter-spacing:.12em;
       text-transform:uppercase;
+      line-height:1.1;
     }
 
     .brand-copy p{
       margin:4px 0 0;
       color:var(--muted);
-      font-size:.88rem;
+      font-size:.85rem;
+      letter-spacing:.05em;
     }
 
     .status-row{
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
       align-items:center;
       justify-content:flex-end;
+      flex-wrap:wrap;
+      gap:10px;
     }
 
     .terminal-pill{
       min-width:220px;
-      border-radius:999px;
-      border:1px solid rgba(124,236,255,.18);
-      background:rgba(11,24,35,.74);
       padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(124,236,255,.16);
+      background:linear-gradient(180deg, rgba(10,22,33,.84), rgba(7,18,27,.72));
       display:flex;
       align-items:center;
       gap:10px;
-      color:#c8f4fb;
-      font-size:.84rem;
+      color:#d2f7ff;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.82rem;
       white-space:nowrap;
     }
 
@@ -123,133 +159,150 @@
       width:10px;
       height:10px;
       border-radius:50%;
-      background:#54707a;
+      background:#607d87;
+      flex:0 0 auto;
     }
 
     .dot.online{
       background:var(--ok);
-      box-shadow:0 0 0 8px rgba(144,255,211,.1), 0 0 18px rgba(144,255,211,.22);
+      box-shadow:0 0 0 7px rgba(144,255,211,.10), 0 0 18px rgba(144,255,211,.22);
     }
 
     .dot.offline{
       background:var(--danger);
-      box-shadow:0 0 0 8px rgba(255,136,176,.08), 0 0 16px rgba(255,136,176,.16);
+      box-shadow:0 0 0 7px rgba(255,136,176,.08), 0 0 16px rgba(255,136,176,.16);
     }
 
     button{
       border:none;
       cursor:pointer;
-      border-radius:999px;
       font:inherit;
       font-weight:700;
       transition:.2s ease;
+      border-radius:999px;
     }
 
-    .discord-btn,.logout-btn,.btn-primary,.btn-secondary,.btn-ghost,.mini,.pull-btn{
-      padding:11px 16px;
-    }
+    button:hover{transform:translateY(-2px)}
+    button:active{transform:translateY(0)}
 
     .discord-btn{
+      padding:11px 16px;
       color:#041018;
-      background:linear-gradient(135deg, #dffaff, #7cecff);
+      background:linear-gradient(135deg,#ecfdff,#7cecff);
+      box-shadow:0 14px 28px rgba(124,236,255,.18);
     }
 
-    .logout-btn,.btn-secondary,.btn-ghost,.mini{
+    .ghost-btn,.logout-btn,.mini{
+      padding:11px 16px;
       color:var(--ice);
       background:rgba(172,240,255,.06);
       border:1px solid rgba(124,236,255,.16);
     }
 
-    .btn-primary,.pull-btn{
+    .pull-btn{
+      padding:11px 18px;
       color:#031119;
-      background:linear-gradient(135deg, #ecfdff, #7cecff);
+      background:linear-gradient(135deg,#ecfdff,#7cecff);
+      box-shadow:0 14px 24px rgba(124,236,255,.18);
     }
 
-    main{padding:26px 0 56px}
+    .mini.danger{
+      color:#ffdce8;
+      border-color:rgba(255,136,176,.22);
+      background:rgba(255,136,176,.08);
+    }
+
+    main{padding:28px 0 52px}
 
     .hero{
-      display:grid;
-      gap:18px;
-      margin-bottom:18px;
-    }
-
-    .hero-copy{
-      padding:34px;
-      min-height:240px;
+      padding:clamp(24px,4vw,42px);
+      min-height:260px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
+      gap:18px;
+      animation:rise .7s ease forwards;
     }
 
     .eyebrow{
       color:var(--cyan);
+      font-family:"JetBrains Mono",monospace;
+      font-size:.76rem;
       text-transform:uppercase;
       letter-spacing:.18em;
-      font-size:.76rem;
-      margin-bottom:14px;
     }
 
-    .hero-copy h2{
-      margin:0 0 12px;
-      font-size:clamp(2rem, 5vw, 4rem);
+    .hero h2{
+      margin:10px 0 10px;
+      font-family:"Michroma",sans-serif;
+      font-size:clamp(1.9rem,5vw,3.8rem);
       line-height:1.02;
-      letter-spacing:.04em;
+      letter-spacing:.05em;
       text-transform:uppercase;
+      max-width:12ch;
     }
 
-    .hero-copy p{
+    .hero p{
       margin:0;
-      max-width:60ch;
       color:var(--muted);
+      max-width:60ch;
       line-height:1.7;
+      font-size:1rem;
     }
 
     .metrics{
       display:flex;
-      gap:12px;
       flex-wrap:wrap;
-      margin-top:22px;
+      gap:12px;
+      margin-top:8px;
     }
 
     .metric{
       min-width:150px;
-      border-radius:18px;
-      border:1px solid rgba(124,236,255,.16);
-      background:rgba(10,22,33,.4);
       padding:14px 16px;
+      border-radius:18px;
+      border:1px solid rgba(124,236,255,.14);
+      background:rgba(8,21,31,.45);
     }
 
     .metric span{
       display:block;
       color:var(--muted);
-      font-size:.77rem;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.75rem;
       text-transform:uppercase;
-      margin-bottom:5px;
+      margin-bottom:6px;
+      letter-spacing:.08em;
     }
 
     .metric strong{
-      font-size:1.18rem;
       color:var(--ice);
+      font-size:1.15rem;
     }
 
-    .main-grid{
+    .stack{
       display:grid;
       gap:18px;
+      margin-top:18px;
     }
 
-    .panel{padding:22px}
+    .panel{
+      padding:22px;
+      animation:rise .8s ease forwards;
+    }
 
     .panel-head{
       display:flex;
       align-items:flex-end;
       justify-content:space-between;
       gap:16px;
-      margin-bottom:18px;
+      margin-bottom:16px;
     }
 
     .panel-head h3{
       margin:0;
-      font-size:1.2rem;
+      font-family:"Michroma",sans-serif;
+      font-size:clamp(1rem,2.4vw,1.45rem);
       text-transform:uppercase;
       letter-spacing:.08em;
     }
@@ -257,32 +310,48 @@
     .panel-head p{
       margin:7px 0 0;
       color:var(--muted);
-      line-height:1.6;
+      line-height:1.65;
+      font-size:.95rem;
+      max-width:48ch;
     }
 
-    .auth-lock{
-      padding:34px 26px;
+    .lock-panel{
       text-align:center;
+      padding:34px 24px;
     }
 
-    .auth-lock h3{
-      margin:0 0 10px;
-      font-size:1.6rem;
+    .lock-panel h3{
+      margin:0 0 12px;
+      font-family:"Michroma",sans-serif;
       text-transform:uppercase;
       letter-spacing:.08em;
+      font-size:clamp(1.15rem,3vw,1.7rem);
     }
 
-    .auth-lock p{
+    .lock-panel p{
       margin:0 auto 18px;
       max-width:44ch;
       color:var(--muted);
       line-height:1.7;
     }
 
-    .panel-stack{
-      display:grid;
-      gap:18px;
+    .terminal-status{
+      min-height:64px;
+      display:flex;
+      align-items:center;
+      padding:15px 16px;
+      border-radius:18px;
+      border:1px solid rgba(124,236,255,.14);
+      background:linear-gradient(180deg, rgba(7,18,27,.82), rgba(7,18,27,.66));
+      color:#d9fbff;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.88rem;
+      line-height:1.6;
     }
+
+    .terminal-status.ok{color:#e7fff3;border-color:rgba(144,255,211,.18)}
+    .terminal-status.warn{color:#fff1d1;border-color:rgba(255,215,161,.20)}
+    .terminal-status.error{color:#ffe4ec;border-color:rgba(255,136,176,.20)}
 
     .roster{
       display:grid;
@@ -291,13 +360,13 @@
 
     .player-row{
       display:grid;
-      grid-template-columns:minmax(0, 1.2fr) auto;
+      grid-template-columns:minmax(0,1fr) auto;
       gap:14px;
       align-items:center;
       padding:16px;
       border-radius:20px;
-      border:1px solid rgba(124,236,255,.13);
-      background:rgba(9,21,31,.66);
+      border:1px solid rgba(124,236,255,.12);
+      background:linear-gradient(180deg, rgba(9,21,31,.68), rgba(8,19,28,.48));
     }
 
     .player-main{
@@ -308,36 +377,36 @@
 
     .player-top{
       display:flex;
-      align-items:center;
       flex-wrap:wrap;
       gap:10px;
+      align-items:center;
     }
 
     .player-name{
       margin:0;
-      font-size:1.02rem;
       color:var(--ice);
+      font-size:1.05rem;
       font-weight:700;
     }
 
     .chip{
       display:inline-flex;
       align-items:center;
-      gap:8px;
       padding:7px 10px;
       border-radius:999px;
       border:1px solid rgba(124,236,255,.14);
       background:rgba(172,240,255,.05);
-      color:#bdeaf1;
-      font-size:.76rem;
+      color:#bfeaf2;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.75rem;
+      letter-spacing:.06em;
       text-transform:uppercase;
-      letter-spacing:.08em;
     }
 
     .player-meta{
       display:flex;
-      gap:8px;
       flex-wrap:wrap;
+      gap:8px;
     }
 
     .player-actions{
@@ -350,17 +419,19 @@
     .empty{
       padding:28px 20px;
       border-radius:20px;
-      border:1px dashed rgba(124,236,255,.2);
-      text-align:center;
-      color:var(--muted);
+      border:1px dashed rgba(124,236,255,.22);
       background:rgba(172,240,255,.03);
+      color:var(--muted);
+      text-align:center;
+      font-family:"JetBrains Mono",monospace;
     }
 
-    .admin-panel{
+    .admin-wrap{
+      margin-top:4px;
+      padding:18px;
       border-radius:20px;
       border:1px solid rgba(124,236,255,.14);
-      background:rgba(6,17,26,.72);
-      padding:18px;
+      background:linear-gradient(180deg, rgba(7,18,27,.75), rgba(7,18,27,.58));
     }
 
     .form-grid{
@@ -377,33 +448,44 @@
     .field.full{grid-column:1 / -1}
 
     label{
-      color:#bfeaf2;
-      font-size:.82rem;
+      color:#c5eef6;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.8rem;
       text-transform:uppercase;
       letter-spacing:.12em;
     }
 
     input{
       width:100%;
-      border:none;
-      outline:none;
-      color:var(--ice);
-      background:rgba(7,18,27,.94);
-      border:1px solid rgba(124,236,255,.14);
-      border-radius:16px;
       padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(124,236,255,.14);
+      background:linear-gradient(180deg, rgba(6,17,26,.92), rgba(7,18,27,.84));
+      color:var(--ice);
       font:inherit;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:rgba(124,236,255,.34);
+      box-shadow:0 0 0 4px rgba(124,236,255,.08);
     }
 
     .toggle{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
-      border:1px solid rgba(124,236,255,.14);
-      border-radius:18px;
+      gap:14px;
       padding:14px 16px;
+      border-radius:18px;
+      border:1px solid rgba(124,236,255,.14);
       background:rgba(7,18,27,.62);
+    }
+
+    .toggle span{
+      color:#cbeef5;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.88rem;
     }
 
     .toggle input[type="checkbox"]{
@@ -414,36 +496,35 @@
 
     .actions{
       display:flex;
-      gap:12px;
       flex-wrap:wrap;
+      gap:12px;
       margin-top:18px;
     }
 
-    .terminal-status{
-      margin-top:16px;
-      min-height:66px;
-      border-radius:18px;
-      border:1px solid rgba(124,236,255,.14);
-      background:rgba(6,17,26,.74);
-      padding:16px;
-      display:flex;
-      align-items:center;
-      color:#d9fbff;
-      font-size:.9rem;
-      line-height:1.6;
+    .primary-btn{
+      padding:12px 18px;
+      color:#041119;
+      background:linear-gradient(135deg,#ecfdff,#7cecff);
+    }
+
+    .secondary-btn{
+      padding:12px 18px;
+      color:var(--ice);
+      background:rgba(172,240,255,.06);
+      border:1px solid rgba(124,236,255,.16);
     }
 
     .eye-overlay{
       position:fixed;
       inset:0;
-      z-index:100;
+      z-index:99;
       display:grid;
       place-items:center;
-      background:rgba(3, 10, 16, 0.34);
+      background:rgba(3,10,16,.34);
       backdrop-filter:blur(10px);
       opacity:0;
       pointer-events:none;
-      transition:opacity .24s ease;
+      transition:opacity .25s ease;
     }
 
     .eye-overlay.active{
@@ -452,49 +533,57 @@
     }
 
     .eye-panel{
-      width:min(560px, calc(100% - 36px));
-      min-height:300px;
-      border-radius:32px;
+      width:min(540px, calc(100% - 34px));
+      min-height:280px;
+      border-radius:30px;
       border:1px solid rgba(124,236,255,.18);
-      background:linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
-      box-shadow:0 30px 90px rgba(0,0,0,.42);
+      background:
+        radial-gradient(circle at 50% 40%, rgba(124,236,255,.15), transparent 28%),
+        linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
+      backdrop-filter:blur(20px);
+      box-shadow:0 28px 80px rgba(0,0,0,.42);
       display:grid;
       place-items:center;
-      transform:translateY(16px) scale(.94);
-      transition:transform .28s cubic-bezier(.2,.7,.2,1);
+      transform:translateY(16px) scale(.95);
+      transition:transform .28s ease;
     }
 
-    .eye-overlay.active .eye-panel{
-      transform:translateY(0) scale(1);
-    }
+    .eye-overlay.active .eye-panel{transform:translateY(0) scale(1)}
 
     .eye-wrap{
       display:grid;
-      gap:18px;
       place-items:center;
       text-align:center;
-      padding:32px;
+      gap:18px;
+      padding:28px;
     }
 
     .eye-wrap svg{
-      width:min(240px, 52vw);
-      display:block;
-      filter:drop-shadow(0 0 22px rgba(69,216,238,.24));
+      width:min(220px, 50vw);
+      height:auto;
+      filter:drop-shadow(0 0 20px rgba(69,216,238,.22));
       animation:eyePulse 1s ease-in-out infinite alternate;
     }
 
     .eye-wrap h4{
       margin:0;
-      font-size:1.05rem;
+      font-family:"Michroma",sans-serif;
       text-transform:uppercase;
-      letter-spacing:.1em;
+      letter-spacing:.08em;
+      font-size:1rem;
       color:var(--ice);
     }
 
     .eye-wrap p{
       margin:0;
       color:var(--muted);
-      font-size:.9rem;
+      font-family:"JetBrains Mono",monospace;
+      font-size:.88rem;
+    }
+
+    @keyframes rise{
+      from{opacity:0;transform:translateY(14px)}
+      to{opacity:1;transform:translateY(0)}
     }
 
     @keyframes eyePulse{
@@ -502,7 +591,7 @@
       to{transform:scale(1.04)}
     }
 
-    @media (max-width:720px){
+    @media (max-width:760px){
       .topbar-inner{
         flex-direction:column;
         align-items:flex-start;
@@ -514,6 +603,7 @@
       .form-grid{grid-template-columns:1fr}
       .player-row{grid-template-columns:1fr}
       .player-actions{justify-content:flex-start}
+      .hero h2{max-width:none}
     }
   </style>
 </head>
@@ -555,11 +645,13 @@
           <span class="dot offline" id="backendDot"></span>
           <span id="backendStatus">backend.check()</span>
         </div>
+
         <div class="terminal-pill">
           <span>&gt;</span>
           <span class="dot offline" id="authDot"></span>
           <span id="authStatus">auth.locked()</span>
         </div>
+
         <button class="discord-btn" id="loginBtn" type="button">Login with Discord</button>
         <button class="logout-btn hide" id="logoutBtn" type="button">Logout</button>
       </div>
@@ -567,40 +659,38 @@
   </header>
 
   <main class="shell">
-    <section class="hero">
-      <article class="glass hero-copy">
-        <div>
-          <div class="eyebrow">Frosted Cyan Surface • Precision Under Pressure</div>
-          <h2>Cold focus. Clean timing. No wasted motion.</h2>
-          <p>
-            Login first. The roster, live status, and pull controls stay hidden until your Discord session is verified.
-          </p>
-        </div>
+    <section class="glass hero">
+      <div>
+        <div class="eyebrow">Frosted Cyan Surface • Auth Gated</div>
+        <h2>Roster and pull controls stay hidden until login.</h2>
+        <p>
+          This page only reveals roster, status, and pull controls after Discord authentication.
+          The add player panel is completely hidden unless the authenticated member has the admin role.
+        </p>
+      </div>
 
-        <div class="metrics">
-          <div class="metric">
-            <span>Backend</span>
-            <strong id="backendMetric">Checking…</strong>
-          </div>
-          <div class="metric">
-            <span>Players Loaded</span>
-            <strong id="playerCount">0</strong>
-          </div>
-          <div class="metric">
-            <span>Access</span>
-            <strong id="accessMetric">Locked</strong>
-          </div>
+      <div class="metrics">
+        <div class="metric">
+          <span>Backend</span>
+          <strong id="backendMetric">Checking…</strong>
         </div>
-      </article>
+        <div class="metric">
+          <span>Players Loaded</span>
+          <strong id="playerCount">0</strong>
+        </div>
+        <div class="metric">
+          <span>Access</span>
+          <strong id="accessMetric">Locked</strong>
+        </div>
+      </div>
     </section>
 
-    <section class="main-grid">
+    <section class="stack">
       <section class="glass panel" id="lockedPanel">
-        <div class="auth-lock">
+        <div class="lock-panel">
           <h3>Access Locked</h3>
           <p>
-            Only authenticated Discord members can view the roster, status, and pearl controls.
-            Admin tools appear only for accounts with the admin role.
+            Login with Discord first. Until then, roster, pull controls, and admin tools remain hidden.
           </p>
           <button class="discord-btn" id="heroLoginBtn" type="button">Login with Discord</button>
         </div>
@@ -612,18 +702,22 @@
             <h3>Roster & Controls</h3>
             <p id="rosterSubtitle">Authenticated session active.</p>
           </div>
-          <button class="btn-ghost" id="refreshBtn" type="button">Refresh</button>
+          <button class="ghost-btn" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="terminal-status" id="liveStatus">[ready] authenticated session required</div>
+        <div class="terminal-status" id="liveStatus" role="status" aria-live="polite">
+          [ready] authenticated session required
+        </div>
 
-        <div class="roster" id="playerList"></div>
+        <div class="roster" id="playerList">
+          <div class="empty">No roster loaded.</div>
+        </div>
 
-        <section class="admin-panel hide" id="adminPanel" hidden aria-hidden="true">
+        <section class="admin-wrap hide" id="adminPanel" hidden aria-hidden="true">
           <div class="panel-head" style="margin-bottom:14px;">
             <div>
               <h3 id="formTitle">Add Player</h3>
-              <p>Visible only to members with the admin role.</p>
+              <p>Only visible for the configured admin role.</p>
             </div>
           </div>
 
@@ -633,35 +727,35 @@
             <div class="form-grid">
               <div class="field">
                 <label for="name">Player Name</label>
-                <input id="name" name="name" type="text" placeholder="FrostedFang" required />
+                <input id="name" type="text" placeholder="FrostedFang" required />
               </div>
 
               <div class="field">
                 <label for="signal_strength">Signal Strength</label>
-                <input id="signal_strength" name="signal_strength" type="number" min="0" max="15" value="15" required />
+                <input id="signal_strength" type="number" min="0" max="15" value="15" required />
               </div>
 
               <div class="field">
                 <label for="channel_name">Channel Name</label>
-                <input id="channel_name" name="channel_name" type="text" placeholder="pearl-main" />
+                <input id="channel_name" type="text" placeholder="pearl-main" />
               </div>
 
               <div class="field">
                 <label for="computer_name">Computer Name</label>
-                <input id="computer_name" name="computer_name" type="text" placeholder="shared-pearl-computer" />
+                <input id="computer_name" type="text" placeholder="shared-pearl-computer" />
               </div>
 
               <div class="field full">
                 <div class="toggle">
                   <span>Admin Permission</span>
-                  <input id="is_admin" name="is_admin" type="checkbox" />
+                  <input id="is_admin" type="checkbox" />
                 </div>
               </div>
             </div>
 
             <div class="actions">
-              <button type="submit" class="btn-primary" id="saveBtn">Save Player</button>
-              <button type="button" class="btn-secondary" id="resetBtn">Clear Form</button>
+              <button class="primary-btn" id="saveBtn" type="submit">Save Player</button>
+              <button class="secondary-btn" id="resetBtn" type="button">Clear Form</button>
             </div>
           </form>
 
@@ -675,11 +769,13 @@
     const API_BASE = 'https://backend-website-syxe.onrender.com';
 
     const CONFIG = {
-      adminRoleId: '1556390847191322806',
-      pullRoleId: '1553856941204181162',
-      discordLoginUrl: `${API_BASE}/auth/discord/login`,
       authMeUrl: `${API_BASE}/auth/me`,
-      logoutUrl: `${API_BASE}/auth/logout`
+      loginUrl: `${API_BASE}/auth/discord/login`,
+      logoutUrl: `${API_BASE}/auth/logout`,
+      healthUrl: `${API_BASE}/health`,
+      playersUrl: `${API_BASE}/players`,
+      adminRoleId: '1556390847191322806',
+      pullRoleId: '1553856941204181162'
     };
 
     const els = {
@@ -695,10 +791,11 @@
       logoutBtn: document.getElementById('logoutBtn'),
       lockedPanel: document.getElementById('lockedPanel'),
       authedPanel: document.getElementById('authedPanel'),
-      rosterSubtitle: document.getElementById('rosterSubtitle'),
-      playerList: document.getElementById('playerList'),
-      liveStatus: document.getElementById('liveStatus'),
       adminPanel: document.getElementById('adminPanel'),
+      rosterSubtitle: document.getElementById('rosterSubtitle'),
+      liveStatus: document.getElementById('liveStatus'),
+      playerList: document.getElementById('playerList'),
+      refreshBtn: document.getElementById('refreshBtn'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       name: document.getElementById('name'),
@@ -708,9 +805,8 @@
       is_admin: document.getElementById('is_admin'),
       saveBtn: document.getElementById('saveBtn'),
       resetBtn: document.getElementById('resetBtn'),
-      feedback: document.getElementById('feedback'),
       formTitle: document.getElementById('formTitle'),
-      refreshBtn: document.getElementById('refreshBtn'),
+      feedback: document.getElementById('feedback'),
       eyeOverlay: document.getElementById('eyeOverlay'),
       eyeTitle: document.getElementById('eyeTitle'),
       eyeText: document.getElementById('eyeText')
@@ -729,6 +825,13 @@
         .replaceAll("'", '&#039;');
     }
 
+    function setVisible(el, visible) {
+      if (!el) return;
+      el.hidden = !visible;
+      el.classList.toggle('hide', !visible);
+      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+
     function hasRole(roleId) {
       return !!currentUser?.roles?.includes(roleId);
     }
@@ -745,35 +848,28 @@
       return isLoggedIn() && (hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId));
     }
 
-    function setVisible(el, visible) {
-      if (!el) return;
-      el.hidden = !visible;
-      el.classList.toggle('hide', !visible);
-      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    }
-
-    function setBackendStatus(ok, text) {
+    function setBackend(ok) {
       els.backendDot.className = 'dot ' + (ok ? 'online' : 'offline');
-      els.backendStatus.textContent = text;
+      els.backendStatus.textContent = ok ? 'backend.online()' : 'backend.offline()';
       els.backendMetric.textContent = ok ? 'Online' : 'Offline';
     }
 
-    function setAuthStatus(ok, text) {
+    function setAuth(ok, label) {
       els.authDot.className = 'dot ' + (ok ? 'online' : 'offline');
-      els.authStatus.textContent = text;
+      els.authStatus.textContent = label;
     }
 
-    function setFeedback(message, type = '') {
-      els.feedback.textContent = message;
-      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
-    }
-
-    function setLiveStatus(message, type = '') {
-      els.liveStatus.textContent = message;
+    function setLiveStatus(text, type = '') {
+      els.liveStatus.textContent = text;
       els.liveStatus.className = 'terminal-status' + (type ? ' ' + type : '');
     }
 
-    function showEyePanel(title, text) {
+    function setFeedback(text, type = '') {
+      els.feedback.textContent = text;
+      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
+    }
+
+    function showEye(title, text) {
       clearTimeout(eyeTimer);
       els.eyeTitle.textContent = title;
       els.eyeText.textContent = text;
@@ -781,60 +877,64 @@
       els.eyeOverlay.setAttribute('aria-hidden', 'false');
     }
 
-    function hideEyePanel() {
+    function hideEye() {
       els.eyeOverlay.classList.remove('active');
       els.eyeOverlay.setAttribute('aria-hidden', 'true');
     }
 
-    function pulseEyePanel(title, text, duration = 1300) {
-      showEyePanel(title, text);
-      eyeTimer = setTimeout(hideEyePanel, duration);
+    function pulseEye(title, text, duration = 1400) {
+      showEye(title, text);
+      eyeTimer = setTimeout(hideEye, duration);
     }
 
     async function fetchJson(url, options = {}) {
       const res = await fetch(url, {
+        method: options.method || 'GET',
+        headers: {
+          ...(options.headers || {})
+        },
+        body: options.body,
         credentials: 'include',
-        ...options,
-        headers: { ...(options.headers || {}) }
+        mode: 'cors'
       });
 
       const text = await res.text();
       let data = {};
-      try { data = text ? JSON.parse(text) : {}; } catch {}
 
-      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {};
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || text || `Request failed (${res.status})`);
+      }
+
       return data;
     }
 
-    function goLogin() {
-      window.location.href = CONFIG.discordLoginUrl;
+    async function checkBackend() {
+      try {
+        await fetchJson(CONFIG.healthUrl);
+        setBackend(true);
+      } catch {
+        setBackend(false);
+      }
     }
 
-    function resetForm() {
-      els.playerId.value = '';
-      els.name.value = '';
-      els.signal_strength.value = 15;
-      els.channel_name.value = '';
-      els.computer_name.value = '';
-      els.is_admin.checked = false;
-      els.formTitle.textContent = 'Add Player';
-      els.saveBtn.textContent = 'Save Player';
+    async function checkAuth() {
+      try {
+        const data = await fetchJson(CONFIG.authMeUrl);
+        currentUser = data.user || null;
+      } catch {
+        currentUser = null;
+      }
+
+      updateAuthUi();
     }
 
-    function fillForm(player) {
-      if (!canAdmin()) return;
-      els.playerId.value = player.id || '';
-      els.name.value = player.name || '';
-      els.signal_strength.value = player.signal_strength ?? 15;
-      els.channel_name.value = player.channel_name || '';
-      els.computer_name.value = player.computer_name || '';
-      els.is_admin.checked = !!player.is_admin;
-      els.formTitle.textContent = 'Edit Player';
-      els.saveBtn.textContent = 'Update Player';
-      window.scrollTo({ top: els.adminPanel.offsetTop - 80, behavior: 'smooth' });
-    }
-
-    function updateUiState() {
+    function updateAuthUi() {
       const loggedIn = isLoggedIn();
       const admin = canAdmin();
       const pull = canPull();
@@ -847,30 +947,25 @@
       setVisible(els.adminPanel, loggedIn && admin);
 
       if (!loggedIn) {
-        setAuthStatus(false, 'auth.locked()');
+        setAuth(false, 'auth.locked()');
         els.accessMetric.textContent = 'Locked';
+        setLiveStatus('[ready] authenticated session required');
       } else if (admin) {
-        setAuthStatus(true, 'auth.admin()');
+        setAuth(true, 'auth.admin()');
         els.accessMetric.textContent = 'Admin';
-      } else if (pull) {
-        setAuthStatus(true, 'auth.pull()');
-        els.accessMetric.textContent = 'Pull';
-      } else {
-        setAuthStatus(false, 'auth.denied()');
-        els.accessMetric.textContent = 'Denied';
-      }
-
-      if (loggedIn && admin) {
         els.rosterSubtitle.textContent = 'Authenticated. Admin access active.';
         setLiveStatus('[ok] admin session verified', 'ok');
-      } else if (loggedIn && pull) {
+        setFeedback('[ok] admin tools unlocked', 'ok');
+      } else if (pull) {
+        setAuth(true, 'auth.pull()');
+        els.accessMetric.textContent = 'Pull';
         els.rosterSubtitle.textContent = 'Authenticated. Pull access active.';
         setLiveStatus('[ok] pull access verified', 'ok');
-      } else if (loggedIn) {
-        els.rosterSubtitle.textContent = 'Authenticated, but no valid pearl role found.';
-        setLiveStatus('[warn] no valid pearl role found', 'warn');
       } else {
-        setLiveStatus('[ready] authenticated session required');
+        setAuth(true, 'auth.user()');
+        els.accessMetric.textContent = 'User';
+        els.rosterSubtitle.textContent = 'Authenticated. No pull role found.';
+        setLiveStatus('[warn] authenticated but missing pull role', 'warn');
       }
     }
 
@@ -912,26 +1007,6 @@
       `).join('');
     }
 
-    async function checkBackend() {
-      try {
-        await fetchJson(`${API_BASE}/health`);
-        setBackendStatus(true, 'backend.online()');
-      } catch {
-        setBackendStatus(false, 'backend.offline()');
-      }
-    }
-
-    async function checkAuth() {
-      try {
-        const data = await fetchJson(CONFIG.authMeUrl);
-        currentUser = data.user || null;
-      } catch {
-        currentUser = null;
-      }
-      updateUiState();
-      renderPlayers();
-    }
-
     async function loadPlayers() {
       if (!isLoggedIn()) {
         players = [];
@@ -940,10 +1015,9 @@
       }
 
       try {
-        const data = await fetchJson(`${API_BASE}/players`);
+        const data = await fetchJson(CONFIG.playersUrl);
         players = Array.isArray(data) ? data : [];
         renderPlayers();
-        if (canAdmin()) setFeedback(`[ok] loaded ${players.length} player${players.length === 1 ? '' : 's'}`, 'ok');
       } catch (err) {
         players = [];
         renderPlayers();
@@ -951,9 +1025,52 @@
       }
     }
 
+    function goLogin() {
+      window.location.href = CONFIG.loginUrl;
+    }
+
+    async function logout() {
+      try {
+        await fetchJson(CONFIG.logoutUrl, { method: 'POST' });
+      } catch {}
+
+      currentUser = null;
+      players = [];
+      updateAuthUi();
+      renderPlayers();
+      hideEye();
+    }
+
+    function resetForm() {
+      els.playerId.value = '';
+      els.name.value = '';
+      els.signal_strength.value = '15';
+      els.channel_name.value = '';
+      els.computer_name.value = '';
+      els.is_admin.checked = false;
+      els.formTitle.textContent = 'Add Player';
+      els.saveBtn.textContent = 'Save Player';
+    }
+
+    function fillForm(player) {
+      if (!canAdmin()) return;
+      els.playerId.value = player.id || '';
+      els.name.value = player.name || '';
+      els.signal_strength.value = player.signal_strength ?? 15;
+      els.channel_name.value = player.channel_name || '';
+      els.computer_name.value = player.computer_name || '';
+      els.is_admin.checked = !!player.is_admin;
+      els.formTitle.textContent = 'Edit Player';
+      els.saveBtn.textContent = 'Update Player';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
     async function savePlayer(event) {
       event.preventDefault();
-      if (!canAdmin()) return;
+      if (!canAdmin()) {
+        setFeedback('[warn] admin role required', 'warn');
+        return;
+      }
 
       const payload = {
         name: els.name.value.trim(),
@@ -963,14 +1080,19 @@
         is_admin: els.is_admin.checked
       };
 
-      if (!payload.name) return setFeedback('[error] player name is required', 'error');
+      if (!payload.name) {
+        setFeedback('[error] player name is required', 'error');
+        return;
+      }
+
       if (Number.isNaN(payload.signal_strength) || payload.signal_strength < 0 || payload.signal_strength > 15) {
-        return setFeedback('[error] signal strength must be between 0 and 15', 'error');
+        setFeedback('[error] signal strength must be between 0 and 15', 'error');
+        return;
       }
 
       const id = els.playerId.value.trim();
       const isEdit = !!id;
-      const url = isEdit ? `${API_BASE}/players/${id}` : `${API_BASE}/players`;
+      const url = isEdit ? `${CONFIG.playersUrl}/${id}` : CONFIG.playersUrl;
       const method = isEdit ? 'PUT' : 'POST';
 
       try {
@@ -993,10 +1115,11 @@
 
       const player = players.find(p => p.id === id);
       const label = player?.name || 'this player';
+
       if (!confirm(`Remove ${label}?`)) return;
 
       try {
-        await fetchJson(`${API_BASE}/players/${id}`, { method: 'DELETE' });
+        await fetchJson(`${CONFIG.playersUrl}/${id}`, { method: 'DELETE' });
         setFeedback(`[ok] removed ${label}`, 'ok');
         await loadPlayers();
       } catch (err) {
@@ -1005,61 +1128,59 @@
     }
 
     async function triggerPlayer(id) {
-      if (!canPull()) return;
+      if (!canPull()) {
+        setLiveStatus('[warn] missing pull role', 'warn');
+        return;
+      }
 
       const player = players.find(p => p.id === id);
       const label = player?.name || 'Player';
 
-      pulseEyePanel('Routing Pearl', `${label} :: stand by`);
+      pulseEye('Routing Pearl', `${label} :: stand by`);
 
       try {
         await fetchJson(`${API_BASE}/trigger/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' }
         });
 
-        pulseEyePanel('Pearl Triggered', `${label} :: signal sent`, 1400);
+        pulseEye('Pearl Triggered', `${label} :: signal sent`, 1500);
         setLiveStatus(`[ok] pull sent for ${label}`, 'ok');
       } catch (err) {
-        pulseEyePanel('Trigger Failed', err.message, 1800);
+        pulseEye('Trigger Failed', err.message, 1800);
         setLiveStatus(`[error] ${err.message}`, 'error');
       }
     }
 
     els.loginBtn.addEventListener('click', goLogin);
     els.heroLoginBtn.addEventListener('click', goLogin);
-
-    els.logoutBtn.addEventListener('click', async () => {
-      try { await fetchJson(CONFIG.logoutUrl, { method: 'POST' }); } catch {}
-      currentUser = null;
-      players = [];
-      setVisible(els.adminPanel, false);
-      setVisible(els.authedPanel, false);
-      setVisible(els.lockedPanel, true);
-      updateUiState();
-      renderPlayers();
-      hideEyePanel();
+    els.logoutBtn.addEventListener('click', logout);
+    els.refreshBtn.addEventListener('click', async () => {
+      await checkBackend();
+      await checkAuth();
+      await loadPlayers();
     });
-
-    els.eyeOverlay.addEventListener('click', hideEyePanel);
+    els.eyeOverlay.addEventListener('click', hideEye);
     els.playerForm.addEventListener('submit', savePlayer);
-    els.resetBtn.addEventListener('click', () => { resetForm(); setFeedback('[ready] form cleared', 'ok'); });
-    els.refreshBtn.addEventListener('click', async () => { await checkBackend(); await checkAuth(); await loadPlayers(); });
+    els.resetBtn.addEventListener('click', () => {
+      resetForm();
+      setFeedback('[ready] form cleared', 'ok');
+    });
 
     els.playerList.addEventListener('click', async (event) => {
       const button = event.target.closest('button[data-action]');
       if (!button) return;
 
-      const { action, id } = button.dataset;
+      const action = button.dataset.action;
+      const id = button.dataset.id;
       if (!id) return;
 
+      if (action === 'trigger') await triggerPlayer(id);
       if (action === 'edit') {
         const player = players.find(p => p.id === id);
         if (player) fillForm(player);
       }
-
       if (action === 'delete') await deletePlayer(id);
-      if (action === 'trigger') await triggerPlayer(id);
     });
 
     async function init() {
