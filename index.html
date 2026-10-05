@@ -249,7 +249,7 @@
 
     .hero-copy h2{
       margin:0 0 12px;
-      max-width:10ch;
+      max-width:11ch;
       font-family:"Michroma", sans-serif;
       font-size:clamp(2rem, 5.8vw, 4.3rem);
       line-height:1.02;
@@ -260,7 +260,7 @@
 
     .hero-copy p{
       margin:0;
-      max-width:60ch;
+      max-width:56ch;
       color:var(--muted);
       line-height:1.7;
       font-size:1rem;
@@ -779,7 +779,7 @@
         <div class="terminal-pill">
           <span class="prompt">></span>
           <span class="dot offline" id="wsDot"></span>
-          <span id="wsStatus">computer.link.wait()</span>
+          <span id="wsStatus">system.link.wait()</span>
         </div>
       </div>
     </div>
@@ -789,11 +789,11 @@
     <section class="hero">
       <article class="glass hero-copy reveal delay-1">
         <div>
-          <div class="eyebrow">Frosted Cyan Surface • Shared Computer Control</div>
-          <h2>Pull the correct pearl on the correct side.</h2>
+          <div class="eyebrow">Frosted Cyan Surface • Precision Under Pressure</div>
+          <h2>Cold focus. Clean timing. No wasted motion.</h2>
           <p>
-            A frosted control panel for your pearl routing setup. Save players to Supabase, assign left or right
-            direction, monitor backend state in a terminal log, and trigger a routed pearl pull with a single click.
+            Built for quick calls, calm control, and instant action when the moment matters.
+            A sharp command surface designed to feel fast, clear, and locked in.
           </p>
         </div>
 
@@ -807,8 +807,8 @@
             <strong id="playerCount">0</strong>
           </div>
           <div class="metric">
-            <span>Route</span>
-            <strong>/trigger/:id</strong>
+            <span>Status</span>
+            <strong>Live Sync</strong>
           </div>
         </div>
       </article>
@@ -1173,7 +1173,7 @@
           '<span class="ok">boot</span> :: frosted control panel ready',
           '<span class="ok">api</span>  :: backend health passed',
           '<span class="ok">ws</span>   :: trigger pushed to websocket',
-          `<span class="cyan">pull</span> :: ${escapeHtml(who)} routed to ${escapeHtml(dir)}`
+          `<span class="cyan">pull</span> :: ${escapeHtml(who)} routed successfully`
         ]);
       } catch (err) {
         setFeedback(`[error] ${err.message}`, 'error');
@@ -1186,33 +1186,33 @@
       try {
         ws = new WebSocket(WS_URL);
       } catch {
-        setWsStatus(false, 'computer.link.fail()');
+        setWsStatus(false, 'system.link.fail()');
         scheduleReconnect();
         return;
       }
 
       ws.addEventListener('open', () => {
-        setWsStatus(true, 'computer.link.open()');
+        setWsStatus(true, 'system.link.open()');
       });
 
       ws.addEventListener('message', (event) => {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === 'welcome') {
-            setWsStatus(true, 'computer.link.ready()');
+            setWsStatus(true, 'system.link.ready()');
           } else if (msg.type === 'ping') {
-            setWsStatus(true, 'computer.link.alive()');
+            setWsStatus(true, 'system.link.alive()');
           }
         } catch {}
       });
 
       ws.addEventListener('close', () => {
-        setWsStatus(false, 'computer.link.closed()');
+        setWsStatus(false, 'system.link.closed()');
         scheduleReconnect();
       });
 
       ws.addEventListener('error', () => {
-        setWsStatus(false, 'computer.link.error()');
+        setWsStatus(false, 'system.link.error()');
       });
     }
 
