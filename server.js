@@ -1,213 +1,343 @@
+require('dotenv').config();
+
 const express = require('express');
+const session = require('express-session');
+const passport = require('passport');
+const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
-const http = require('http');
-const { WebSocketServer } = require('ws');
-const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+const fs = require('fs');
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const PORT = process.env.PORT || 3000;
+const app = express();
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('FATAL: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+// =====================
+// ENV
+// =====================
+const PORT = process.env.PORT || 10000;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const DISCORD_CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
+
+const ADMIN_ROLE_ID = '1556390847191322806';
+const PULL_ROLE_ID = '1553856941204181162';
+
+// Optional backend config
+const BACKEND_URL = process.env.BACKEND_URL || '';
+const STATUS_MESSAGE_FILE = process.env.STATUS_MESSAGE_FILE || './status_message_id.json';
+
+// =====================
+// BASIC CHECKS
+// =====================
+if (!SESSION_SECRET) {
+  console.error('Missing SESSION_SECRET in .env');
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL || !DISCORD_GUILD_ID) {
+  console.error('Missing DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_CALLBACK_URL, or DISCORD_GUILD_ID in .env');
+  process.exit(1);
+}
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ noServer: true });
-
+// =====================
+// MIDDLEWARE
+// =====================
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: true,
+  credentials: true
 }));
 
 app.use(express.json());
 
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    ok: true,
-    status: 'running',
-    time: new Date().toISOString()
+app.use(session({
+  secret: SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none'
+  }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// =====================
+// PASSPORT
+// =====================
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
+
+passport.use(new DiscordStrategy(
+  {
+    clientID: DISCORD_CLIENT_ID,
+    clientSecret: DISCORD_CLIENT_SECRET,
+    callbackURL: DISCORD_CALLBACK_URL,
+    scope: ['identify', 'guilds']
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      // Fetch guild member to get role ids
+      const memberRes = await fetch(`https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+
+      let roles = [];
+      if (memberRes.ok) {
+        const memberData = await memberRes.json();
+        roles = Array.isArray(memberData.roles) ? memberData.roles : [];
+      }
+
+      return done(null, {
+        id: profile.id,
+        username: profile.username,
+        avatar: profile.avatar,
+        roles
+      });
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+// =====================
+// HELPERS
+// =====================
+function ensureAuth(req, res, next) {
+  if (req.isAuthenticated && req.isAuthenticated()) return next();
+  return res.status(401).json({ error: 'Not authenticated' });
+}
+
+function hasRole(req, roleId) {
+  return Array.isArray(req.user?.roles) && req.user.roles.includes(roleId);
+}
+
+function ensurePullRole(req, res, next) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  if (hasRole(req, PULL_ROLE_ID) || hasRole(req, ADMIN_ROLE_ID)) return next();
+  return res.status(403).json({ error: 'Missing pull role' });
+}
+
+function ensureAdminRole(req, res, next) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  if (hasRole(req, ADMIN_ROLE_ID)) return next();
+  return res.status(403).json({ error: 'Missing admin role' });
+}
+
+// =====================
+// AUTH ROUTES
+// =====================
+app.get('/auth/discord/login', passport.authenticate('discord'));
+
+app.get('/auth/discord/callback',
+  passport.authenticate('discord', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
+app.get('/auth/me', (req, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.json({ user: null });
+  }
+
+  return res.json({
+    user: {
+      id: req.user.id,
+      username: req.user.username,
+      avatar: req.user.avatar,
+      roles: req.user.roles || []
+    }
   });
 });
 
-app.get('/players', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('players')
-      .select('*')
-      .order('created_at', { ascending: true });
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data || []);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.post('/auth/logout', (req, res) => {
+  req.logout(() => {
+    req.session.destroy(() => {
+      res.json({ ok: true });
+    });
+  });
 });
 
-app.post('/players', async (req, res) => {
-  try {
-    const body = req.body || {};
-
-    const row = {
-      name: String(body.name || '').trim(),
-      signal_strength: Number.isFinite(Number(body.signal_strength)) ? Number(body.signal_strength) : 15,
-      direction: String(body.direction || '').trim(),
-      channel_name: String(body.channel_name || '').trim(),
-      computer_name: String(body.computer_name || '').trim(),
-      is_admin: !!body.is_admin
-    };
-
-    if (!row.name || !row.direction) {
-      return res.status(400).json({ error: 'name and direction are required' });
-    }
-
-    const { data, error } = await supabase
-      .from('players')
-      .insert([row])
-      .select('*')
-      .single();
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(201).json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// =====================
+// HEALTH
+// =====================
+app.get('/health', (req, res) => {
+  res.json({ status: 'ON' });
 });
 
-app.put('/players/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const body = req.body || {};
+// =====================
+// SIMPLE IN-MEMORY PLAYER STORE
+// Replace with Supabase later if you want
+// =====================
+let players = [
+  // example:
+  // {
+  //   id: '1',
+  //   name: 'Sample',
+  //   signal_strength: 15,
+  //   direction: 'left',
+  //   channel_name: 'pearl-main',
+  //   computer_name: 'shared-pearl-computer',
+  //   is_admin: false
+  // }
+];
 
-    const updateData = {};
-    if (body.name !== undefined) updateData.name = String(body.name).trim();
-    if (body.signal_strength !== undefined) {
-      updateData.signal_strength = Number.isFinite(Number(body.signal_strength)) ? Number(body.signal_strength) : 15;
-    }
-    if (body.direction !== undefined) updateData.direction = String(body.direction).trim();
-    if (body.channel_name !== undefined) updateData.channel_name = String(body.channel_name).trim();
-    if (body.computer_name !== undefined) updateData.computer_name = String(body.computer_name).trim();
-    if (body.is_admin !== undefined) updateData.is_admin = !!body.is_admin;
+function makeId() {
+  return Math.random().toString(36).slice(2, 10);
+}
 
-    const { data, error } = await supabase
-      .from('players')
-      .update(updateData)
-      .eq('id', id)
-      .select('*')
-      .single();
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// =====================
+// PLAYER ROUTES
+// =====================
+app.get('/players', ensureAuth, (req, res) => {
+  res.json(players);
 });
 
-app.delete('/players/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+app.post('/players', ensureAdminRole, (req, res) => {
+  const {
+    name,
+    signal_strength = 15,
+    direction,
+    channel_name = '',
+    computer_name = '',
+    is_admin = false
+  } = req.body || {};
 
-    const { error } = await supabase
-      .from('players')
-      .delete()
-      .eq('id', id);
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  if (!name) {
+    return res.status(400).json({ error: 'name is required' });
   }
+
+  const player = {
+    id: makeId(),
+    name: String(name),
+    signal_strength: Number(signal_strength),
+    direction: String(direction || ''),
+    channel_name: String(channel_name),
+    computer_name: String(computer_name),
+    is_admin: !!is_admin
+  };
+
+  players.push(player);
+  res.json(player);
 });
 
-app.post('/trigger/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+app.put('/players/:id', ensureAdminRole, (req, res) => {
+  const { id } = req.params;
+  const index = players.findIndex(p => p.id === id);
 
-    const { data: player, error } = await supabase
-      .from('players')
-      .select('*')
-      .eq('id', id)
-      .single();
+  if (index === -1) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
 
-    if (error || !player) {
-      return res.status(404).json({ error: 'Player not found' });
-    }
+  const {
+    name,
+    signal_strength = 15,
+    direction,
+    channel_name = '',
+    computer_name = '',
+    is_admin = false
+  } = req.body || {};
 
-    const payload = {
-      type: 'pearl',
+  if (!name) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+
+  players[index] = {
+    ...players[index],
+    name: String(name),
+    signal_strength: Number(signal_strength),
+    direction: String(direction || ''),
+    channel_name: String(channel_name),
+    computer_name: String(computer_name),
+    is_admin: !!is_admin
+  };
+
+  res.json(players[index]);
+});
+
+app.delete('/players/:id', ensureAdminRole, (req, res) => {
+  const { id } = req.params;
+  const before = players.length;
+  players = players.filter(p => p.id !== id);
+
+  if (players.length === before) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  res.json({ ok: true });
+});
+
+// =====================
+// TRIGGER ROUTE
+// =====================
+app.post('/trigger/:id', ensurePullRole, (req, res) => {
+  const { id } = req.params;
+  const player = players.find(p => p.id === id);
+
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  res.json({
+    ok: true,
+    sent: {
       player: player.name,
       direction: player.direction,
       signal_strength: player.signal_strength,
-      channel_name: player.channel_name,
-      computer_name: player.computer_name
-    };
-
-    const message = JSON.stringify(payload);
-
-    for (const client of wss.clients) {
-      if (client.readyState === 1) {
-        client.send(message);
-      }
+      computer_name: player.computer_name,
+      channel_name: player.channel_name
     }
-
-    res.json({
-      success: true,
-      sent: payload,
-      connected_clients: [...wss.clients].filter(c => c.readyState === 1).length
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-server.on('upgrade', (request, socket, head) => {
-  const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
-
-  if (pathname === '/ws') {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
-});
-
-wss.on('connection', (ws) => {
-  console.log('WebSocket client connected');
-
-  ws.send(JSON.stringify({
-    type: 'welcome',
-    message: 'Connected to backend'
-  }));
-
-  ws.on('message', (msg) => {
-    console.log('WS message:', msg.toString());
-  });
-
-  ws.on('close', () => {
-    console.log('WebSocket client disconnected');
-  });
-
-  ws.on('error', (err) => {
-    console.log('WebSocket error:', err.message);
   });
 });
 
-setInterval(() => {
-  const ping = JSON.stringify({ type: 'ping', time: Date.now() });
+// =====================
+// OPTIONAL STATUS ROUTE FOR DISCORD BOT
+// =====================
+app.get('/status', async (req, res) => {
+  let backendStatus = 'OFF';
+  let websiteStatus = 'Working';
+  let oilRig = 'Offline';
+  let computer = 'N/A';
 
-  for (const client of wss.clients) {
-    if (client.readyState === 1) {
-      client.send(ping);
-    }
+  if (BACKEND_URL) {
+    try {
+      const r = await fetch(BACKEND_URL, { headers: { Accept: 'application/json' } });
+      if (r.ok) backendStatus = 'ON';
+    } catch {}
   }
-}, 30000);
 
-server.listen(PORT, () => {
+  res.json({
+    status: 'ON',
+    backend_status: backendStatus,
+    computer,
+    oilRig,
+    website: websiteStatus,
+    players: players.map(p => p.name)
+  });
+});
+
+// =====================
+// ROOT
+// =====================
+app.get('/', (req, res) => {
+  res.send('Server running');
+});
+
+// =====================
+// START
+// =====================
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
