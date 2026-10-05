@@ -114,7 +114,11 @@ function isPullAuthorized(req) {
 }
 
 async function postWebhook(webhookUrl, payload) {
-  if (!webhookUrl) return;
+  if (!webhookUrl) {
+    console.warn('Missing webhook URL, skipping send.');
+    return;
+  }
+
   try {
     await axios.post(webhookUrl, payload);
   } catch (err) {
@@ -145,15 +149,33 @@ async function sendGameOverEmbed(playerName) {
   });
 }
 
+function buildGeneralStatusMessage() {
+  return [
+    `Backend: On`,
+    `Website: Working`,
+    `Minecraft Computer: ${minecraftClient && minecraftClient.readyState === 1 ? 'On' : 'Off'}`,
+    `Oil Rig: ${PLAYER_ROSTER['Necrox'] ? 'On' : 'Off'}`,
+    `Name: ${PLAYER_ROSTER['Frosted Fang'] ? 'On' : 'Off'}`
+  ].join('\n');
+}
+
+async function sendStartupStatus() {
+  await sendStatusGeneral(buildGeneralStatusMessage());
+  await sendStatusLog('Backend started and is online.');
+}
+
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Minecraft bridge connected');
   minecraftClient = ws;
 
+  sendStatusGeneral(buildGeneralStatusMessage());
+
   ws.on('close', () => {
     console.log('Minecraft bridge disconnected');
     if (minecraftClient === ws) minecraftClient = null;
+    sendStatusGeneral(buildGeneralStatusMessage());
   });
 
   ws.on('message', (msg) => {
@@ -488,18 +510,7 @@ app.post('/api/kick-player', async (req, res) => {
     delete PLAYER_ROSTER[cleanName];
 
     await sendStatusLog(`Player ${cleanName} was kicked`);
-    await postWebhook(STATUS_LOG_WEBHOOK_URL, {
-      embeds: [
-        {
-          title: 'GAME OVER',
-          description: `Player **${cleanName}** was kicked from the pearl pull system.`,
-          color: 0x111111,
-          image: {
-            url: 'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg'
-          }
-        }
-      ]
-    });
+    await sendGameOverEmbed(cleanName);
 
     return res.json({ ok: true });
   } catch (err) {
@@ -520,25 +531,31 @@ app.post('/api/backend-status', async (req, res) => {
     const backendState = backend ? 'On' : 'Off';
     const websiteState = website ? 'Working' : 'Off';
 
-    const compStates = {};
     if (computers && typeof computers === 'object') {
       for (const [key, value] of Object.entries(computers)) {
-        compStates[key] = value ? 'On' : 'Off';
+        PLAYER_ROSTER[key] = PLAYER_ROSTER[key] || {
+          name: key,
+          signal: 15,
+          direction: 'back',
+          computerId: 1,
+          channelName: key,
+          locked: false,
+          active: true
+        };
+        PLAYER_ROSTER[key].active = !!value;
       }
     }
 
-    latestSignal = {
-      ...latestSignal,
-      at: Date.now()
-    };
+    const compLines = Object.keys(PLAYER_ROSTER)
+      .filter(name => name === 'Oil Rig' || name === 'Name')
+      .map(name => `${name}: ${PLAYER_ROSTER[name].active ? 'On' : 'Off'}`);
 
-    await sendStatusGeneral(
-      [
-        `Backend: ${backendState}`,
-        `Website: ${websiteState}`,
-        ...Object.entries(compStates).map(([k, v]) => `${k}: ${v}`)
-      ].join('\n')
-    );
+    await sendStatusGeneral([
+      `Backend: ${backendState}`,
+      `Website: ${websiteState}`,
+      `Minecraft Computer: ${minecraftClient && minecraftClient.readyState === 1 ? 'On' : 'Off'}`,
+      ...compLines
+    ].join('\n'));
 
     return res.json({ ok: true });
   } catch (err) {
@@ -570,6 +587,8 @@ app.post('/api/computer-heartbeat', async (req, res) => {
       active: true
     };
 
+    PLAYER_ROSTER[computerName].active = true;
+
     await sendStatusGeneral(`${computerName}: On`);
 
     return res.json({ ok: true });
@@ -579,6 +598,7 @@ app.post('/api/computer-heartbeat', async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  await sendStartupStatus();
 });
