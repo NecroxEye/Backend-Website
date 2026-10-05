@@ -9,6 +9,7 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const app = express();
 
 const PORT = process.env.PORT || 10000;
+
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -25,14 +26,14 @@ if (!SESSION_SECRET) {
 }
 
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL || !FRONTEND_URL || !DISCORD_GUILD_ID) {
-  console.error('Missing one or more required env vars');
+  console.error('Missing required environment variables');
   process.exit(1);
 }
 
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: 'https://necroxeye.github.io',
   credentials: true
 }));
 
@@ -119,7 +120,7 @@ function ensureAdminRole(req, res, next) {
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get('/auth/discord/callback',
-  passport.authenticate('discord', { failureRedirect: '/' }),
+  passport.authenticate('discord', { failureRedirect: FRONTEND_URL }),
   (req, res) => {
     res.redirect(FRONTEND_URL);
   }
@@ -143,7 +144,11 @@ app.get('/auth/me', (req, res) => {
 app.post('/auth/logout', (req, res) => {
   req.logout(() => {
     req.session.destroy(() => {
-      res.clearCookie('connect.sid');
+      res.clearCookie('connect.sid', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+      });
       res.json({ ok: true });
     });
   });
