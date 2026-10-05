@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control</title>
   <meta name="description" content="Discord-auth gated roster and pull controls." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#06111a;
@@ -15,7 +12,6 @@
       --panel:rgba(172,240,255,.07);
       --panel-2:rgba(172,240,255,.04);
       --stroke:rgba(145,229,255,.18);
-      --stroke-2:rgba(145,229,255,.10);
       --text:#ebfcff;
       --muted:#a5c9d3;
       --cyan:#7cecff;
@@ -33,24 +29,12 @@
     body{
       min-height:100vh;
       color:var(--text);
-      font-family:"Inter",sans-serif;
+      font-family:Arial, sans-serif;
       background:
         radial-gradient(circle at 12% 12%, rgba(124,236,255,.16), transparent 22%),
         radial-gradient(circle at 88% 10%, rgba(124,236,255,.10), transparent 18%),
         linear-gradient(180deg,var(--bg),var(--bg2));
       overflow-x:hidden;
-    }
-
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      opacity:.32;
-      background:
-        linear-gradient(rgba(124,236,255,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(124,236,255,.025) 1px, transparent 1px);
-      background-size:34px 34px;
     }
 
     .shell{
@@ -66,16 +50,6 @@
       backdrop-filter:blur(18px);
       box-shadow:var(--shadow);
       overflow:hidden;
-    }
-
-    .glass::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(124,236,255,.12), transparent 24%);
     }
 
     .hide,[hidden]{display:none !important}
@@ -113,23 +87,19 @@
       background:
         radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), transparent 22%),
         linear-gradient(135deg, rgba(124,236,255,.26), rgba(69,216,238,.05));
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 14px 24px rgba(69,216,238,.10);
     }
 
     .brand-copy h1{
       margin:0;
-      font-family:"Michroma",sans-serif;
-      font-size:clamp(.95rem,2vw,1.2rem);
+      font-size:1.1rem;
       letter-spacing:.12em;
       text-transform:uppercase;
-      line-height:1.1;
     }
 
     .brand-copy p{
       margin:4px 0 0;
       color:var(--muted);
       font-size:.85rem;
-      letter-spacing:.05em;
     }
 
     .status-row{
@@ -150,7 +120,6 @@
       align-items:center;
       gap:10px;
       color:#d2f7ff;
-      font-family:"JetBrains Mono",monospace;
       font-size:.82rem;
       white-space:nowrap;
     }
@@ -160,7 +129,6 @@
       height:10px;
       border-radius:50%;
       background:#607d87;
-      flex:0 0 auto;
     }
 
     .dot.online{
@@ -182,28 +150,20 @@
       border-radius:999px;
     }
 
-    button:hover{transform:translateY(-2px)}
-    button:active{transform:translateY(0)}
-
-    .discord-btn{
+    .discord-btn,.logout-btn,.ghost-btn,.mini,.pull-btn,.primary-btn,.secondary-btn{
       padding:11px 16px;
+    }
+
+    .discord-btn,.pull-btn,.primary-btn{
       color:#041018;
       background:linear-gradient(135deg,#ecfdff,#7cecff);
       box-shadow:0 14px 28px rgba(124,236,255,.18);
     }
 
-    .ghost-btn,.logout-btn,.mini{
-      padding:11px 16px;
+    .logout-btn,.ghost-btn,.mini,.secondary-btn{
       color:var(--ice);
       background:rgba(172,240,255,.06);
       border:1px solid rgba(124,236,255,.16);
-    }
-
-    .pull-btn{
-      padding:11px 18px;
-      color:#031119;
-      background:linear-gradient(135deg,#ecfdff,#7cecff);
-      box-shadow:0 14px 24px rgba(124,236,255,.18);
     }
 
     .mini.danger{
@@ -215,18 +175,16 @@
     main{padding:28px 0 52px}
 
     .hero{
-      padding:clamp(24px,4vw,42px);
+      padding:34px;
       min-height:260px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
       gap:18px;
-      animation:rise .7s ease forwards;
     }
 
     .eyebrow{
       color:var(--cyan);
-      font-family:"JetBrains Mono",monospace;
       font-size:.76rem;
       text-transform:uppercase;
       letter-spacing:.18em;
@@ -234,7 +192,6 @@
 
     .hero h2{
       margin:10px 0 10px;
-      font-family:"Michroma",sans-serif;
       font-size:clamp(1.9rem,5vw,3.8rem);
       line-height:1.02;
       letter-spacing:.05em;
@@ -268,7 +225,6 @@
     .metric span{
       display:block;
       color:var(--muted);
-      font-family:"JetBrains Mono",monospace;
       font-size:.75rem;
       text-transform:uppercase;
       margin-bottom:6px;
@@ -288,7 +244,6 @@
 
     .panel{
       padding:22px;
-      animation:rise .8s ease forwards;
     }
 
     .panel-head{
@@ -301,8 +256,7 @@
 
     .panel-head h3{
       margin:0;
-      font-family:"Michroma",sans-serif;
-      font-size:clamp(1rem,2.4vw,1.45rem);
+      font-size:1.2rem;
       text-transform:uppercase;
       letter-spacing:.08em;
     }
@@ -322,7 +276,6 @@
 
     .lock-panel h3{
       margin:0 0 12px;
-      font-family:"Michroma",sans-serif;
       text-transform:uppercase;
       letter-spacing:.08em;
       font-size:clamp(1.15rem,3vw,1.7rem);
@@ -344,7 +297,6 @@
       border:1px solid rgba(124,236,255,.14);
       background:linear-gradient(180deg, rgba(7,18,27,.82), rgba(7,18,27,.66));
       color:#d9fbff;
-      font-family:"JetBrains Mono",monospace;
       font-size:.88rem;
       line-height:1.6;
     }
@@ -397,7 +349,6 @@
       border:1px solid rgba(124,236,255,.14);
       background:rgba(172,240,255,.05);
       color:#bfeaf2;
-      font-family:"JetBrains Mono",monospace;
       font-size:.75rem;
       letter-spacing:.06em;
       text-transform:uppercase;
@@ -423,7 +374,6 @@
       background:rgba(172,240,255,.03);
       color:var(--muted);
       text-align:center;
-      font-family:"JetBrains Mono",monospace;
     }
 
     .admin-wrap{
@@ -449,7 +399,6 @@
 
     label{
       color:#c5eef6;
-      font-family:"JetBrains Mono",monospace;
       font-size:.8rem;
       text-transform:uppercase;
       letter-spacing:.12em;
@@ -484,7 +433,6 @@
 
     .toggle span{
       color:#cbeef5;
-      font-family:"JetBrains Mono",monospace;
       font-size:.88rem;
     }
 
@@ -499,19 +447,6 @@
       flex-wrap:wrap;
       gap:12px;
       margin-top:18px;
-    }
-
-    .primary-btn{
-      padding:12px 18px;
-      color:#041119;
-      background:linear-gradient(135deg,#ecfdff,#7cecff);
-    }
-
-    .secondary-btn{
-      padding:12px 18px;
-      color:var(--ice);
-      background:rgba(172,240,255,.06);
-      border:1px solid rgba(124,236,255,.16);
     }
 
     .eye-overlay{
@@ -567,7 +502,6 @@
 
     .eye-wrap h4{
       margin:0;
-      font-family:"Michroma",sans-serif;
       text-transform:uppercase;
       letter-spacing:.08em;
       font-size:1rem;
@@ -577,13 +511,7 @@
     .eye-wrap p{
       margin:0;
       color:var(--muted);
-      font-family:"JetBrains Mono",monospace;
       font-size:.88rem;
-    }
-
-    @keyframes rise{
-      from{opacity:0;transform:translateY(14px)}
-      to{opacity:1;transform:translateY(0)}
     }
 
     @keyframes eyePulse{
@@ -592,14 +520,8 @@
     }
 
     @media (max-width:760px){
-      .topbar-inner{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .status-row{
-        width:100%;
-        justify-content:flex-start;
-      }
+      .topbar-inner{flex-direction:column;align-items:flex-start}
+      .status-row{width:100%;justify-content:flex-start}
       .form-grid{grid-template-columns:1fr}
       .player-row{grid-template-columns:1fr}
       .player-actions{justify-content:flex-start}
@@ -645,13 +567,11 @@
           <span class="dot offline" id="backendDot"></span>
           <span id="backendStatus">backend.check()</span>
         </div>
-
         <div class="terminal-pill">
           <span>&gt;</span>
           <span class="dot offline" id="authDot"></span>
           <span id="authStatus">auth.locked()</span>
         </div>
-
         <button class="discord-btn" id="loginBtn" type="button">Login with Discord</button>
         <button class="logout-btn hide" id="logoutBtn" type="button">Logout</button>
       </div>
@@ -664,8 +584,9 @@
         <div class="eyebrow">Frosted Cyan Surface • Auth Gated</div>
         <h2>Roster and pull controls stay hidden until login.</h2>
         <p>
-          This page only reveals roster, status, and pull controls after Discord authentication.
-          The add player panel is completely hidden unless the authenticated member has the admin role.
+          This page checks your backend session from the Render server.
+          If you're logged in, it will show roster and pull controls.
+          Admin tools only show for the configured admin role.
         </p>
       </div>
 
@@ -689,9 +610,7 @@
       <section class="glass panel" id="lockedPanel">
         <div class="lock-panel">
           <h3>Access Locked</h3>
-          <p>
-            Login with Discord first. Until then, roster, pull controls, and admin tools remain hidden.
-          </p>
+          <p>Login with Discord first. Until then, roster, pull controls, and admin tools remain hidden.</p>
           <button class="discord-btn" id="heroLoginBtn" type="button">Login with Discord</button>
         </div>
       </section>
@@ -709,9 +628,7 @@
           [ready] authenticated session required
         </div>
 
-        <div class="roster" id="playerList">
-          <div class="empty">No roster loaded.</div>
-        </div>
+        <div class="roster" id="playerList"></div>
 
         <section class="admin-wrap hide" id="adminPanel" hidden aria-hidden="true">
           <div class="panel-head" style="margin-bottom:14px;">
@@ -900,17 +817,11 @@
 
       const text = await res.text();
       let data = {};
-
       try {
         data = text ? JSON.parse(text) : {};
-      } catch {
-        data = {};
-      }
+      } catch {}
 
-      if (!res.ok) {
-        throw new Error(data.error || text || `Request failed (${res.status})`);
-      }
-
+      if (!res.ok) throw new Error(data.error || text || `Request failed (${res.status})`);
       return data;
     }
 
@@ -930,7 +841,6 @@
       } catch {
         currentUser = null;
       }
-
       updateAuthUi();
     }
 
@@ -1030,10 +940,7 @@
     }
 
     async function logout() {
-      try {
-        await fetchJson(CONFIG.logoutUrl, { method: 'POST' });
-      } catch {}
-
+      try { await fetchJson(CONFIG.logoutUrl, { method: 'POST' }); } catch {}
       currentUser = null;
       players = [];
       updateAuthUi();
@@ -1067,10 +974,7 @@
 
     async function savePlayer(event) {
       event.preventDefault();
-      if (!canAdmin()) {
-        setFeedback('[warn] admin role required', 'warn');
-        return;
-      }
+      if (!canAdmin()) return;
 
       const payload = {
         name: els.name.value.trim(),
@@ -1080,14 +984,9 @@
         is_admin: els.is_admin.checked
       };
 
-      if (!payload.name) {
-        setFeedback('[error] player name is required', 'error');
-        return;
-      }
-
+      if (!payload.name) return setFeedback('[error] player name is required', 'error');
       if (Number.isNaN(payload.signal_strength) || payload.signal_strength < 0 || payload.signal_strength > 15) {
-        setFeedback('[error] signal strength must be between 0 and 15', 'error');
-        return;
+        return setFeedback('[error] signal strength must be between 0 and 15', 'error');
       }
 
       const id = els.playerId.value.trim();
