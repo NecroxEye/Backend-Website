@@ -857,7 +857,7 @@ Awaiting authorization...</div>
           await loadPlayers();
           setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${currentUser.global_name || currentUser.username}`);
         }
-      } catch (err) {
+      } catch {
         isLoggedIn = false;
         currentUser = null;
         canPull = false;
