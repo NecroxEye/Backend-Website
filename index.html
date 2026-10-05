@@ -14,14 +14,12 @@
       --bg-3:#0b3a4c;
       --ice:#e8fdff;
       --cyan:#8af7ff;
-      --cyan-2:#4de6ff;
       --line:rgba(138,247,255,.22);
       --line-strong:rgba(138,247,255,.42);
       --text:#ecfdff;
       --muted:#a7d8df;
       --success:#7fffd4;
-      --danger:#ff8ca8;
-      --warning:#ffe08a;
+      --danger:#ff92ad;
       --shadow:0 24px 80px rgba(0,0,0,.35);
       --radius:26px;
       --max:1240px;
@@ -261,7 +259,7 @@
       padding:12px 16px;
       font:inherit;
       font-weight:700;
-      transition:transform .18s ease, filter .18s ease, opacity .18s ease, border-color .18s ease;
+      transition:transform .18s ease, filter .18s ease, opacity .18s ease;
     }
 
     .btn:hover{transform:translateY(-2px);filter:brightness(1.03)}
@@ -405,7 +403,7 @@
 
     .player-actions{
       display:grid;
-      grid-template-columns:1fr auto auto;
+      grid-template-columns:1fr auto;
       gap:10px;
       align-items:center;
       margin-top:auto;
@@ -427,23 +425,10 @@
     .trigger-btn:active{transform:translateY(0) scale(.985)}
     .trigger-btn:disabled{cursor:not-allowed;opacity:.55;filter:none;transform:none}
 
-    .pack-btn,.bite-btn{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.08);
-      color:var(--text);
-      min-width:82px;
-    }
-
-    .pack-btn.packed{
-      border-color:rgba(255,224,138,.5);
-      color:#fff0bf;
-      background:rgba(255,224,138,.12);
-    }
-
-    .bite-btn{
-      border-color:rgba(255,140,168,.36);
-      color:#ffd4df;
-      background:rgba(255,140,168,.10);
+    .remove-btn{
+      border:1px solid rgba(255,146,173,.4);
+      background:rgba(255,146,173,.10);
+      color:#ffd6df;
     }
 
     .admin-panel{
@@ -456,7 +441,7 @@
 
     .admin-grid{
       display:grid;
-      grid-template-columns:1.2fr .7fr .7fr 1fr;
+      grid-template-columns:1.1fr .7fr .75fr .95fr .85fr;
       gap:12px;
       margin-top:14px;
     }
@@ -624,8 +609,7 @@
       }
       .players{grid-template-columns:1fr}
       .admin-grid{grid-template-columns:1fr}
-      .player-actions{grid-template-columns:1fr 1fr}
-      .trigger-btn{grid-column:1 / -1}
+      .player-actions{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -656,16 +640,14 @@
         <article class="glass hero-copy">
           <span class="eyebrow">Frosted Fang Pearl Pull System</span>
           <h1>0 MERCY. 0 MISFIRES.</h1>
-          <p class="lead">
-            Run cold. Strike clean. Hold the line.
-          </p>
+          <p class="lead">Run cold. Strike clean. Hold the line.</p>
         </article>
 
         <aside class="glass hero-side">
           <div class="mini">Authorization</div>
 
           <div class="auth-box">
-            <div class="auth-text" id="authText">Checking login...</div>
+            <div class="auth-text" id="authText">Not logged in</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button id="loginBtn" class="btn btn-login" type="button">Login with Discord</button>
               <button id="logoutBtn" class="btn btn-logout hidden" type="button">Logout</button>
@@ -696,9 +678,7 @@ Awaiting authorization...</div>
             <div>
               <span class="eyebrow">Pack Control</span>
               <h2>Operator Roster</h2>
-              <p>
-                Pearl controls stay hidden until authorized.
-              </p>
+              <p>Pearl controls stay hidden until authorized.</p>
             </div>
             <div class="big-count" id="playerCountBig">0</div>
           </div>
@@ -712,9 +692,9 @@ Awaiting authorization...</div>
             <h3 style="font-size:clamp(1.2rem,2vw,1.6rem); margin-top:4px;">Add New Player</h3>
 
             <div class="admin-grid">
-              <input id="newPlayerName" class="input" type="text" maxlength="24" placeholder="Player name" />
+              <input id="newPlayerName" class="input" type="text" maxlength="24" placeholder="Name" />
               <input id="newPlayerSignal" class="input" type="number" min="1" max="15" value="15" placeholder="Signal" />
-              <select id="newPlayerSide" class="select">
+              <select id="newPlayerDirection" class="select">
                 <option value="back">back</option>
                 <option value="front">front</option>
                 <option value="left">left</option>
@@ -722,13 +702,15 @@ Awaiting authorization...</div>
                 <option value="top">top</option>
                 <option value="bottom">bottom</option>
               </select>
-              <input id="newPlayerChannel" class="input" type="text" maxlength="32" value="Oil Rig" placeholder="Channel name" />
+              <input id="newPlayerComputerId" class="input" type="number" min="1" placeholder="Computer ID" />
+              <input id="newPlayerChannelName" class="input" type="text" maxlength="32" placeholder="Computer Name" />
             </div>
 
             <button id="addPlayerBtn" class="btn add-btn" type="button">Add Player</button>
 
             <p class="hint">
-              Only your admin role can add, bite, or pack players.
+              Pull role: 1553856941204181162<br>
+              Admin role: 1556390847191322806
             </p>
           </div>
         </article>
@@ -758,31 +740,34 @@ Awaiting authorization...</div>
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
+    const PULL_ROLE_ID = '1553856941204181162';
     const ADMIN_ROLE_ID = '1556390847191322806';
 
     let players = [];
     let isLoggedIn = false;
     let currentUser = null;
-    let canManagePlayers = false;
+    let canPull = false;
+    let isAdmin = false;
 
     const playersGrid = document.getElementById('playersGrid');
     const playersWrap = document.getElementById('playersWrap');
+    const adminPanel = document.getElementById('adminPanel');
     const playerCountSmall = document.getElementById('playerCountSmall');
     const playerCountBig = document.getElementById('playerCountBig');
     const backendStatus = document.getElementById('backendStatus');
     const consoleScreen = document.getElementById('consoleScreen');
     const lastAction = document.getElementById('lastAction');
-    const overlay = document.getElementById('overlay');
-    const animText = document.getElementById('animText');
     const authText = document.getElementById('authText');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    const adminPanel = document.getElementById('adminPanel');
     const addPlayerBtn = document.getElementById('addPlayerBtn');
     const newPlayerName = document.getElementById('newPlayerName');
     const newPlayerSignal = document.getElementById('newPlayerSignal');
-    const newPlayerSide = document.getElementById('newPlayerSide');
-    const newPlayerChannel = document.getElementById('newPlayerChannel');
+    const newPlayerDirection = document.getElementById('newPlayerDirection');
+    const newPlayerComputerId = document.getElementById('newPlayerComputerId');
+    const newPlayerChannelName = document.getElementById('newPlayerChannelName');
+    const overlay = document.getElementById('overlay');
+    const animText = document.getElementById('animText');
     const logoImage = document.getElementById('logoImage');
     const logoFallback = document.getElementById('logoFallback');
 
@@ -791,37 +776,43 @@ Awaiting authorization...</div>
       logoFallback.style.display = 'grid';
     });
 
-    function updateCounts() {
-      const count = players.length;
-      playerCountSmall.textContent = `${count} player${count === 1 ? '' : 's'} loaded`;
-      playerCountBig.textContent = count;
-    }
-
     function setConsole(text) {
       consoleScreen.textContent = text;
+    }
+
+    function updateCounts() {
+      const count = players.length;
+      playerCountSmall.textContent = `${count} players loaded`;
+      playerCountBig.textContent = count;
     }
 
     function cleanText(value) {
       return String(value || '').replace(/\s+/g, ' ').trim();
     }
 
-    function updateAuthUI() {
-      playersWrap.classList.toggle('hidden', !isLoggedIn);
-      adminPanel.classList.toggle('hidden', !canManagePlayers);
-
-      if (isLoggedIn) {
-        const name = currentUser?.global_name || currentUser?.username || 'Authorized User';
-        authText.textContent = `Logged in as ${name}`;
-        loginBtn.classList.add('hidden');
-        logoutBtn.classList.remove('hidden');
-        setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${name}`);
-      } else {
+    function updateUI() {
+      if (!isLoggedIn) {
         authText.textContent = 'Not logged in';
         loginBtn.classList.remove('hidden');
         logoutBtn.classList.add('hidden');
         playersWrap.classList.add('hidden');
         adminPanel.classList.add('hidden');
+        players = [];
+        renderPlayers();
         setConsole('Frosted Fang System\nAwaiting authorization...');
+        return;
+      }
+
+      const name = currentUser?.global_name || currentUser?.username || 'User';
+      authText.textContent = `Logged in as ${name}`;
+      loginBtn.classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+
+      playersWrap.classList.toggle('hidden', !canPull);
+      adminPanel.classList.toggle('hidden', !isAdmin);
+
+      if (!canPull) {
+        setConsole('Frosted Fang System\nAccess denied.\nMissing pearl pull role.');
       }
     }
 
@@ -841,27 +832,38 @@ Awaiting authorization...</div>
           method: 'GET',
           credentials: 'include'
         });
+
         const data = await res.json();
 
-        if (data.loggedIn) {
-          isLoggedIn = true;
-          currentUser = data.user;
-          canManagePlayers = Array.isArray(data.user.roles) && data.user.roles.includes(ADMIN_ROLE_ID);
-        } else {
+        if (!data.loggedIn) {
           isLoggedIn = false;
           currentUser = null;
-          canManagePlayers = false;
+          canPull = false;
+          isAdmin = false;
+          updateUI();
+          return;
         }
-      } catch {
+
+        isLoggedIn = true;
+        currentUser = data.user;
+
+        const roles = Array.isArray(data.user.roles) ? data.user.roles : [];
+        canPull = roles.includes(PULL_ROLE_ID) || roles.includes(ADMIN_ROLE_ID);
+        isAdmin = roles.includes(ADMIN_ROLE_ID);
+
+        updateUI();
+
+        if (canPull) {
+          await loadPlayers();
+          setConsole(`Frosted Fang System\nAuthorized.\nWelcome ${currentUser.global_name || currentUser.username}`);
+        }
+      } catch (err) {
         isLoggedIn = false;
         currentUser = null;
-        canManagePlayers = false;
-      }
-
-      updateAuthUI();
-
-      if (isLoggedIn) {
-        await loadPlayers();
+        canPull = false;
+        isAdmin = false;
+        updateUI();
+        setConsole('Frosted Fang System\nAuthorization check failed.');
       }
     }
 
@@ -871,41 +873,39 @@ Awaiting authorization...</div>
           method: 'GET',
           credentials: 'include'
         });
-        const data = await res.json();
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to load roster');
+        }
 
         players = Array.isArray(data.players) ? data.players : [];
         renderPlayers();
-      } catch {
+      } catch (err) {
         players = [];
         renderPlayers();
-        setConsole('Frosted Fang System\nFailed to load player roster.');
+        setConsole(`Frosted Fang System\nFailed to load player roster.\n${err.message || ''}`.trim());
       }
     }
 
     function showAnimation(player) {
       animText.textContent = `Pulled ${player} Pearl`;
       overlay.classList.add('show');
-      overlay.setAttribute('aria-hidden', 'false');
 
       setTimeout(() => {
         overlay.classList.remove('show');
-        overlay.setAttribute('aria-hidden', 'true');
-      }, 1900);
+      }, 1800);
     }
 
     async function pullPearl(player, button) {
-      if (!isLoggedIn) {
-        setConsole('Frosted Fang System\nAccess denied.\nPlease login first.');
-        return;
-      }
-
-      if (!player.active) {
-        setConsole(`Frosted Fang System\n${player.name} is inactive.`);
+      if (!canPull) {
+        setConsole('Frosted Fang System\nMissing pearl pull role.');
         return;
       }
 
       button.disabled = true;
-      setConsole(`Frosted Fang System\nSending command...\nTarget: ${player.name}\nSide: ${player.side}\nChannel: ${player.channel}`);
+      setConsole(`Frosted Fang System\nSending command...\nTarget: ${player.name}`);
 
       try {
         const res = await fetch(`${API_BASE}/api/pull-pearl`, {
@@ -918,7 +918,7 @@ Awaiting authorization...</div>
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data.message || 'Request failed');
+          throw new Error(data.message || 'Command failed');
         }
 
         lastAction.textContent = `Last action: ${player.name}`;
@@ -931,14 +931,17 @@ Awaiting authorization...</div>
       }
     }
 
-    async function togglePack(player) {
-      if (!canManagePlayers) {
-        setConsole('Frosted Fang System\nAdmin access required.');
+    async function removePlayer(player) {
+      if (!isAdmin) {
+        setConsole('Frosted Fang System\nAdmin role required.');
         return;
       }
 
+      const ok = confirm(`Remove ${player.name}?`);
+      if (!ok) return;
+
       try {
-        const res = await fetch(`${API_BASE}/api/toggle-pack`, {
+        const res = await fetch(`${API_BASE}/api/remove-player`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -948,48 +951,13 @@ Awaiting authorization...</div>
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data.message || 'Failed to toggle pack');
+          throw new Error(data.message || 'Remove failed');
         }
 
-        setConsole(`Frosted Fang System\n${player.name} pack state updated.\nLocked: ${data.player.locked ? 'YES' : 'NO'}`);
+        setConsole(`Frosted Fang System\nRemoved ${player.name}.`);
         await loadPlayers();
       } catch (err) {
-        setConsole(`Frosted Fang System\nPack failed.\n${err.message}`);
-      }
-    }
-
-    async function bitePlayer(player) {
-      if (!canManagePlayers) {
-        setConsole('Frosted Fang System\nAdmin access required.');
-        return;
-      }
-
-      if (player.locked) {
-        setConsole(`Frosted Fang System\n${player.name} is packed.\nUnpack before bite.`);
-        return;
-      }
-
-      const confirmBite = confirm(`Bite ${player.name}? This will deactivate them.`);
-      if (!confirmBite) return;
-
-      try {
-        const res = await fetch(`${API_BASE}/api/bite-player`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ name: player.name })
-        });
-
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to bite player');
-        }
-
-        setConsole(`Frosted Fang System\n${player.name} has been bitten.\nAccess revoked.`);
-        await loadPlayers();
-      } catch (err) {
-        setConsole(`Frosted Fang System\nBite failed.\n${err.message}`);
+        setConsole(`Frosted Fang System\nRemove failed.\n${err.message}`);
       }
     }
 
@@ -997,47 +965,36 @@ Awaiting authorization...</div>
       const card = document.createElement('article');
       card.className = 'player-card';
 
-      const top = document.createElement('div');
-      top.className = 'player-top';
-      top.innerHTML = `
-        <span class="label">${player.active ? 'Pearl Trigger' : 'Inactive'}</span>
-        <span class="name">${player.name}</span>
-        <span class="sub">
-          Signal ${player.signal} • ${player.side} • ${player.channel}<br>
-          ${player.locked ? 'Packed' : 'Unpacked'} • ${player.active ? 'Active' : 'Bitten'}
-        </span>
+      card.innerHTML = `
+        <div class="player-top">
+          <span class="label">Pearl Trigger</span>
+          <span class="name">${player.name}</span>
+          <span class="sub">
+            Signal ${player.signal} • ${player.direction}<br>
+            Computer ${player.computerId} • ${player.channelName}
+          </span>
+        </div>
       `;
 
       const actions = document.createElement('div');
       actions.className = 'player-actions';
 
-      const triggerBtn = document.createElement('button');
-      triggerBtn.className = 'trigger-btn';
-      triggerBtn.type = 'button';
-      triggerBtn.textContent = player.active ? 'Pull' : 'Offline';
-      triggerBtn.disabled = !player.active;
-      triggerBtn.addEventListener('click', () => pullPearl(player, triggerBtn));
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'trigger-btn';
+      trigger.textContent = 'Pull';
+      trigger.addEventListener('click', () => pullPearl(player, trigger));
+      actions.appendChild(trigger);
 
-      actions.appendChild(triggerBtn);
-
-      if (canManagePlayers) {
-        const packBtn = document.createElement('button');
-        packBtn.className = `btn pack-btn ${player.locked ? 'packed' : ''}`;
-        packBtn.type = 'button';
-        packBtn.textContent = player.locked ? 'Packed' : 'Pack';
-        packBtn.addEventListener('click', () => togglePack(player));
-        actions.appendChild(packBtn);
-
-        const biteBtn = document.createElement('button');
-        biteBtn.className = 'btn bite-btn';
-        biteBtn.type = 'button';
-        biteBtn.textContent = 'Bite';
-        biteBtn.disabled = !!player.locked;
-        biteBtn.addEventListener('click', () => bitePlayer(player));
-        actions.appendChild(biteBtn);
+      if (isAdmin) {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'btn remove-btn';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => removePlayer(player));
+        actions.appendChild(remove);
       }
 
-      card.appendChild(top);
       card.appendChild(actions);
       return card;
     }
@@ -1051,28 +1008,34 @@ Awaiting authorization...</div>
     }
 
     async function addPlayer() {
-      if (!canManagePlayers) {
-        setConsole('Frosted Fang System\nAdmin access required.');
+      if (!isAdmin) {
+        setConsole('Frosted Fang System\nAdmin role required.');
         return;
       }
 
       const name = cleanText(newPlayerName.value);
       const signal = Number(newPlayerSignal.value);
-      const side = newPlayerSide.value;
-      const channel = cleanText(newPlayerChannel.value);
+      const direction = newPlayerDirection.value;
+      const computerId = Number(newPlayerComputerId.value);
+      const channelName = cleanText(newPlayerChannelName.value);
 
       if (!name) {
         setConsole('Frosted Fang System\nMissing player name.');
         return;
       }
 
-      if (!channel) {
-        setConsole('Frosted Fang System\nMissing channel name.');
+      if (!Number.isInteger(signal) || signal < 1 || signal > 15) {
+        setConsole('Frosted Fang System\nSignal must be 1 to 15.');
         return;
       }
 
-      if (!Number.isInteger(signal) || signal < 1 || signal > 15) {
-        setConsole('Frosted Fang System\nSignal must be between 1 and 15.');
+      if (!Number.isInteger(computerId) || computerId < 1) {
+        setConsole('Frosted Fang System\nInvalid computer ID.');
+        return;
+      }
+
+      if (!channelName) {
+        setConsole('Frosted Fang System\nMissing computer name.');
         return;
       }
 
@@ -1081,20 +1044,28 @@ Awaiting authorization...</div>
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ name, signal, side, channel })
+          body: JSON.stringify({
+            name,
+            signal,
+            direction,
+            computerId,
+            channelName
+          })
         });
 
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data.message || 'Failed to add player');
+          throw new Error(data.message || 'Add failed');
         }
 
-        setConsole(`Frosted Fang System\nRegistered ${name}.\nSignal ${signal} • ${side} • ${channel}`);
         newPlayerName.value = '';
         newPlayerSignal.value = '15';
-        newPlayerSide.value = 'back';
-        newPlayerChannel.value = 'Oil Rig';
+        newPlayerDirection.value = 'back';
+        newPlayerComputerId.value = '';
+        newPlayerChannelName.value = '';
+
+        setConsole(`Frosted Fang System\nAdded ${name}.`);
         await loadPlayers();
       } catch (err) {
         setConsole(`Frosted Fang System\nAdd failed.\n${err.message}`);
@@ -1112,12 +1083,15 @@ Awaiting authorization...</div>
           credentials: 'include'
         });
       } catch {}
+
       isLoggedIn = false;
       currentUser = null;
-      canManagePlayers = false;
+      canPull = false;
+      isAdmin = false;
       players = [];
+      updateUI();
       renderPlayers();
-      updateAuthUI();
+      await checkLogin();
     });
 
     addPlayerBtn.addEventListener('click', addPlayer);
