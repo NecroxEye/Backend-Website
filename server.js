@@ -16,6 +16,10 @@ const DISCORD_API = 'https://discord.com/api';
 const PULL_ROLE_ID = process.env.DISCORD_ROLE_ID || '1553856941204181162';
 const ADMIN_ROLE_ID = '1556390847191322806';
 
+const STATUS_LOG_WEBHOOK_URL = process.env.STATUS_LOG_WEBHOOK_URL;
+const STATUS_GENERAL_WEBHOOK_URL = process.env.STATUS_GENERAL_WEBHOOK_URL;
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'change_this_secret';
+
 const allowedOrigins = [
   'https://necroxeye.github.io'
 ];
@@ -107,6 +111,38 @@ function isAdmin(req) {
 function isPullAuthorized(req) {
   const roles = req.session?.discordUser?.roles || [];
   return roles.includes(PULL_ROLE_ID) || roles.includes(ADMIN_ROLE_ID);
+}
+
+async function postWebhook(webhookUrl, payload) {
+  if (!webhookUrl) return;
+  try {
+    await axios.post(webhookUrl, payload);
+  } catch (err) {
+    console.error('Webhook error:', err.response?.data || err.message);
+  }
+}
+
+async function sendStatusLog(message) {
+  await postWebhook(STATUS_LOG_WEBHOOK_URL, { content: message });
+}
+
+async function sendStatusGeneral(message) {
+  await postWebhook(STATUS_GENERAL_WEBHOOK_URL, { content: message });
+}
+
+async function sendGameOverEmbed(playerName) {
+  await postWebhook(STATUS_LOG_WEBHOOK_URL, {
+    embeds: [
+      {
+        title: 'GAME OVER',
+        description: `Player **${playerName}** was kicked from the pearl pull system.`,
+        color: 0x111111,
+        image: {
+          url: 'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg'
+        }
+      }
+    ]
+  });
 }
 
 const wss = new WebSocketServer({ server });
@@ -289,7 +325,7 @@ app.post('/auth/logout', (req, res) => {
   });
 });
 
-app.post('/api/add-player', (req, res) => {
+app.post('/api/add-player', async (req, res) => {
   try {
     if (!isLoggedIn(req)) {
       return res.status(401).json({ message: 'Not logged in' });
@@ -329,6 +365,8 @@ app.post('/api/add-player', (req, res) => {
       active: true
     };
 
+    await sendStatusLog(`Player ${cleanName} was added`);
+
     return res.json({
       ok: true,
       player: getPublicPlayer(PLAYER_ROSTER[cleanName])
@@ -339,7 +377,7 @@ app.post('/api/add-player', (req, res) => {
   }
 });
 
-app.post('/api/remove-player', (req, res) => {
+app.post('/api/remove-player', async (req, res) => {
   try {
     if (!isLoggedIn(req)) {
       return res.status(401).json({ message: 'Not logged in' });
@@ -363,6 +401,8 @@ app.post('/api/remove-player', (req, res) => {
 
     delete PLAYER_ROSTER[cleanName];
 
+    await sendStatusLog(`Player ${cleanName} was removed`);
+
     return res.json({ ok: true });
   } catch (err) {
     console.error('Error in /api/remove-player:', err);
@@ -370,7 +410,7 @@ app.post('/api/remove-player', (req, res) => {
   }
 });
 
-app.post('/api/pull-pearl', (req, res) => {
+app.post('/api/pull-pearl', async (req, res) => {
   try {
     if (!isLoggedIn(req)) {
       return res.status(401).json({ message: 'Not logged in' });
@@ -413,6 +453,8 @@ app.post('/api/pull-pearl', (req, res) => {
       }));
     }
 
+    await sendStatusLog(`Pearl Pulled on: ${cleanName}`);
+
     console.log(`Pearl action requested by ${req.session.discordUser.username} for ${cleanName}`);
     return res.json({
       ok: true,
@@ -422,6 +464,118 @@ app.post('/api/pull-pearl', (req, res) => {
   } catch (err) {
     console.error('Error in /api/pull-pearl:', err);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/kick-player', async (req, res) => {
+  try {
+    if (!isLoggedIn(req)) {
+      return res.status(401).json({ message: 'Not logged in' });
+    }
+
+    if (!isAdmin(req)) {
+      return res.status(403).json({ message: 'Admin role required' });
+    }
+
+    const { name } = req.body;
+    const cleanName = String(name || '').replace(/\s+/g, ' ').trim();
+
+    const player = PLAYER_ROSTER[cleanName];
+    if (!player) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+
+    delete PLAYER_ROSTER[cleanName];
+
+    await sendStatusLog(`Player ${cleanName} was kicked`);
+    await postWebhook(STATUS_LOG_WEBHOOK_URL, {
+      embeds: [
+        {
+          title: 'GAME OVER',
+          description: `Player **${cleanName}** was kicked from the pearl pull system.`,
+          color: 0x111111,
+          image: {
+            url: 'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg'
+          }
+        }
+      ]
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('Error in /api/kick-player:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/api/backend-status', async (req, res) => {
+  try {
+    const secret = req.headers['x-webhook-secret'];
+    if (secret !== WEBHOOK_SECRET) {
+      return res.status(403).json({ ok: false, message: 'Unauthorized' });
+    }
+
+    const { backend, website, computers } = req.body;
+
+    const backendState = backend ? 'On' : 'Off';
+    const websiteState = website ? 'Working' : 'Off';
+
+    const compStates = {};
+    if (computers && typeof computers === 'object') {
+      for (const [key, value] of Object.entries(computers)) {
+        compStates[key] = value ? 'On' : 'Off';
+      }
+    }
+
+    latestSignal = {
+      ...latestSignal,
+      at: Date.now()
+    };
+
+    await sendStatusGeneral(
+      [
+        `Backend: ${backendState}`,
+        `Website: ${websiteState}`,
+        ...Object.entries(compStates).map(([k, v]) => `${k}: ${v}`)
+      ].join('\n')
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('Error in /api/backend-status:', err);
+    return res.status(500).json({ ok: false, message: 'Internal server error' });
+  }
+});
+
+app.post('/api/computer-heartbeat', async (req, res) => {
+  try {
+    const secret = req.headers['x-webhook-secret'];
+    if (secret !== WEBHOOK_SECRET) {
+      return res.status(403).json({ ok: false, message: 'Unauthorized' });
+    }
+
+    const { computerName } = req.body;
+
+    if (!computerName) {
+      return res.status(400).json({ ok: false, message: 'Missing computerName' });
+    }
+
+    PLAYER_ROSTER[computerName] = PLAYER_ROSTER[computerName] || {
+      name: computerName,
+      signal: 15,
+      direction: 'back',
+      computerId: 1,
+      channelName: computerName,
+      locked: false,
+      active: true
+    };
+
+    await sendStatusGeneral(`${computerName}: On`);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('Error in /api/computer-heartbeat:', err);
+    return res.status(500).json({ ok: false, message: 'Internal server error' });
   }
 });
 
