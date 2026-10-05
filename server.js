@@ -1,22 +1,23 @@
 const express = require('express');
-const http = require('http');
 const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
+const http = require('http');
 const { WebSocketServer } = require('ws');
+const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
-const server = http.createServer(app);
-
-const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const PORT = process.env.PORT || 3000;
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('FATAL: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ noServer: true });
 
 app.use(cors({
   origin: '*',
@@ -26,7 +27,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health
 app.get('/health', (req, res) => {
   res.status(200).json({
     ok: true,
@@ -35,7 +35,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Players
 app.get('/players', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -43,39 +42,29 @@ app.get('/players', async (req, res) => {
       .select('*')
       .order('created_at', { ascending: true });
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.json(data || []);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data || []);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
 app.post('/players', async (req, res) => {
   try {
-    const {
-      name,
-      signal_strength,
-      direction,
-      channel_name,
-      computer_name,
-      is_admin
-    } = req.body || {};
-
-    if (!name || !direction) {
-      return res.status(400).json({ error: 'name and direction are required' });
-    }
+    const body = req.body || {};
 
     const row = {
-      name: String(name).trim(),
-      signal_strength: Number.isFinite(Number(signal_strength)) ? Number(signal_strength) : 15,
-      direction: String(direction).trim(),
-      channel_name: String(channel_name || '').trim(),
-      computer_name: String(computer_name || '').trim(),
-      is_admin: !!is_admin
+      name: String(body.name || '').trim(),
+      signal_strength: Number.isFinite(Number(body.signal_strength)) ? Number(body.signal_strength) : 15,
+      direction: String(body.direction || '').trim(),
+      channel_name: String(body.channel_name || '').trim(),
+      computer_name: String(body.computer_name || '').trim(),
+      is_admin: !!body.is_admin
     };
+
+    if (!row.name || !row.direction) {
+      return res.status(400).json({ error: 'name and direction are required' });
+    }
 
     const { data, error } = await supabase
       .from('players')
@@ -83,13 +72,10 @@ app.post('/players', async (req, res) => {
       .select('*')
       .single();
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.status(201).json(data);
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(201).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -99,29 +85,14 @@ app.put('/players/:id', async (req, res) => {
     const body = req.body || {};
 
     const updateData = {};
-    const fields = [
-      'name',
-      'signal_strength',
-      'direction',
-      'channel_name',
-      'computer_name',
-      'is_admin'
-    ];
-
-    for (const field of fields) {
-      if (body[field] !== undefined) updateData[field] = body[field];
+    if (body.name !== undefined) updateData.name = String(body.name).trim();
+    if (body.signal_strength !== undefined) {
+      updateData.signal_strength = Number.isFinite(Number(body.signal_strength)) ? Number(body.signal_strength) : 15;
     }
-
-    if (updateData.name !== undefined) updateData.name = String(updateData.name).trim();
-    if (updateData.direction !== undefined) updateData.direction = String(updateData.direction).trim();
-    if (updateData.channel_name !== undefined) updateData.channel_name = String(updateData.channel_name).trim();
-    if (updateData.computer_name !== undefined) updateData.computer_name = String(updateData.computer_name).trim();
-    if (updateData.signal_strength !== undefined) {
-      updateData.signal_strength = Number.isFinite(Number(updateData.signal_strength))
-        ? Number(updateData.signal_strength)
-        : 15;
-    }
-    if (updateData.is_admin !== undefined) updateData.is_admin = !!updateData.is_admin;
+    if (body.direction !== undefined) updateData.direction = String(body.direction).trim();
+    if (body.channel_name !== undefined) updateData.channel_name = String(body.channel_name).trim();
+    if (body.computer_name !== undefined) updateData.computer_name = String(body.computer_name).trim();
+    if (body.is_admin !== undefined) updateData.is_admin = !!body.is_admin;
 
     const { data, error } = await supabase
       .from('players')
@@ -130,13 +101,10 @@ app.put('/players/:id', async (req, res) => {
       .select('*')
       .single();
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.json(data);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -149,17 +117,13 @@ app.delete('/players/:id', async (req, res) => {
       .delete()
       .eq('id', id);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.json({ success: true });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Trigger a player
 app.post('/trigger/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -183,26 +147,35 @@ app.post('/trigger/:id', async (req, res) => {
       computer_name: player.computer_name
     };
 
-    // Send to any connected websocket clients
     const message = JSON.stringify(payload);
+
     for (const client of wss.clients) {
       if (client.readyState === 1) {
         client.send(message);
       }
     }
 
-    return res.json({
+    res.json({
       success: true,
       sent: payload,
       connected_clients: [...wss.clients].filter(c => c.readyState === 1).length
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// WebSocket
-const wss = new WebSocketServer({ server, path: '/ws' });
+server.on('upgrade', (request, socket, head) => {
+  const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+
+  if (pathname === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
 
 wss.on('connection', (ws) => {
   console.log('WebSocket client connected');
@@ -225,7 +198,6 @@ wss.on('connection', (ws) => {
   });
 });
 
-// Keepalive ping
 setInterval(() => {
   const ping = JSON.stringify({ type: 'ping', time: Date.now() });
 
