@@ -12,9 +12,13 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 const DISCORD_API = 'https://discord.com/api';
+
+const PULL_ROLE_ID = process.env.DISCORD_ROLE_ID || '1553856941204181162';
 const ADMIN_ROLE_ID = '1556390847191322806';
 
-const allowedOrigins = ['https://necroxeye.github.io'];
+const allowedOrigins = [
+  'https://necroxeye.github.io'
+];
 
 app.set('trust proxy', 1);
 
@@ -49,12 +53,45 @@ app.use(session({
 let minecraftClient = null;
 let latestSignal = null;
 
-// Player roster stored in memory.
-// Each player has: signal, side, channel, locked, active
-const PLAYER_SIGNALS = {
-  Necrox: { signal: 15, side: 'back', channel: 'Oil Rig', locked: false, active: true },
-  Alice: { signal: 15, side: 'top', channel: 'Oil Rig', locked: false, active: true },
-  'Frosted Fang': { signal: 15, side: 'left', channel: 'Oil Rig', locked: false, active: true }
+// In-memory roster
+// Each player:
+// {
+//   name,
+//   signal,
+//   direction,
+//   computerId,
+//   channelName,
+//   locked,
+//   active
+// }
+const PLAYER_ROSTER = {
+  Necrox: {
+    name: 'Necrox',
+    signal: 15,
+    direction: 'back',
+    computerId: 1,
+    channelName: 'Oil Rig',
+    locked: false,
+    active: true
+  },
+  Alice: {
+    name: 'Alice',
+    signal: 15,
+    direction: 'top',
+    computerId: 1,
+    channelName: 'Oil Rig',
+    locked: false,
+    active: true
+  },
+  'Frosted Fang': {
+    name: 'Frosted Fang',
+    signal: 15,
+    direction: 'left',
+    computerId: 1,
+    channelName: 'Oil Rig',
+    locked: false,
+    active: true
+  }
 };
 
 const wss = new WebSocketServer({ server });
@@ -73,13 +110,39 @@ wss.on('connection', (ws) => {
   });
 });
 
+function getPublicPlayer(player) {
+  return {
+    name: player.name,
+    signal: player.signal,
+    direction: player.direction,
+    computerId: player.computerId,
+    channelName: player.channelName,
+    locked: !!player.locked,
+    active: player.active !== false
+  };
+}
+
+function isLoggedIn(req) {
+  return !!(req.session && req.session.discordUser);
+}
+
+function isAdmin(req) {
+  const roles = req.session?.discordUser?.roles || [];
+  return roles.includes(ADMIN_ROLE_ID);
+}
+
+function isPullAuthorized(req) {
+  const roles = req.session?.discordUser?.roles || [];
+  return roles.includes(PULL_ROLE_ID) || roles.includes(ADMIN_ROLE_ID);
+}
+
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
 
 app.get('/api/me', (req, res) => {
   try {
-    if (!req.session || !req.session.discordUser) {
+    if (!isLoggedIn(req)) {
       return res.json({ loggedIn: false });
     }
 
@@ -93,30 +156,27 @@ app.get('/api/me', (req, res) => {
   }
 });
 
-app.get('/api/latest-signal', (req, res) => {
-  return res.json(latestSignal || { player: null, signal: 0, side: null, channel: null, at: 0 });
-});
-
 app.get('/api/players', (req, res) => {
   try {
-    if (!req.session || !req.session.discordUser) {
+    if (!isLoggedIn(req)) {
       return res.status(401).json({ message: 'Not logged in' });
     }
 
-    const players = Object.entries(PLAYER_SIGNALS).map(([name, config]) => ({
-      name,
-      signal: config.signal,
-      side: config.side,
-      channel: config.channel,
-      locked: !!config.locked,
-      active: config.active !== false
-    }));
+    if (!isPullAuthorized(req)) {
+      return res.status(403).json({ message: 'Missing pearl pull role' });
+    }
 
-    return res.json({ players });
+    return res.json({
+      players: Object.values(PLAYER_ROSTER).map(getPublicPlayer)
+    });
   } catch (err) {
     console.error('Error in /api/players:', err);
     return res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+app.get('/api/latest-signal', (req, res) => {
+  return res.json(latestSignal || { player: null, signal: 0, side: null, computerId: null, channelName: null, at: 0 });
 });
 
 app.get('/auth/discord', (req, res) => {
@@ -180,10 +240,9 @@ app.get('/auth/discord/callback', async (req, res) => {
     );
 
     const member = memberResponse.data;
-    const targetRoleId = process.env.DISCORD_ROLE_ID;
-    const hasRole = Array.isArray(member.roles) && member.roles.includes(targetRoleId);
+    const roles = Array.isArray(member.roles) ? member.roles : [];
 
-    if (!hasRole) {
+    if (!roles.includes(PULL_ROLE_ID) && !roles.includes(ADMIN_ROLE_ID)) {
       return res.status(403).send('You do not have the required Discord role.');
     }
 
@@ -191,7 +250,7 @@ app.get('/auth/discord/callback', async (req, res) => {
       id: user.id,
       username: user.username,
       global_name: user.global_name || null,
-      roles: member.roles || []
+      roles
     };
 
     req.session.save((err) => {
@@ -236,50 +295,47 @@ app.post('/auth/logout', (req, res) => {
 
 app.post('/api/add-player', (req, res) => {
   try {
-    if (!req.session || !req.session.discordUser) {
+    if (!isLoggedIn(req)) {
       return res.status(401).json({ message: 'Not logged in' });
     }
 
-    const roles = req.session.discordUser.roles || [];
-    const isAdmin = roles.includes(ADMIN_ROLE_ID);
-
-    if (!isAdmin) {
+    if (!isAdmin(req)) {
       return res.status(403).json({ message: 'Admin role required' });
     }
 
-    const { name, signal, side, channel } = req.body;
+    const { name, signal, direction, computerId, channelName } = req.body;
 
-    if (!name || !channel) {
-      return res.status(400).json({ message: 'Missing player name or channel' });
+    const cleanName = String(name || '').replace(/\s+/g, ' ').trim();
+    const cleanChannelName = String(channelName || '').replace(/\s+/g, ' ').trim();
+    const cleanDirection = ['top', 'bottom', 'left', 'right', 'front', 'back'].includes(direction) ? direction : 'back';
+    const cleanSignal = Number.isInteger(signal) && signal >= 1 && signal <= 15 ? signal : 15;
+    const cleanComputerId = Number.isInteger(computerId) && computerId >= 1 ? computerId : 1;
+
+    if (!cleanName) {
+      return res.status(400).json({ message: 'Missing player name' });
     }
 
-    const cleanName = String(name).replace(/\s+/g, ' ').trim();
-    const cleanChannel = String(channel).replace(/\s+/g, ' ').trim();
-    const cleanSide = ['front', 'back', 'left', 'right', 'top', 'bottom'].includes(side) ? side : 'back';
-    const cleanSignal = Number.isInteger(signal) && signal >= 1 && signal <= 15 ? signal : 15;
+    if (!cleanChannelName) {
+      return res.status(400).json({ message: 'Missing computer name' });
+    }
 
-    if (PLAYER_SIGNALS[cleanName]) {
+    if (PLAYER_ROSTER[cleanName]) {
       return res.status(400).json({ message: 'Player already exists' });
     }
 
-    PLAYER_SIGNALS[cleanName] = {
+    PLAYER_ROSTER[cleanName] = {
+      name: cleanName,
       signal: cleanSignal,
-      side: cleanSide,
-      channel: cleanChannel,
+      direction: cleanDirection,
+      computerId: cleanComputerId,
+      channelName: cleanChannelName,
       locked: false,
       active: true
     };
 
     return res.json({
       ok: true,
-      player: {
-        name: cleanName,
-        signal: cleanSignal,
-        side: cleanSide,
-        channel: cleanChannel,
-        locked: false,
-        active: true
-      }
+      player: getPublicPlayer(PLAYER_ROSTER[cleanName])
     });
   } catch (err) {
     console.error('Error in /api/add-player:', err);
@@ -287,171 +343,4 @@ app.post('/api/add-player', (req, res) => {
   }
 });
 
-app.post('/api/toggle-pack', (req, res) => {
-  try {
-    if (!req.session || !req.session.discordUser) {
-      return res.status(401).json({ message: 'Not logged in' });
-    }
-
-    const roles = req.session.discordUser.roles || [];
-    const isAdmin = roles.includes(ADMIN_ROLE_ID);
-
-    if (!isAdmin) {
-      return res.status(403).json({ message: 'Admin role required' });
-    }
-
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: 'Missing player name' });
-    }
-
-    const cleanName = String(name).replace(/\s+/g, ' ').trim();
-    const player = PLAYER_SIGNALS[cleanName];
-
-    if (!player) {
-      return res.status(404).json({ message: 'Player not found' });
-    }
-
-    player.locked = !player.locked;
-
-    return res.json({
-      ok: true,
-      player: {
-        name: cleanName,
-        signal: player.signal,
-        side: player.side,
-        channel: player.channel,
-        locked: player.locked,
-        active: player.active !== false
-      }
-    });
-  } catch (err) {
-    console.error('Error in /api/toggle-pack:', err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-app.post('/api/bite-player', (req, res) => {
-  try {
-    if (!req.session || !req.session.discordUser) {
-      return res.status(401).json({ message: 'Not logged in' });
-    }
-
-    const roles = req.session.discordUser.roles || [];
-    const isAdmin = roles.includes(ADMIN_ROLE_ID);
-
-    if (!isAdmin) {
-      return res.status(403).json({ message: 'Admin role required' });
-    }
-
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: 'Missing player name' });
-    }
-
-    const cleanName = String(name).replace(/\s+/g, ' ').trim();
-    const player = PLAYER_SIGNALS[cleanName];
-
-    if (!player) {
-      return res.status(404).json({ message: 'Player not found' });
-    }
-
-    if (player.locked) {
-      return res.status(400).json({ message: 'Player is packed and cannot be bitten' });
-    }
-
-    player.active = false;
-
-    latestSignal = {
-      player: cleanName,
-      signal: player.signal,
-      side: player.side,
-      channel: player.channel,
-      at: Date.now(),
-      action: 'bite'
-    };
-
-    if (minecraftClient && minecraftClient.readyState === 1) {
-      minecraftClient.send(JSON.stringify({
-        type: 'bite',
-        player: cleanName,
-        side: player.side,
-        channel: player.channel,
-        requestedBy: req.session.discordUser.username
-      }));
-    }
-
-    return res.json({
-      ok: true,
-      player: {
-        name: cleanName,
-        signal: player.signal,
-        side: player.side,
-        channel: player.channel,
-        locked: player.locked,
-        active: false
-      }
-    });
-  } catch (err) {
-    console.error('Error in /api/bite-player:', err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-app.post('/api/pull-pearl', async (req, res) => {
-  try {
-    if (!req.session || !req.session.discordUser) {
-      return res.status(401).json({ message: 'Not logged in' });
-    }
-
-    const { name } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ message: 'Missing player' });
-    }
-
-    const cleanName = String(name).replace(/\s+/g, ' ').trim();
-    const config = PLAYER_SIGNALS[cleanName];
-
-    if (!config) {
-      return res.status(400).json({ message: 'Unknown player' });
-    }
-
-    if (config.active === false) {
-      return res.status(400).json({ message: 'Player is inactive' });
-    }
-
-    latestSignal = {
-      player: cleanName,
-      signal: config.signal,
-      side: config.side,
-      channel: config.channel,
-      at: Date.now()
-    };
-
-    if (minecraftClient && minecraftClient.readyState === 1) {
-      minecraftClient.send(JSON.stringify({
-        type: 'pearl',
-        player: cleanName,
-        signal: config.signal,
-        side: config.side,
-        channel: config.channel,
-        requestedBy: req.session.discordUser.username
-      }));
-    }
-
-    console.log(`Pearl action requested by ${req.session.discordUser.username} for ${cleanName}, signal ${config.signal}, side ${config.side}, channel ${config.channel}`);
-    return res.json({
-      message: `Sent signal ${config.signal} for ${cleanName}`,
-      player: cleanName,
-      config
-    });
-  } catch (err) {
-    console.error('Error in /api/pull-pearl:', err);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.post('/
