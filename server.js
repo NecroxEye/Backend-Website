@@ -13,15 +13,21 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const DISCORD_API = 'https://discord.com/api';
 
-const PULL_ROLE_ID = process.env.DISCORD_ROLE_ID || '1553856941204181162';
-const ADMIN_ROLE_ID = '1556390847191322806';
+const PULL_ROLE_ID = process.env.DISCORD_ROLE_ID || '';
+const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID || '1556390847191322806';
 
 const STATUS_LOG_WEBHOOK_URL = process.env.STATUS_LOG_WEBHOOK_URL;
 const STATUS_GENERAL_WEBHOOK_URL = process.env.STATUS_GENERAL_WEBHOOK_URL;
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'change_this_secret';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || '';
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://necroxeye.github.io/Backend-Website/';
+const GAME_OVER_IMAGE_URL =
+  process.env.GAME_OVER_IMAGE_URL ||
+  'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg';
 
 const allowedOrigins = [
-  'https://necroxeye.github.io'
+  'https://necroxeye.github.io',
+  'https://necroxeye.github.io/Backend-Website'
 ];
 
 app.set('trust proxy', 1);
@@ -56,6 +62,7 @@ app.use(session({
 
 let minecraftClient = null;
 let latestSignal = null;
+let startupPosted = false;
 
 const PLAYER_ROSTER = {
   Necrox: {
@@ -81,7 +88,7 @@ const PLAYER_ROSTER = {
     signal: 15,
     direction: 'left',
     computerId: 1,
-    channelName: 'Oil Rig',
+    channelName: 'Name',
     locked: false,
     active: true
   }
@@ -142,7 +149,7 @@ async function sendGameOverEmbed(playerName) {
         description: `Player **${playerName}** was kicked from the pearl pull system.`,
         color: 0x111111,
         image: {
-          url: 'https://wallpapers.com/images/hd/dark-game-over-1920-x-1080-wallpaper-i26t6zc4u8hj29ea.jpg'
+          url: GAME_OVER_IMAGE_URL
         }
       }
     ]
@@ -160,6 +167,9 @@ function buildGeneralStatusMessage() {
 }
 
 async function sendStartupStatus() {
+  if (startupPosted) return;
+  startupPosted = true;
+
   await sendStatusGeneral(buildGeneralStatusMessage());
   await sendStatusLog('Backend started and is online.');
 }
@@ -185,6 +195,21 @@ wss.on('connection', (ws) => {
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
+});
+
+app.get('/health', (req, res) => {
+  res.json({
+    ok: true,
+    loggedIn: isLoggedIn(req),
+    system: {
+      backend: true,
+      website: true,
+      minecraftComputer: minecraftClient && minecraftClient.readyState === 1,
+      oilRig: !!PLAYER_ROSTER['Necrox'],
+      name: !!PLAYER_ROSTER['Frosted Fang']
+    },
+    latestSignal
+  });
 });
 
 app.get('/api/me', (req, res) => {
@@ -313,7 +338,7 @@ app.get('/auth/discord/callback', async (req, res) => {
         return res.status(500).send('Failed to save session');
       }
 
-      res.redirect('https://necroxeye.github.io/Backend-Website/');
+      res.redirect(FRONTEND_URL);
     });
   } catch (error) {
     console.error('Discord callback error:', error.response?.data || error.message);
