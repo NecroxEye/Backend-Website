@@ -21,12 +21,8 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const ADMIN_ROLE_ID = '1556390847191322806';
 const PULL_ROLE_ID = '1553856941204181162';
 
-if (!SESSION_SECRET) {
-  console.error('Missing SESSION_SECRET');
-  process.exit(1);
-}
-
 if (
+  !SESSION_SECRET ||
   !DISCORD_CLIENT_ID ||
   !DISCORD_CLIENT_SECRET ||
   !DISCORD_CALLBACK_URL ||
@@ -65,48 +61,36 @@ app.use(passport.session());
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
+async function fetchGuildMemberRoles(userId) {
+  const memberRes = await fetch(
+    `https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`,
+    {
+      headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  if (!memberRes.ok) {
+    const errText = await memberRes.text();
+    throw new Error(`Failed to fetch guild member: ${errText}`);
+  }
+
+  const memberData = await memberRes.json();
+  return Array.isArray(memberData.roles) ? memberData.roles : [];
+}
+
 passport.use(new DiscordStrategy(
   {
     clientID: DISCORD_CLIENT_ID,
     clientSecret: DISCORD_CLIENT_SECRET,
     callbackURL: DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds']
+    scope: ['identify']
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const userGuildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
-
-      let roles = [];
-
-      if (userGuildsRes.ok) {
-        const guilds = await userGuildsRes.json();
-        const inGuild = guilds.some(g => g.id === DISCORD_GUILD_ID);
-
-        if (inGuild) {
-          const memberRes = await fetch(
-            `https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${profile.id}`,
-            {
-              headers: {
-                Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-
-          if (memberRes.ok) {
-            const memberData = await memberRes.json();
-            roles = Array.isArray(memberData.roles) ? memberData.roles : [];
-          } else {
-            console.error('Failed to fetch guild member:', await memberRes.text());
-          }
-        }
-      } else {
-        console.error('Failed to fetch user guilds:', await userGuildsRes.text());
-      }
+      const roles = await fetchGuildMemberRoles(profile.id);
 
       return done(null, {
         id: profile.id,
@@ -115,8 +99,13 @@ passport.use(new DiscordStrategy(
         roles
       });
     } catch (err) {
-      console.error('Discord strategy error:', err);
-      return done(err);
+      console.error('Discord auth error:', err);
+      return done(null, {
+        id: profile.id,
+        username: profile.username,
+        avatar: profile.avatar,
+        roles: []
+      });
     }
   }
 ));
