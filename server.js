@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const fs = require('fs');
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
@@ -66,7 +67,18 @@ const STATUS_URL = BACKEND_URL || 'https://backend-website-syxe.onrender.com/sta
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 app.set('trust proxy', 1);
+
+/**
+ * CORS must come BEFORE routes.
+ * This is required so your GitHub Pages frontend can call the backend with cookies.
+ */
+app.use(cors({
+  origin: 'https://necroxeye.github.io',
+  credentials: true
+}));
+
 app.use(express.json());
+
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
@@ -542,7 +554,6 @@ async function updatePanel() {
   updateRunning = true;
 
   try {
-    console.log('[panel] fetching backend...');
     const raw = await fetchStatusForPanel();
     const state = normalizeState(raw);
 
@@ -574,12 +585,10 @@ async function updatePanel() {
 
     if (existing) {
       await existing.edit({ embeds: [embed], components: [row] });
-      console.log('[panel] panel edited');
     } else {
       const sent = await channel.send({ embeds: [embed], components: [row] });
       cachedMessageId = sent.id;
       saveMessageId(sent.id);
-      console.log('[panel] new panel sent:', sent.id);
     }
   } catch (err) {
     console.error('[panel] update failed:', err.message);
