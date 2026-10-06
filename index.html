@@ -4,27 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang Control Panel</title>
-  <meta name="description" content="Frosted Fang control panel with Discord login, player status, and system monitoring." />
+  <meta name="description" content="Frosted Fang control panel with Discord login, live status, and player management." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg-top:#0a0b0d;
-      --bg-mid:#0b1217;
+      --bg-mid:#10181d;
       --bg-bottom:#b8f7ff;
       --panel:rgba(255,255,255,0.08);
-      --panel-strong:rgba(255,255,255,0.14);
-      --line:rgba(255,255,255,0.18);
-      --text:#eefcff;
-      --muted:#b9d7db;
-      --dark:#071217;
-      --accent:#8ef2ff;
-      --accent-2:#d8fdff;
-      --danger:#ff6b7e;
-      --ok:#7dffb3;
-      --shadow:0 18px 60px rgba(0,0,0,.28);
+      --panel-2:rgba(255,255,255,0.12);
+      --line:rgba(255,255,255,0.16);
+      --text:#effdff;
+      --muted:#b8d4d9;
+      --ink:#071317;
+      --accent:#92f4ff;
+      --accent-2:#e9fdff;
+      --ok:#8fffc0;
+      --bad:#ff7d91;
       --radius:24px;
+      --shadow:0 18px 60px rgba(0,0,0,.28);
     }
 
     *{box-sizing:border-box}
@@ -32,12 +32,12 @@
     body{
       margin:0;
       min-height:100vh;
-      color:var(--text);
       font-family:"Inter", sans-serif;
+      color:var(--text);
       background:
-        radial-gradient(circle at 15% 10%, rgba(255,255,255,0.06), transparent 22%),
-        radial-gradient(circle at 78% 28%, rgba(142,242,255,0.18), transparent 26%),
-        linear-gradient(180deg, var(--bg-top) 0%, #111518 20%, var(--bg-mid) 46%, #23414b 68%, #6fd7e7 86%, var(--bg-bottom) 100%);
+        radial-gradient(circle at 20% 12%, rgba(255,255,255,.05), transparent 24%),
+        radial-gradient(circle at 78% 30%, rgba(146,244,255,.16), transparent 28%),
+        linear-gradient(180deg, var(--bg-top) 0%, #101214 18%, var(--bg-mid) 44%, #234048 70%, #6fd6e5 88%, var(--bg-bottom) 100%);
       overflow-x:hidden;
     }
 
@@ -46,12 +46,12 @@
       position:fixed;
       inset:0;
       pointer-events:none;
+      opacity:.18;
       background:
         linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
       background-size:34px 34px;
-      mask-image:radial-gradient(circle at center, rgba(0,0,0,1), transparent 84%);
-      opacity:.22;
+      mask-image:radial-gradient(circle at center, black 44%, transparent 84%);
     }
 
     .wrap{
@@ -62,9 +62,9 @@
     header{
       position:sticky;
       top:0;
-      z-index:30;
-      backdrop-filter: blur(18px);
-      background:linear-gradient(to bottom, rgba(7,12,16,.78), rgba(7,12,16,.35), transparent);
+      z-index:20;
+      backdrop-filter:blur(18px);
+      background:linear-gradient(to bottom, rgba(8,13,16,.78), rgba(8,13,16,.38), transparent);
       border-bottom:1px solid rgba(255,255,255,.06);
     }
 
@@ -72,7 +72,7 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:20px;
+      gap:18px;
       padding:18px 0;
     }
 
@@ -80,24 +80,23 @@
       display:flex;
       align-items:center;
       gap:12px;
-      text-decoration:none;
       color:var(--text);
+      text-decoration:none;
     }
 
-    .brand-mark{
+    .brand-dot{
       width:14px;
       height:14px;
       border-radius:50%;
-      background:linear-gradient(135deg, #f3feff, var(--accent));
-      box-shadow:0 0 24px rgba(142,242,255,.65);
-      flex:0 0 auto;
+      background:linear-gradient(135deg, #ffffff, var(--accent));
+      box-shadow:0 0 24px rgba(146,244,255,.6);
     }
 
     .brand span{
       font-family:"Orbitron", sans-serif;
-      letter-spacing:.16em;
       text-transform:uppercase;
-      font-size:.84rem;
+      letter-spacing:.16em;
+      font-size:.85rem;
     }
 
     .nav-actions{
@@ -107,65 +106,61 @@
       flex-wrap:wrap;
     }
 
-    .ghost, .cta, .logout-btn{
+    .btn, .btn-secondary, .btn-logout{
       appearance:none;
       border:none;
       cursor:pointer;
-      font:inherit;
       text-decoration:none;
+      font:inherit;
       border-radius:999px;
-      transition:.22s ease;
+      min-height:46px;
+      padding:12px 18px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:10px;
-      padding:12px 18px;
-      min-height:46px;
+      transition:.22s ease;
     }
 
-    .ghost{
+    .btn{
+      color:#071a1f;
+      font-weight:700;
+      background:linear-gradient(135deg, #f8ffff, var(--accent));
+      box-shadow:0 12px 28px rgba(146,244,255,.24);
+    }
+
+    .btn:hover{
+      transform:translateY(-2px) scale(1.01);
+      box-shadow:0 18px 34px rgba(146,244,255,.32);
+    }
+
+    .btn-secondary{
       color:var(--text);
-      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.05);
-      backdrop-filter: blur(12px);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(10px);
     }
 
-    .ghost:hover{
+    .btn-secondary:hover,
+    .btn-logout:hover{
       transform:translateY(-1px);
       background:rgba(255,255,255,.09);
-      border-color:rgba(255,255,255,.24);
     }
 
-    .cta{
-      color:#062026;
-      font-weight:700;
-      background:linear-gradient(135deg, #f3feff, var(--accent));
-      box-shadow:0 10px 24px rgba(142,242,255,.24);
-    }
-
-    .cta:hover{
-      transform:translateY(-2px) scale(1.01);
-      box-shadow:0 16px 34px rgba(142,242,255,.34);
-    }
-
-    .cta:active, .ghost:active, .logout-btn:active{
-      transform:translateY(0) scale(.985);
-    }
-
-    .logout-btn{
-      color:#062026;
-      font-weight:700;
-      background:linear-gradient(135deg, #ffffff, #c8fbff);
+    .btn-logout{
       display:none;
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);
     }
 
     main{
-      padding:36px 0 72px;
+      padding:34px 0 72px;
     }
 
     .hero{
       display:grid;
-      grid-template-columns:1.15fr .85fr;
+      grid-template-columns:1.12fr .88fr;
       gap:22px;
       align-items:stretch;
       min-height:68vh;
@@ -173,22 +168,23 @@
 
     .panel{
       position:relative;
+      overflow:hidden;
       border-radius:var(--radius);
       border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.06));
-      backdrop-filter: blur(18px);
+      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.055));
+      backdrop-filter:blur(18px);
       box-shadow:var(--shadow);
-      overflow:hidden;
     }
 
     .panel::after{
       content:"";
       position:absolute;
-      inset:auto -10% -35% auto;
-      width:340px;
-      height:340px;
+      right:-80px;
+      bottom:-120px;
+      width:320px;
+      height:320px;
       border-radius:50%;
-      background:radial-gradient(circle, rgba(142,242,255,.20), transparent 68%);
+      background:radial-gradient(circle, rgba(146,244,255,.2), transparent 68%);
       pointer-events:none;
     }
 
@@ -201,34 +197,34 @@
 
     .eyebrow{
       font-family:"Orbitron", sans-serif;
-      letter-spacing:.18em;
-      text-transform:uppercase;
-      color:var(--accent-2);
       font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      color:var(--accent-2);
       margin-bottom:16px;
     }
 
-    h1,h2,h3{
+    h1,h2{
       margin:0;
       font-family:"Orbitron", sans-serif;
       line-height:.96;
-      letter-spacing:-.03em;
+      letter-spacing:-.04em;
     }
 
     h1{
-      font-size:clamp(2.4rem, 7vw, 5.9rem);
+      font-size:clamp(2.5rem, 7vw, 5.8rem);
       max-width:10ch;
     }
 
     .lead{
       margin:20px 0 0;
-      max-width:60ch;
+      max-width:62ch;
       color:var(--muted);
-      font-size:clamp(1rem, 1.35vw, 1.12rem);
+      font-size:clamp(1rem, 1.35vw, 1.1rem);
       line-height:1.75;
     }
 
-    .hero-meta{
+    .meta-grid{
       display:grid;
       grid-template-columns:repeat(3, minmax(0,1fr));
       gap:12px;
@@ -238,7 +234,7 @@
     .meta{
       padding:16px;
       border-radius:18px;
-      background:rgba(255,255,255,.06);
+      background:rgba(255,255,255,.055);
       border:1px solid rgba(255,255,255,.12);
     }
 
@@ -246,12 +242,11 @@
       display:block;
       font-size:1rem;
       margin-bottom:5px;
-      color:#f6ffff;
     }
 
     .meta span{
       color:var(--muted);
-      font-size:.92rem;
+      font-size:.9rem;
     }
 
     .hero-side{
@@ -262,61 +257,58 @@
 
     .status-box{
       padding:18px;
-      border-radius:20px;
-      background:rgba(5,18,24,.32);
+      border-radius:18px;
+      background:rgba(6,20,25,.32);
       border:1px solid rgba(255,255,255,.12);
     }
 
     .status-label{
       color:var(--muted);
-      font-size:.82rem;
+      font-size:.8rem;
+      letter-spacing:.16em;
       text-transform:uppercase;
-      letter-spacing:.14em;
       margin-bottom:10px;
     }
 
     .status-value{
-      font-size:1.05rem;
+      font-size:1rem;
       font-weight:700;
-    }
-
-    .system-dot{
       display:inline-flex;
       align-items:center;
       gap:10px;
     }
 
-    .system-dot::before{
+    .status-value::before{
       content:"";
       width:10px;
       height:10px;
       border-radius:50%;
-      background:var(--danger);
-      box-shadow:0 0 14px rgba(255,107,126,.55);
+      background:var(--bad);
+      box-shadow:0 0 14px rgba(255,125,145,.45);
     }
 
-    .system-dot.ok::before{
+    .status-value.ok::before{
       background:var(--ok);
-      box-shadow:0 0 14px rgba(125,255,179,.65);
+      box-shadow:0 0 16px rgba(143,255,192,.6);
     }
 
-    .user-card{
+    .user{
       display:flex;
-      gap:14px;
       align-items:center;
+      gap:14px;
     }
 
     .avatar{
-      width:56px;
-      height:56px;
+      width:58px;
+      height:58px;
       border-radius:50%;
-      background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(142,242,255,.22));
-      border:1px solid rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(146,244,255,.18));
       display:grid;
       place-items:center;
       font-family:"Orbitron", sans-serif;
+      color:white;
       font-size:1rem;
-      color:#fff;
       flex:0 0 auto;
     }
 
@@ -345,17 +337,18 @@
       align-items:end;
       justify-content:space-between;
       gap:16px;
-      margin-bottom:20px;
       flex-wrap:wrap;
+      margin-bottom:20px;
     }
 
     .section-head p{
       margin:0;
       color:var(--muted);
       max-width:65ch;
+      line-height:1.7;
     }
 
-    .stats-grid{
+    .two-col{
       display:grid;
       grid-template-columns:1.1fr .9fr;
       gap:22px;
@@ -368,12 +361,12 @@
 
     .row{
       display:grid;
-      grid-template-columns:1.2fr .9fr .8fr;
+      grid-template-columns:1.15fr .85fr .8fr;
       gap:12px;
       align-items:center;
       padding:14px 16px;
       border-radius:18px;
-      background:rgba(255,255,255,.05);
+      background:rgba(255,255,255,.045);
       border:1px solid rgba(255,255,255,.1);
     }
 
@@ -391,42 +384,41 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
+      width:max-content;
       padding:8px 12px;
       border-radius:999px;
       font-size:.82rem;
       font-weight:700;
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.07);
-      width:max-content;
+      background:rgba(255,255,255,.06);
     }
 
     .badge.ok{
-      color:#032414;
-      background:linear-gradient(135deg, #dffff0, #90ffc2);
+      color:#062415;
+      background:linear-gradient(135deg, #e8fff3, #8fffc0);
       border:none;
     }
 
     .badge.off{
-      color:#fff;
-      background:rgba(255,107,126,.16);
-      border-color:rgba(255,107,126,.4);
+      color:white;
+      background:rgba(255,125,145,.14);
+      border-color:rgba(255,125,145,.35);
     }
 
     .empty{
       padding:18px;
       border-radius:18px;
-      border:1px dashed rgba(255,255,255,.2);
       color:var(--muted);
+      border:1px dashed rgba(255,255,255,.18);
       background:rgba(255,255,255,.03);
     }
 
     .admin-tools{
       display:none;
-      gap:14px;
     }
 
     .admin-tools.show{
-      display:grid;
+      display:block;
     }
 
     .form-grid{
@@ -445,8 +437,8 @@
     }
 
     label{
-      font-size:.9rem;
       color:var(--muted);
+      font-size:.9rem;
     }
 
     input, select{
@@ -455,66 +447,60 @@
       outline:none;
       font:inherit;
       color:var(--text);
-      border-radius:16px;
       padding:14px 14px;
-      background:rgba(5,18,24,.36);
+      border-radius:16px;
+      background:rgba(6,20,25,.34);
       border:1px solid rgba(255,255,255,.12);
     }
 
     input::placeholder{
-      color:#96b1b5;
+      color:#96afb4;
     }
 
-    .form-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:6px;
-    }
-
-    .mini{
-      padding:11px 14px;
-      border-radius:14px;
-      border:none;
-      cursor:pointer;
-      font:inherit;
-      font-weight:700;
-      transition:.2s ease;
-    }
-
-    .mini.primary{
-      background:linear-gradient(135deg, #f5feff, #96f4ff);
-      color:#041d22;
-    }
-
-    .mini.secondary{
-      background:rgba(255,255,255,.08);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.12);
-    }
-
-    .mini.danger{
-      background:rgba(255,107,126,.14);
-      color:#ffdbe1;
-      border:1px solid rgba(255,107,126,.35);
-    }
-
-    .mini:hover{
-      transform:translateY(-1px);
-    }
-
-    .player-actions{
+    .actions{
       display:flex;
       gap:8px;
       flex-wrap:wrap;
       justify-content:flex-end;
     }
 
+    .mini{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      font:inherit;
+      font-weight:700;
+      padding:10px 14px;
+      border-radius:14px;
+      transition:.2s ease;
+    }
+
+    .mini.primary{
+      color:#071a1f;
+      background:linear-gradient(135deg, #f8ffff, var(--accent));
+    }
+
+    .mini.secondary{
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .mini.danger{
+      color:#ffe4e9;
+      background:rgba(255,125,145,.14);
+      border:1px solid rgba(255,125,145,.34);
+    }
+
+    .mini:hover{
+      transform:translateY(-1px);
+    }
+
     .footer-note{
-      padding:18px 0 8px;
-      color:#0a2a2f;
-      font-weight:600;
       text-align:center;
+      color:#0b2d31;
+      font-weight:700;
+      padding:18px 0 8px;
     }
 
     .reveal{
@@ -529,40 +515,31 @@
     .d4{animation-delay:.32s}
 
     @keyframes rise{
-      to{
-        opacity:1;
-        transform:none;
-      }
+      to{opacity:1;transform:none}
     }
 
     @media (max-width: 980px){
       .hero,
-      .stats-grid{
+      .two-col{
         grid-template-columns:1fr;
       }
-
-      h1{
-        max-width:none;
-      }
+      h1{max-width:none}
     }
 
     @media (max-width: 720px){
-      .hero-meta,
+      nav{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .meta-grid,
       .form-grid{
         grid-template-columns:1fr;
       }
-
       .row{
         grid-template-columns:1fr;
       }
-
-      .player-actions{
+      .actions{
         justify-content:flex-start;
-      }
-
-      nav{
-        align-items:flex-start;
-        flex-direction:column;
       }
     }
   </style>
@@ -572,14 +549,14 @@
     <div class="wrap">
       <nav>
         <a class="brand" href="#">
-          <span class="brand-mark"></span>
+          <span class="brand-dot"></span>
           <span>Frosted Fang</span>
         </a>
 
         <div class="nav-actions">
-          <a class="ghost" href="https://backend-website-syxe.onrender.com/status" target="_blank" rel="noopener">Backend Status</a>
-          <a class="cta" id="loginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
-          <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+          <a class="btn-secondary" href="https://backend-website-syxe.onrender.com/status" target="_blank" rel="noopener">Open Status JSON</a>
+          <a class="btn" id="loginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
+          <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
         </div>
       </nav>
     </div>
@@ -589,15 +566,15 @@
     <section class="hero">
       <article class="panel hero-copy reveal">
         <div>
-          <div class="eyebrow">Signal control interface</div>
-          <h1>Cold glass. Live system. Discord-auth access.</h1>
+          <div class="eyebrow">Frosted signal interface</div>
+          <h1>Live control with Discord-auth access.</h1>
           <p class="lead">
-            Frosted Fang is your live control surface for system state, connected players, and role-based access.
-            Log in with Discord to view your access level, monitor active users, and manage players if you have the right role.
+            This panel talks to your Render backend for auth, player data, and system state.
+            The login button correctly starts on the backend, while the page checks your session with credentials included.
           </p>
         </div>
 
-        <div class="hero-meta">
+        <div class="meta-grid">
           <div class="meta">
             <strong id="heroWebsite">Checking...</strong>
             <span>Website status</span>
@@ -615,13 +592,13 @@
 
       <aside class="panel hero-side reveal d1">
         <div class="status-box">
-          <div class="status-label">Authentication</div>
-          <div id="authState" class="status-value system-dot">Not logged in</div>
+          <div class="status-label">Session state</div>
+          <div class="status-value" id="authState">Not logged in</div>
         </div>
 
         <div class="status-box">
           <div class="status-label">Current user</div>
-          <div class="user-card">
+          <div class="user">
             <div class="avatar" id="avatarBox">FF</div>
             <div class="user-meta">
               <strong id="usernameText">Guest</strong>
@@ -631,8 +608,8 @@
         </div>
 
         <div class="status-box">
-          <div class="status-label">Service pulse</div>
-          <div id="servicePulse" class="status-value system-dot">Offline</div>
+          <div class="status-label">Backend pulse</div>
+          <div class="status-value" id="backendPulse">Offline</div>
         </div>
       </aside>
     </section>
@@ -642,11 +619,11 @@
         <div class="section-head">
           <div>
             <h2>System snapshot</h2>
-            <p>Live values pulled from the backend status route. This updates automatically while the page is open.</p>
+            <p>Live values from your backend status route.</p>
           </div>
         </div>
 
-        <div class="stats-grid">
+        <div class="two-col">
           <div class="list" id="computersList">
             <div class="empty">No systems reported yet.</div>
           </div>
@@ -657,38 +634,26 @@
                 <strong>Website</strong>
                 <span>Frontend availability</span>
               </div>
-              <div>
-                <span id="websiteText">Checking...</span>
-              </div>
-              <div>
-                <span class="badge" id="websiteBadge">...</span>
-              </div>
+              <div><span id="websiteText">Checking...</span></div>
+              <div><span class="badge" id="websiteBadge">...</span></div>
             </div>
 
             <div class="row">
               <div>
                 <strong>Backend</strong>
-                <span>API status</span>
+                <span>API connection</span>
               </div>
-              <div>
-                <span id="backendText">Checking...</span>
-              </div>
-              <div>
-                <span class="badge" id="backendBadge">...</span>
-              </div>
+              <div><span id="backendText">Checking...</span></div>
+              <div><span class="badge" id="backendBadge">...</span></div>
             </div>
 
             <div class="row">
               <div>
                 <strong>Oil Rig</strong>
-                <span>Primary machine state</span>
+                <span>Primary machine</span>
               </div>
-              <div>
-                <span id="oilRigText">Checking...</span>
-              </div>
-              <div>
-                <span class="badge" id="oilRigBadge">...</span>
-              </div>
+              <div><span id="oilRigText">Checking...</span></div>
+              <div><span class="badge" id="oilRigBadge">...</span></div>
             </div>
           </div>
         </div>
@@ -698,7 +663,7 @@
         <div class="section-head">
           <div>
             <h2>Players</h2>
-            <p>Visible after login. Admins can add, edit, and remove players. Pull-enabled users can trigger them.</p>
+            <p>Loads only when your session is recognized by the backend.</p>
           </div>
         </div>
 
@@ -711,7 +676,7 @@
         <div class="section-head">
           <div>
             <h2>Admin tools</h2>
-            <p>Create or update player entries. These controls only appear for users with the admin role.</p>
+            <p>Add or update players if your account has the admin role.</p>
           </div>
         </div>
 
@@ -758,9 +723,9 @@
             </div>
 
             <div class="field full">
-              <div class="form-actions">
-                <button class="mini primary" type="submit" id="saveBtn">Save player</button>
-                <button class="mini secondary" type="button" id="resetBtn">Reset form</button>
+              <div class="actions">
+                <button class="mini primary" id="saveBtn" type="submit">Save player</button>
+                <button class="mini secondary" id="resetBtn" type="button">Reset form</button>
               </div>
             </div>
           </div>
@@ -768,12 +733,11 @@
       </article>
     </section>
 
-    <div class="footer-note">Frosted cyan uplink active.</div>
+    <div class="footer-note">Matte black to frosted cyan uplink.</div>
   </main>
 
   <script>
     const API_BASE = 'https://backend-website-syxe.onrender.com';
-
     let currentUser = null;
     let currentPlayers = [];
 
@@ -783,7 +747,7 @@
     const usernameText = document.getElementById('usernameText');
     const roleText = document.getElementById('roleText');
     const avatarBox = document.getElementById('avatarBox');
-    const servicePulse = document.getElementById('servicePulse');
+    const backendPulse = document.getElementById('backendPulse');
     const playersContainer = document.getElementById('playersContainer');
     const adminTools = document.getElementById('adminTools');
 
@@ -809,6 +773,15 @@
     const isAdminPlayer = document.getElementById('isAdminPlayer');
     const resetBtn = document.getElementById('resetBtn');
 
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
     function setBadge(el, ok, onText = 'ON', offText = 'OFF') {
       el.textContent = ok ? onText : offText;
       el.className = `badge ${ok ? 'ok' : 'off'}`;
@@ -816,10 +789,10 @@
 
     function setPulse(el, ok, text) {
       el.textContent = text;
-      el.className = `status-value system-dot ${ok ? 'ok' : ''}`;
+      el.className = `status-value ${ok ? 'ok' : ''}`;
     }
 
-    function initialsFromName(name) {
+    function initials(name) {
       if (!name) return 'FF';
       const parts = name.trim().split(/\s+/).slice(0, 2);
       return parts.map(p => p[0]?.toUpperCase() || '').join('') || 'FF';
@@ -839,11 +812,12 @@
     async function api(path, options = {}) {
       const res = await fetch(`${API_BASE}${path}`, {
         credentials: 'include',
+        mode: 'cors',
+        ...options,
         headers: {
           'Content-Type': 'application/json',
           ...(options.headers || {})
-        },
-        ...options
+        }
       });
 
       const text = await res.text();
@@ -862,67 +836,61 @@
       return data;
     }
 
-    function renderUser(user) {
-      currentUser = user || null;
+    async function loadAuth() {
+      try {
+        const data = await api('/auth/me');
+        currentUser = data.user || null;
 
-      if (!user) {
+        if (!currentUser) {
+          setPulse(authState, false, 'Not logged in');
+          usernameText.textContent = 'Guest';
+          roleText.textContent = 'No active session';
+          avatarBox.textContent = 'FF';
+          loginBtn.style.display = 'inline-flex';
+          logoutBtn.style.display = 'none';
+          adminTools.classList.remove('show');
+          return;
+        }
+
+        setPulse(authState, true, 'Logged in');
+        usernameText.textContent = currentUser.username || 'Unknown User';
+        avatarBox.textContent = initials(currentUser.username);
+
+        const roles = [];
+        if (currentUser.isAdmin) roles.push('Admin');
+        if (currentUser.canPull) roles.push('Pull Access');
+        if (!roles.length) roles.push('Authenticated User');
+        roleText.textContent = roles.join(' • ');
+
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+
+        if (currentUser.isAdmin) {
+          adminTools.classList.add('show');
+        } else {
+          adminTools.classList.remove('show');
+        }
+      } catch (err) {
+        currentUser = null;
         setPulse(authState, false, 'Not logged in');
         usernameText.textContent = 'Guest';
-        roleText.textContent = 'No active session';
+        roleText.textContent = 'Session check failed';
         avatarBox.textContent = 'FF';
         loginBtn.style.display = 'inline-flex';
         logoutBtn.style.display = 'none';
         adminTools.classList.remove('show');
-        return;
-      }
-
-      setPulse(authState, true, 'Logged in');
-      usernameText.textContent = user.username || 'Unknown User';
-
-      const roleParts = [];
-      if (user.isAdmin) roleParts.push('Admin');
-      if (user.canPull) roleParts.push('Pull Access');
-      if (!roleParts.length) roleParts.push('Authenticated User');
-
-      roleText.textContent = roleParts.join(' • ');
-      avatarBox.textContent = initialsFromName(user.username);
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-flex';
-
-      if (user.isAdmin) {
-        adminTools.classList.add('show');
-      } else {
-        adminTools.classList.remove('show');
       }
     }
 
-    function groupComputers(players, oilRigState) {
-      if (!players.length) {
-        return [{ name: 'Oil Rig', state: oilRigState === 'Working' ? 'ON' : 'OFF', users: [] }];
-      }
-
-      const map = new Map();
-      for (const p of players) {
-        const key = p.computer_name || 'Oil Rig';
-        if (!map.has(key)) map.set(key, []);
-        map.get(key).push(p);
-      }
-
-      return Array.from(map.entries()).map(([name, users]) => ({
-        name,
-        state: users.length ? 'ON' : 'OFF',
-        users
-      }));
-    }
-
-    function renderStatus(status) {
-      const websiteOk = String(status.website).toLowerCase() === 'working' || status.status === 'ON';
-      const backendOk = String(status.backend_status).toUpperCase() === 'ON';
-      const oilRigOk = String(status.oilRig).toLowerCase() === 'working';
+    function renderStatus(data) {
+      const websiteOk = String(data.website || '').toLowerCase() === 'working' || data.status === 'ON';
+      const backendOk = String(data.backend_status || '').toUpperCase() === 'ON';
+      const oilRigOk = String(data.oilRig || '').toLowerCase() === 'working';
+      const players = Array.isArray(data.players) ? data.players : [];
 
       heroWebsite.textContent = websiteOk ? 'Working' : 'Offline';
       heroBackend.textContent = backendOk ? 'Online' : 'Offline';
-      heroPlayers.textContent = String((status.players || []).length);
+      heroPlayers.textContent = String(players.length);
 
       websiteText.textContent = websiteOk ? 'Operational' : 'Unavailable';
       backendText.textContent = backendOk ? 'Connected' : 'Unavailable';
@@ -931,20 +899,35 @@
       setBadge(websiteBadge, websiteOk, 'WORKING', 'OFFLINE');
       setBadge(backendBadge, backendOk, 'ON', 'OFF');
       setBadge(oilRigBadge, oilRigOk, 'WORKING', 'OFFLINE');
-      setPulse(servicePulse, backendOk, backendOk ? 'Online' : 'Offline');
+      setPulse(backendPulse, backendOk, backendOk ? 'Online' : 'Offline');
 
-      const grouped = groupComputers(status.players || [], status.oilRig);
-      computersList.innerHTML = grouped.map(group => `
+      if (!players.length) {
+        computersList.innerHTML = `<div class="row">
+          <div><strong>Oil Rig</strong><span>No active users</span></div>
+          <div><span>0 users</span></div>
+          <div><span class="badge ${oilRigOk ? 'ok' : 'off'}">${oilRigOk ? 'ON' : 'OFF'}</span></div>
+        </div>`;
+        return;
+      }
+
+      const grouped = new Map();
+      players.forEach(player => {
+        const key = player.computer_name || 'Oil Rig';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(player);
+      });
+
+      computersList.innerHTML = [...grouped.entries()].map(([name, list]) => `
         <div class="row">
           <div>
-            <strong>${escapeHtml(group.name)}</strong>
-            <span>${group.users.length ? group.users.map(u => escapeHtml(u.name)).join(', ') : 'No active users'}</span>
+            <strong>${escapeHtml(name)}</strong>
+            <span>${list.map(p => escapeHtml(p.name)).join(', ')}</span>
           </div>
           <div>
-            <span>${group.users.length} user${group.users.length === 1 ? '' : 's'}</span>
+            <span>${list.length} user${list.length === 1 ? '' : 's'}</span>
           </div>
           <div>
-            <span class="badge ${group.state === 'ON' ? 'ok' : 'off'}">${group.state}</span>
+            <span class="badge ok">ON</span>
           </div>
         </div>
       `).join('');
@@ -958,55 +941,32 @@
         return;
       }
 
-      if (!players.length) {
+      if (!currentPlayers.length) {
         playersContainer.innerHTML = `<div class="empty">No players found.</div>`;
         return;
       }
 
-      playersContainer.innerHTML = players.map(player => {
-        const canEdit = !!currentUser?.isAdmin;
-        const canPull = !!currentUser?.canPull;
-
-        return `
-          <div class="row">
-            <div>
-              <strong>${escapeHtml(player.name)}</strong>
-              <span>${escapeHtml(player.computer_name || 'Oil Rig')} • ${escapeHtml(player.channel_name || 'No channel')}</span>
-            </div>
-            <div>
-              <span>Signal ${Number(player.signal_strength ?? 15)} • ${escapeHtml(player.direction || 'left')}</span>
-            </div>
-            <div class="player-actions">
-              ${canPull ? `<button class="mini secondary" type="button" onclick="triggerPlayer('${player.id}')">Trigger</button>` : ''}
-              ${canEdit ? `<button class="mini primary" type="button" onclick="editPlayer('${player.id}')">Edit</button>` : ''}
-              ${canEdit ? `<button class="mini danger" type="button" onclick="deletePlayerEntry('${player.id}')">Delete</button>` : ''}
-            </div>
+      playersContainer.innerHTML = currentPlayers.map(player => `
+        <div class="row">
+          <div>
+            <strong>${escapeHtml(player.name)}</strong>
+            <span>${escapeHtml(player.computer_name || 'Oil Rig')} • ${escapeHtml(player.channel_name || 'No channel')}</span>
           </div>
-        `;
-      }).join('');
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    async function loadAuth() {
-      try {
-        const data = await api('/auth/me', { method: 'GET' });
-        renderUser(data.user || null);
-      } catch {
-        renderUser(null);
-      }
+          <div>
+            <span>Signal ${Number(player.signal_strength ?? 15)} • ${escapeHtml(player.direction || 'left')}</span>
+          </div>
+          <div class="actions">
+            ${currentUser?.canPull ? `<button class="mini secondary" type="button" onclick="triggerPlayer('${player.id}')">Trigger</button>` : ''}
+            ${currentUser?.isAdmin ? `<button class="mini primary" type="button" onclick="editPlayer('${player.id}')">Edit</button>` : ''}
+            ${currentUser?.isAdmin ? `<button class="mini danger" type="button" onclick="deletePlayerEntry('${player.id}')">Delete</button>` : ''}
+          </div>
+        </div>
+      `).join('');
     }
 
     async function loadStatus() {
       try {
-        const data = await api('/status', { method: 'GET' });
+        const data = await api('/status');
         renderStatus(data);
       } catch (err) {
         heroWebsite.textContent = 'Offline';
@@ -1018,7 +978,7 @@
         setBadge(websiteBadge, false, 'WORKING', 'OFFLINE');
         setBadge(backendBadge, false, 'ON', 'OFF');
         setBadge(oilRigBadge, false, 'WORKING', 'OFFLINE');
-        setPulse(servicePulse, false, 'Offline');
+        setPulse(backendPulse, false, 'Offline');
         computersList.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
       }
     }
@@ -1030,7 +990,7 @@
       }
 
       try {
-        const data = await api('/players', { method: 'GET' });
+        const data = await api('/players');
         renderPlayers(Array.isArray(data) ? data : []);
       } catch (err) {
         playersContainer.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
@@ -1045,12 +1005,17 @@
 
     logoutBtn.addEventListener('click', async () => {
       try {
-        await api('/auth/logout', {
-          method: 'POST'
-        });
+        await api('/auth/logout', { method: 'POST' });
       } catch {}
-      renderUser(null);
-      renderPlayers([]);
+      currentUser = null;
+      setPulse(authState, false, 'Not logged in');
+      usernameText.textContent = 'Guest';
+      roleText.textContent = 'No active session';
+      avatarBox.textContent = 'FF';
+      loginBtn.style.display = 'inline-flex';
+      logoutBtn.style.display = 'none';
+      adminTools.classList.remove('show');
+      playersContainer.innerHTML = `<div class="empty">Log in to load players.</div>`;
     });
 
     playerForm.addEventListener('submit', async (e) => {
@@ -1107,9 +1072,7 @@
       if (!confirm('Delete this player?')) return;
 
       try {
-        await api(`/players/${id}`, {
-          method: 'DELETE'
-        });
+        await api(`/players/${id}`, { method: 'DELETE' });
         await loadPlayers();
         await loadStatus();
       } catch (err) {
@@ -1119,9 +1082,7 @@
 
     window.triggerPlayer = async function(id) {
       try {
-        const data = await api(`/trigger/${id}`, {
-          method: 'POST'
-        });
+        const data = await api(`/trigger/${id}`, { method: 'POST' });
         alert(`Triggered: ${data.sent?.player || 'player'}`);
       } catch (err) {
         alert(err.message);
