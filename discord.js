@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const fs = require('fs');
-const path = require('path');
 const {
   Client,
   GatewayIntentBits,
@@ -25,7 +24,6 @@ const client = new Client({
 });
 
 let cachedMessageId = null;
-let lastSnapshot = null;
 let updateRunning = false;
 
 function loadSavedMessageId() {
@@ -35,7 +33,8 @@ function loadSavedMessageId() {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed.messageId || null;
-  } catch {
+  } catch (err) {
+    console.error('Failed to load saved message id:', err.message);
     return null;
   }
 }
@@ -59,7 +58,7 @@ async function fetchStatus() {
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
-    throw new Error(`Backend did not return JSON: ${text.slice(0, 120)}`);
+    throw new Error(`Backend did not return JSON: ${text.slice(0, 200)}`);
   }
 
   if (!res.ok) {
@@ -78,10 +77,7 @@ function normalizeState(data) {
 
   const players = playersRaw.map(p => {
     if (typeof p === 'string') {
-      return {
-        name: p,
-        computer_name: 'Oil Rig'
-      };
+      return { name: p, computer_name: 'Oil Rig' };
     }
 
     return {
@@ -93,11 +89,7 @@ function normalizeState(data) {
   const websiteStatus = String(data.website_status || data.website || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
   const backendStatus = String(data.backend_status || data.backend || data.status || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
 
-  return {
-    websiteStatus,
-    backendStatus,
-    players
-  };
+  return { websiteStatus, backendStatus, players };
 }
 
 function buildComputerLines(players) {
@@ -115,39 +107,28 @@ function buildComputerLines(players) {
 
   const lines = [];
   for (const [computer, names] of computers.entries()) {
-    const state = names.length > 0 ? 'ON' : 'OFF';
-    lines.push(`${computer} - ${state}`);
+    lines.push(`${computer} - ${names.length > 0 ? 'ON' : 'OFF'}`);
   }
 
   return lines.join('\n');
 }
 
-function buildPlayersLines(players) {
-  if (!players.length) return 'None';
-  return players.map(p => `• ${p.name}`).join('\n');
-}
-
 function buildEmbed(state) {
-  const computerLines = buildComputerLines(state.players);
-  const playersLines = buildPlayersLines(state.players);
-
   const backendEmoji = state.backendStatus === 'ON' ? '🟢' : '🔴';
   const websiteEmoji = state.websiteStatus === 'ON' ? '🟢' : '🔴';
 
-  const embed = new EmbedBuilder()
+  return new EmbedBuilder()
     .setTitle('System Status Panel')
     .setColor(state.backendStatus === 'ON' ? 0x2ecc71 : 0xe74c3c)
     .addFields(
-      { name: 'Computers', value: computerLines || 'Oil Rig - OFF', inline: false },
-      { name: 'Players', value: playersLines, inline: false },
+      { name: 'Computers', value: buildComputerLines(state.players), inline: false },
+      { name: 'Players', value: state.players.length ? state.players.map(p => `• ${p.name}`).join('\n') : 'None', inline: false },
       { name: 'Website Status', value: `${websiteEmoji} ${state.websiteStatus}`, inline: true },
       { name: 'Backend Status', value: `${backendEmoji} ${state.backendStatus}`, inline: true },
-      { name: 'Link', value: `[Frosted Fang](${WEBSITE_URL})`, inline: false }
+      { name: 'Frosted Fang', value: `[Open Website](${WEBSITE_URL})`, inline: false }
     )
-    .setFooter({ text: 'Auto-updating status panel' })
-    .setTimestamp();
-
-  return embed;
+    .setTimestamp()
+    .setFooter({ text: 'Auto-updating status panel' });
 }
 
 async function getExistingMessage(channel) {
@@ -156,7 +137,8 @@ async function getExistingMessage(channel) {
 
   try {
     return await channel.messages.fetch(cachedMessageId);
-  } catch {
+  } catch (err) {
+    console.error('Could not fetch existing panel message:', err.message);
     cachedMessageId = null;
     return null;
   }
@@ -167,12 +149,9 @@ async function updatePanel() {
   updateRunning = true;
 
   try {
+    console.log('Checking backend...');
     const raw = await fetchStatus();
     const state = normalizeState(raw);
-    const snapshot = JSON.stringify(state);
-
-    if (snapshot === lastSnapshot) return;
-    lastSnapshot = snapshot;
 
     const channel = await client.channels.fetch(CHANNEL_ID);
     if (!channel) {
@@ -185,10 +164,12 @@ async function updatePanel() {
 
     if (existing) {
       await existing.edit({ embeds: [embed] });
+      console.log('Panel updated');
     } else {
       const sent = await channel.send({ embeds: [embed] });
       cachedMessageId = sent.id;
       saveMessageId(sent.id);
+      console.log('Panel created and saved');
     }
   } catch (err) {
     console.error('Status panel update error:', err.message);
@@ -199,6 +180,7 @@ async function updatePanel() {
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
+  cachedMessageId = loadSavedMessageId();
   await updatePanel();
   setInterval(updatePanel, POLL_INTERVAL_MS);
 });
