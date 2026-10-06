@@ -20,7 +20,7 @@ const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 10000);
 const WEBSITE_URL = 'https://necroxeye.github.io/Backend-Website/';
 
 if (!DISCORD_BOT_TOKEN) {
-  console.error('Missing DISCORD_BOT_TOKEN in .env');
+  console.error('[bot] Missing DISCORD_BOT_TOKEN');
   process.exit(1);
 }
 
@@ -29,7 +29,6 @@ const client = new Client({
 });
 
 let cachedMessageId = null;
-let lastSnapshot = null;
 let updateRunning = false;
 
 function loadSavedMessageId() {
@@ -40,20 +39,16 @@ function loadSavedMessageId() {
     const parsed = JSON.parse(raw);
     return parsed.messageId || null;
   } catch (err) {
-    console.error('[panel] failed loading message id:', err.message);
+    console.error('[storage] failed reading message id:', err.message);
     return null;
   }
 }
 
 function saveMessageId(messageId) {
   try {
-    fs.writeFileSync(
-      STATUS_MESSAGE_FILE,
-      JSON.stringify({ messageId }, null, 2),
-      'utf8'
-    );
+    fs.writeFileSync(STATUS_MESSAGE_FILE, JSON.stringify({ messageId }, null, 2), 'utf8');
   } catch (err) {
-    console.error('[panel] failed saving message id:', err.message);
+    console.error('[storage] failed saving message id:', err.message);
   }
 }
 
@@ -68,7 +63,7 @@ async function fetchStatus() {
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
-    throw new Error(`Backend did not return JSON: ${text.slice(0, 200)}`);
+    throw new Error(`Backend did not return JSON. Response: ${text.slice(0, 200)}`);
   }
 
   if (!res.ok) {
@@ -78,98 +73,86 @@ async function fetchStatus() {
   return data;
 }
 
+function normalizePlayer(p) {
+  return {
+    id: p.id || '',
+    name: String(p.name || p.username || 'Unknown'),
+    computer_name: String(p.computer_name || p.computer || 'Oil Rig'),
+    channel_name: String(p.channel_name || ''),
+    signal_strength: Number(p.signal_strength ?? 15),
+    direction: String(p.direction || 'left'),
+    is_admin: !!p.is_admin,
+    created_at: p.created_at || null
+  };
+}
+
 function normalizeState(data) {
-  const playersRaw = Array.isArray(data.players) ? data.players : [];
-
-  const players = playersRaw.map((p) => {
-    if (typeof p === 'string') {
-      return {
-        name: p,
-        computer_name: 'Oil Rig',
-        direction: 'left'
-      };
-    }
-
-    return {
-      name: String(p.name || p.username || 'Unknown'),
-      computer_name: String(p.computer_name || p.computer || 'Oil Rig'),
-      direction: String(p.direction || 'left')
-    };
-  });
+  const players = Array.isArray(data.players) ? data.players.map(normalizePlayer) : [];
 
   return {
     status: String(data.status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
-    backendStatus: String(data.backend_status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
-    website: String(data.website || 'Offline'),
-    oilRig: String(data.oilRig || 'Offline'),
+    backend_status: String(data.backend_status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
     computer: String(data.computer || 'N/A'),
+    oilRig: String(data.oilRig || 'Offline'),
+    website: String(data.website || 'Offline'),
     players
   };
 }
 
 function buildComputerLines(state) {
-  const players = state.players || [];
-  const computers = new Map();
-
-  for (const player of players) {
-    const comp = String(player.computer_name || 'Oil Rig').trim() || 'Oil Rig';
-    if (!computers.has(comp)) computers.set(comp, []);
-    computers.get(comp).push(player.name);
-  }
-
-  if (computers.size === 0) {
+  if (!state.players.length) {
     return `Oil Rig - ${String(state.oilRig).toLowerCase() === 'working' ? 'ON' : 'OFF'}`;
   }
 
-  return [...computers.entries()]
-    .map(([comp, names]) => `${comp} - ${names.length ? 'ON' : 'OFF'}`)
+  const grouped = new Map();
+
+  for (const p of state.players) {
+    const key = p.computer_name || 'Oil Rig';
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(p.name);
+  }
+
+  return [...grouped.entries()]
+    .map(([computer, list]) => `${computer} - ${list.length > 0 ? 'ON' : 'OFF'}`)
     .join('\n');
 }
 
 function buildPlayersLines(players) {
   if (!players.length) return 'None';
-  return players.map((p) => `• ${p.name}`).join('\n');
+  return players.map(p => `• ${p.name} — ${p.computer_name} — ${p.direction}`).join('\n');
 }
 
 function buildEmbed(state) {
   const websiteOk = String(state.website).toLowerCase() === 'working' || state.status === 'ON';
-  const oilRigOk = String(state.oilRig).toLowerCase() === 'working';
+  const backendOk = state.backend_status === 'ON';
 
   return new EmbedBuilder()
     .setTitle('System Status Panel')
-    .setColor(state.backendStatus === 'ON' ? 0x74d4ff : 0xe74c3c)
+    .setColor(backendOk ? 0x67d7ff : 0xd65574)
     .addFields(
-      { name: 'Computer', value: buildComputerLines(state), inline: false },
+      { name: 'Computers', value: buildComputerLines(state), inline: false },
       { name: 'Players', value: buildPlayersLines(state.players), inline: false },
-      { name: 'Website Status', value: websiteOk ? '🟢 ON' : '🔴 OFF', inline: true },
-      { name: 'Backend', value: state.backendStatus === 'ON' ? '🟢 ON' : '🔴 OFF', inline: true },
+      { name: 'Website Status', value: websiteOk ? '🟢 Working' : '🔴 Offline', inline: true },
+      { name: 'Backend Status', value: backendOk ? '🟢 ON' : '🔴 OFF', inline: true },
       { name: 'Frosted Fang', value: `[Open Website](${WEBSITE_URL})`, inline: false }
     )
-    .setFooter({ text: 'Auto-updating status panel' })
-    .setTimestamp();
+    .setTimestamp()
+    .setFooter({ text: 'Auto-updating status panel' });
 }
 
 async function resolveChannel() {
-  console.log('[panel] resolving channel:', CHANNEL_ID);
-
-  const channel = await client.channels.fetch(CHANNEL_ID).catch((err) => {
-    console.error('[panel] channel fetch failed:', err.message);
+  const channel = await client.channels.fetch(CHANNEL_ID).catch(err => {
+    console.error('[discord] channel fetch failed:', err.message);
     return null;
   });
 
   if (!channel) return null;
 
-  console.log('[panel] channel found:', {
-    id: channel.id,
-    type: channel.type,
-    name: channel.name || 'unknown'
-  });
-
   if (
     channel.type !== ChannelType.GuildText &&
     channel.type !== ChannelType.GuildAnnouncement
   ) {
-    console.error('[panel] channel is not a text channel');
+    console.error('[discord] channel is not a text channel');
     return null;
   }
 
@@ -181,44 +164,29 @@ async function getExistingMessage(channel) {
   if (!cachedMessageId) return null;
 
   try {
-    const message = await channel.messages.fetch(cachedMessageId);
-    console.log('[panel] existing panel message found:', message.id);
-    return message;
+    return await channel.messages.fetch(cachedMessageId);
   } catch (err) {
-    console.warn('[panel] saved message missing, clearing cache:', err.message);
+    console.warn('[discord] saved panel message missing:', err.message);
     cachedMessageId = null;
     return null;
   }
 }
 
 async function updatePanel() {
-  if (updateRunning) {
-    console.log('[panel] skipped, previous update still running');
-    return;
-  }
-
+  if (updateRunning) return;
   updateRunning = true;
 
   try {
     console.log('[panel] fetching backend...');
     const raw = await fetchStatus();
-    console.log('[panel] backend response:', JSON.stringify(raw));
-
     const state = normalizeState(raw);
-    const snapshot = JSON.stringify(state);
+
+    console.log('[panel] backend status:', JSON.stringify(raw));
 
     const channel = await resolveChannel();
-    if (!channel) {
-      console.error('[panel] no usable channel resolved');
-      return;
-    }
+    if (!channel) return;
 
     const perms = channel.permissionsFor(client.user);
-    if (!perms) {
-      console.error('[panel] could not resolve bot permissions in channel');
-      return;
-    }
-
     const required = [
       PermissionsBitField.Flags.ViewChannel,
       PermissionsBitField.Flags.SendMessages,
@@ -226,9 +194,8 @@ async function updatePanel() {
       PermissionsBitField.Flags.ReadMessageHistory
     ];
 
-    const missing = required.filter((perm) => !perms.has(perm));
-    if (missing.length) {
-      console.error('[panel] missing permissions:', missing);
+    if (!perms || !perms.has(required)) {
+      console.error('[discord] missing permissions in channel');
       return;
     }
 
@@ -243,33 +210,16 @@ async function updatePanel() {
     const existing = await getExistingMessage(channel);
 
     if (existing) {
-      if (snapshot !== lastSnapshot) {
-        console.log('[panel] editing existing panel...');
-        await existing.edit({
-          embeds: [embed],
-          components: [row],
-          content: ''
-        });
-        console.log('[panel] panel edited');
-      } else {
-        console.log('[panel] no changes, skipping edit');
-      }
+      await existing.edit({ embeds: [embed], components: [row] });
+      console.log('[panel] panel edited');
     } else {
-      console.log('[panel] sending new panel...');
-      const sent = await channel.send({
-        content: '',
-        embeds: [embed],
-        components: [row]
-      });
-
+      const sent = await channel.send({ embeds: [embed], components: [row] });
       cachedMessageId = sent.id;
       saveMessageId(sent.id);
-      console.log('[panel] panel created:', sent.id);
+      console.log('[panel] new panel sent:', sent.id);
     }
-
-    lastSnapshot = snapshot;
   } catch (err) {
-    console.error('[panel] update failed:', err);
+    console.error('[panel] update failed:', err.message);
   } finally {
     updateRunning = false;
   }
@@ -277,27 +227,16 @@ async function updatePanel() {
 
 client.once('ready', async () => {
   console.log(`[bot] logged in as ${client.user.tag}`);
-  console.log('[bot] backend url:', BACKEND_URL);
-  console.log('[bot] channel id:', CHANNEL_ID);
-
   cachedMessageId = loadSavedMessageId();
-
   await updatePanel();
   setInterval(updatePanel, POLL_INTERVAL_MS);
 });
 
-client.on('error', (err) => {
-  console.error('[bot] client error:', err);
-});
+client.on('error', err => console.error('[bot] client error:', err));
+process.on('unhandledRejection', err => console.error('[bot] unhandled rejection:', err));
+process.on('uncaughtException', err => console.error('[bot] uncaught exception:', err));
 
-process.on('unhandledRejection', (err) => {
-  console.error('[bot] unhandled rejection:', err);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('[bot] uncaught exception:', err);
-});
-
-client.login(DISCORD_BOT_TOKEN).catch((err) => {
-  console.error('[bot] login failed:', err);
+client.login(DISCORD_BOT_TOKEN).catch(err => {
+  console.error('[bot] login failed:', err.message);
+  process.exit(1);
 });
