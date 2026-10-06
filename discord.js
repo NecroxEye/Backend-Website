@@ -56,12 +56,12 @@ async function fetchStatus() {
   });
 
   const text = await res.text();
-  let data = {};
+  let data;
 
   try {
     data = text ? JSON.parse(text) : {};
   } catch {
-    throw new Error(`Backend did not return JSON. First chars: ${text.slice(0, 120)}`);
+    throw new Error(`Backend did not return JSON. Response: ${text.slice(0, 200)}`);
   }
 
   if (!res.ok) {
@@ -80,11 +80,7 @@ function normalizeState(data) {
 
   const players = playersRaw.map(p => {
     if (typeof p === 'string') {
-      return {
-        name: p,
-        computer_name: 'Oil Rig',
-        direction: 'north'
-      };
+      return { name: p, computer_name: 'Oil Rig', direction: 'north' };
     }
 
     return {
@@ -94,12 +90,9 @@ function normalizeState(data) {
     };
   });
 
-  const websiteStatus = String(data.website_status || data.website || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
-  const backendStatus = String(data.backend_status || data.backend || data.status || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
-
   return {
-    websiteStatus,
-    backendStatus,
+    websiteStatus: String(data.website_status || data.website || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF',
+    backendStatus: String(data.backend_status || data.backend || data.status || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF',
     players
   };
 }
@@ -141,8 +134,8 @@ function buildEmbed(state) {
       { name: 'Backend Status', value: `${backendEmoji} ${state.backendStatus}`, inline: true },
       { name: 'Frosted Fang', value: '[Open Website](https://necroxeye.github.io/Backend-Website/)', inline: false }
     )
-    .setTimestamp()
-    .setFooter({ text: 'Auto-updating status panel' });
+    .setFooter({ text: 'Auto-updating status panel' })
+    .setTimestamp();
 }
 
 async function getExistingMessage(channel) {
@@ -152,7 +145,7 @@ async function getExistingMessage(channel) {
   try {
     return await channel.messages.fetch(cachedMessageId);
   } catch (err) {
-    console.warn('Saved panel message not found anymore:', err.message);
+    console.warn('Saved message missing or inaccessible:', err.message);
     cachedMessageId = null;
     return null;
   }
@@ -163,29 +156,32 @@ async function updatePanel() {
   updateRunning = true;
 
   try {
-    console.log('Fetching backend status...');
+    console.log('[panel] fetching backend...');
     const raw = await fetchStatus();
     const state = normalizeState(raw);
 
+    console.log('[panel] fetching channel...');
     const channel = await client.channels.fetch(CHANNEL_ID);
     if (!channel) {
-      console.error(`Channel not found: ${CHANNEL_ID}`);
+      console.error('[panel] channel not found');
       return;
     }
 
     const perms = channel.permissionsFor(client.user);
-    if (!perms || !perms.has([
+    const needed = [
       PermissionsBitField.Flags.ViewChannel,
       PermissionsBitField.Flags.SendMessages,
       PermissionsBitField.Flags.EmbedLinks,
       PermissionsBitField.Flags.ReadMessageHistory
-    ])) {
-      console.error('Missing required permissions in channel.');
+    ];
+
+    if (!perms || !perms.has(needed)) {
+      console.error('[panel] missing permissions in channel');
       return;
     }
 
     const embed = buildEmbed(state);
-    const linkRow = new ActionRowBuilder().addComponents(
+    const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setLabel('Frosted Fang')
         .setStyle(ButtonStyle.Link)
@@ -195,16 +191,18 @@ async function updatePanel() {
     const existing = await getExistingMessage(channel);
 
     if (existing) {
-      await existing.edit({ embeds: [embed], components: [linkRow] });
-      console.log('Panel edited.');
+      console.log('[panel] editing existing message');
+      await existing.edit({ embeds: [embed], components: [row] });
     } else {
-      const sent = await channel.send({ embeds: [embed], components: [linkRow] });
+      console.log('[panel] sending new message');
+      const sent = await channel.send({ embeds: [embed], components: [row] });
       cachedMessageId = sent.id;
       saveMessageId(sent.id);
-      console.log('Panel created.');
     }
+
+    console.log('[panel] done');
   } catch (err) {
-    console.error('Status panel update error:', err.message);
+    console.error('[panel] update failed:', err.message);
   } finally {
     updateRunning = false;
   }
