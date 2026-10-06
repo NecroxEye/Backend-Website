@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frosted Fang</title>
-  <meta name="description" content="Frosted Fang control panel with working Discord auth state, live status, and role-aware UI." />
+  <meta name="description" content="Frosted Fang pull system with Discord auth, floating player control, and role-aware admin tools." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,6 +25,8 @@
       --ink:#071317;
       --shadow:0 18px 60px rgba(0,0,0,.30);
       --radius:24px;
+      --cyan-soft:#bff8ff;
+      --cyan-deep:#0e2f39;
     }
 
     *{box-sizing:border-box}
@@ -205,7 +207,7 @@
 
     h1{
       font-size:clamp(2.6rem, 7vw, 5.7rem);
-      max-width:10ch;
+      max-width:11ch;
     }
 
     .lead{
@@ -214,6 +216,27 @@
       color:var(--muted);
       line-height:1.75;
       font-size:clamp(1rem, 1.3vw, 1.08rem);
+    }
+
+    .eye-block{
+      margin-top:22px;
+      padding:18px 20px;
+      border-radius:22px;
+      background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.11);
+      width:max-content;
+      max-width:100%;
+    }
+
+    .eye-lines{
+      margin:0;
+      color:#eefdff;
+      font-family:"Orbitron", monospace;
+      font-size:clamp(.55rem, 1.3vw, .8rem);
+      line-height:1.35;
+      letter-spacing:.08em;
+      white-space:pre;
+      text-shadow:0 0 18px rgba(151,245,255,.16);
     }
 
     .meta-grid{
@@ -446,6 +469,20 @@
 
     input::placeholder{color:#98b1b6}
 
+    #direction,
+    #isAdminPlayer{
+      background:linear-gradient(180deg, #d7fcff, var(--cyan-soft));
+      color:var(--cyan-deep);
+      border:1px solid rgba(14,47,57,.14);
+      font-weight:700;
+    }
+
+    #direction option,
+    #isAdminPlayer option{
+      color:#0d3340;
+      background:#dfffff;
+    }
+
     .actions{
       display:flex;
       gap:8px;
@@ -483,6 +520,122 @@
 
     .mini:hover{transform:translateY(-1px)}
 
+    .floating-pull{
+      position:fixed;
+      top:94px;
+      right:18px;
+      width:min(360px, calc(100vw - 24px));
+      max-height:calc(100vh - 112px);
+      overflow:auto;
+      z-index:40;
+      padding:16px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(180deg, rgba(10,19,24,.82), rgba(18,31,37,.7));
+      backdrop-filter:blur(18px);
+      box-shadow:0 20px 48px rgba(0,0,0,.34);
+    }
+
+    .floating-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .floating-head strong{
+      display:block;
+      font-family:"Orbitron", sans-serif;
+      font-size:1rem;
+      letter-spacing:.04em;
+    }
+
+    .floating-head span{
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .pull-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .pull-item{
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.05);
+      display:grid;
+      gap:10px;
+    }
+
+    .pull-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .pull-top strong{
+      display:block;
+      font-size:.98rem;
+    }
+
+    .pull-top span{
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .pull-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .panel-kamui{
+      position:fixed;
+      inset:0;
+      z-index:999;
+      display:grid;
+      place-items:center;
+      pointer-events:none;
+      opacity:0;
+      visibility:hidden;
+      background:radial-gradient(circle at center, rgba(151,245,255,.18), rgba(7,19,23,.12) 35%, rgba(0,0,0,.28) 72%, rgba(0,0,0,.5) 100%);
+      transition:opacity .18s ease, visibility .18s ease;
+    }
+
+    .panel-kamui.show{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .panel-kamui-box{
+      padding:24px 30px;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(180deg, rgba(14,25,31,.72), rgba(10,18,22,.54));
+      backdrop-filter:blur(16px);
+      box-shadow:0 24px 64px rgba(0,0,0,.38);
+      text-align:center;
+    }
+
+    .panel-kamui-box .eye-lines{
+      font-size:clamp(.7rem, 1.8vw, 1rem);
+      line-height:1.5;
+      display:block;
+      margin-bottom:10px;
+    }
+
+    .panel-kamui-text{
+      font-family:"Orbitron", sans-serif;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--accent-2);
+      font-size:.82rem;
+    }
+
     .footer-note{
       text-align:center;
       color:#0b2d31;
@@ -505,6 +658,15 @@
       to{opacity:1;transform:none}
     }
 
+    @media (max-width: 1180px){
+      .floating-pull{
+        position:static;
+        width:100%;
+        max-height:none;
+        margin:0 0 22px;
+      }
+    }
+
     @media (max-width: 980px){
       .hero,.two-col{grid-template-columns:1fr}
       h1{max-width:none}
@@ -519,6 +681,17 @@
   </style>
 </head>
 <body>
+  <div class="panel-kamui" id="triggerOverlay" aria-hidden="true">
+    <div class="panel-kamui-box">
+      <pre class="eye-lines">          ─────────   
+  ╱                              ╲  
+ ┃                 █                  ┃
+  ╲                               ╱  
+         ─────────</pre>
+      <div class="panel-kamui-text" id="triggerOverlayText">Pearl pull engaged</div>
+    </div>
+  </div>
+
   <header>
     <div class="wrap">
       <nav>
@@ -528,7 +701,6 @@
         </a>
 
         <div class="nav-actions">
-          <a class="btn-secondary" href="https://backend-website-syxe.onrender.com/status" target="_blank" rel="noopener">Status JSON</a>
           <a class="btn" id="loginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
           <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
         </div>
@@ -537,15 +709,34 @@
   </header>
 
   <main class="wrap">
+    <aside class="floating-pull reveal d1" id="floatingPullPanel">
+      <div class="floating-head">
+        <div>
+          <strong>Player Pull Panel</strong>
+          <span>Quick trigger access</span>
+        </div>
+      </div>
+      <div class="pull-list" id="quickPullList">
+        <div class="empty">Checking authentication...</div>
+      </div>
+    </aside>
+
     <section class="hero">
       <article class="panel hero-copy reveal">
         <div>
-          <div class="eyebrow">Live role-aware dashboard</div>
-          <h1>Discord auth is handled by the backend.</h1>
+          <div class="eyebrow">Welcome, Fang</div>
+          <h1>Frosted Fang Pull System</h1>
           <p class="lead">
-            This page checks your existing session on load, updates the UI when you are authenticated,
-            and reveals admin or pull actions based on the user object returned from <code>/auth/me</code>.
+            Below Zero, Above All.
           </p>
+
+          <div class="eye-block">
+            <pre class="eye-lines">          ─────────   
+  ╱                              ╲  
+ ┃                 █                  ┃
+  ╲                               ╱  
+         ─────────</pre>
+          </div>
         </div>
 
         <div class="meta-grid">
@@ -564,7 +755,7 @@
         </div>
       </article>
 
-      <aside class="panel hero-side reveal d1">
+      <aside class="panel hero-side reveal d2">
         <div class="status-box">
           <div class="status-label">Session state</div>
           <div class="status-value" id="authState">Checking...</div>
@@ -580,19 +771,14 @@
             </div>
           </div>
         </div>
-
-        <div class="status-box">
-          <div class="status-label">Backend pulse</div>
-          <div class="status-value" id="backendPulse">Checking...</div>
-        </div>
       </aside>
     </section>
 
     <section class="grid">
-      <article class="panel section reveal d2">
+      <article class="panel section reveal d3">
         <div class="section-head">
           <div>
-            <h2>System snapshot</h2>
+            <h2>System Snapshot</h2>
             <p>Live values loaded from the backend status route.</p>
           </div>
         </div>
@@ -633,23 +819,10 @@
         </div>
       </article>
 
-      <article class="panel section reveal d3">
-        <div class="section-head">
-          <div>
-            <h2>Players</h2>
-            <p>This section loads after the auth check succeeds.</p>
-          </div>
-        </div>
-
-        <div id="playersContainer" class="list">
-          <div class="empty">Checking authentication...</div>
-        </div>
-      </article>
-
       <article class="panel section admin-tools reveal d4" id="adminTools">
         <div class="section-head">
           <div>
-            <h2>Admin tools</h2>
+            <h2>Player Admin Panel</h2>
             <p>Only visible for users with <strong>isAdmin: true</strong>.</p>
           </div>
         </div>
@@ -685,6 +858,8 @@
                 <option value="right">right</option>
                 <option value="up">up</option>
                 <option value="down">down</option>
+                <option value="front">front</option>
+                <option value="back">back</option>
               </select>
             </div>
 
@@ -722,9 +897,10 @@
     const usernameText = document.getElementById('usernameText');
     const roleText = document.getElementById('roleText');
     const avatarBox = document.getElementById('avatarBox');
-    const backendPulse = document.getElementById('backendPulse');
-    const playersContainer = document.getElementById('playersContainer');
+    const playersContainer = document.getElementById('quickPullList');
     const adminTools = document.getElementById('adminTools');
+    const triggerOverlay = document.getElementById('triggerOverlay');
+    const triggerOverlayText = document.getElementById('triggerOverlayText');
 
     const heroWebsite = document.getElementById('heroWebsite');
     const heroBackend = document.getElementById('heroBackend');
@@ -842,7 +1018,7 @@
 
       const labels = [];
       if (user.isAdmin) labels.push('Admin');
-      if (user.canPull) labels.push('Pull Access');
+      if (user.canPull) labels.push('Pearl Pull Allowed');
       if (!labels.length) labels.push('Authenticated User');
       roleText.textContent = labels.join(' • ');
 
@@ -861,17 +1037,12 @@
     }
 
     async function loadAuth() {
-      console.log('[auth] checking /auth/me');
-
       try {
         const data = await api('/auth/me');
-        console.log('[auth] response:', data);
-
         if (data && data.user) {
           renderLoggedIn(data.user);
           return true;
         }
-
         renderLoggedOut();
         return false;
       } catch (err) {
@@ -898,7 +1069,6 @@
       setBadge(websiteBadge, websiteOk, 'WORKING', 'OFFLINE');
       setBadge(backendBadge, backendOk, 'ON', 'OFF');
       setBadge(oilRigBadge, oilRigOk, 'WORKING', 'OFFLINE');
-      setPulse(backendPulse, backendOk, backendOk ? 'Online' : 'Offline');
 
       if (!players.length) {
         computersList.innerHTML = `
@@ -947,17 +1117,17 @@
       }
 
       playersContainer.innerHTML = currentPlayers.map(player => `
-        <div class="row">
-          <div>
-            <strong>${escapeHtml(player.name)}</strong>
-            <span>${escapeHtml(player.computer_name || 'Oil Rig')} • ${escapeHtml(player.channel_name || 'No channel')}</span>
+        <div class="pull-item">
+          <div class="pull-top">
+            <div>
+              <strong>${escapeHtml(player.name)}</strong>
+              <span>${escapeHtml(player.computer_name || 'Oil Rig')} • ${escapeHtml(player.channel_name || 'No channel')}</span>
+            </div>
+            <span>${escapeHtml(player.direction || 'left')}</span>
           </div>
-          <div>
-            <span>Signal ${Number(player.signal_strength ?? 15)} • ${escapeHtml(player.direction || 'left')}</span>
-          </div>
-          <div class="actions">
-            ${currentUser?.canPull ? `<button class="mini secondary" type="button" onclick="triggerPlayer('${player.id}')">Trigger</button>` : ''}
-            ${currentUser?.isAdmin ? `<button class="mini primary" type="button" onclick="editPlayer('${player.id}')">Edit</button>` : ''}
+          <div class="pull-actions">
+            ${currentUser?.canPull ? `<button class="mini primary" type="button" onclick="triggerPlayer('${player.id}', '${escapeHtml(player.name)}')">Trigger</button>` : ''}
+            ${currentUser?.isAdmin ? `<button class="mini secondary" type="button" onclick="editPlayer('${player.id}')">Edit</button>` : ''}
             ${currentUser?.isAdmin ? `<button class="mini danger" type="button" onclick="deletePlayerEntry('${player.id}')">Delete</button>` : ''}
           </div>
         </div>
@@ -967,7 +1137,6 @@
     async function loadStatus() {
       try {
         const data = await api('/status');
-        console.log('[status] response:', data);
         renderStatus(data);
       } catch (err) {
         console.error('[status] failed:', err);
@@ -980,7 +1149,6 @@
         setBadge(websiteBadge, false, 'WORKING', 'OFFLINE');
         setBadge(backendBadge, false, 'ON', 'OFF');
         setBadge(oilRigBadge, false, 'WORKING', 'OFFLINE');
-        setPulse(backendPulse, false, 'Offline');
         computersList.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
       }
     }
@@ -993,12 +1161,20 @@
 
       try {
         const data = await api('/players');
-        console.log('[players] response:', data);
         renderPlayers(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('[players] failed:', err);
         playersContainer.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
       }
+    }
+
+    function showTriggerOverlay(name) {
+      triggerOverlayText.textContent = `${name} • Pearl Pull`;
+      triggerOverlay.classList.add('show');
+      clearTimeout(showTriggerOverlay.timer);
+      showTriggerOverlay.timer = setTimeout(() => {
+        triggerOverlay.classList.remove('show');
+      }, 1500);
     }
 
     logoutBtn.addEventListener('click', async () => {
@@ -1072,10 +1248,10 @@
       }
     };
 
-    window.triggerPlayer = async function(id) {
+    window.triggerPlayer = async function(id, name = 'Player') {
       try {
         const data = await api(`/trigger/${id}`, { method: 'POST' });
-        alert(`Triggered: ${data.sent?.player || 'player'}`);
+        showTriggerOverlay(data.sent?.player || name);
       } catch (err) {
         alert(err.message);
       }
