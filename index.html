@@ -6,23 +6,27 @@
   <title>Frosted Fang Control Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0e1116;
-      --bg-soft: #151a22;
-      --panel: rgba(20, 25, 33, 0.82);
-      --panel-strong: rgba(16, 20, 28, 0.94);
-      --line: rgba(255, 255, 255, 0.08);
-      --text: #edf2f7;
-      --muted: #97a3b6;
-      --accent: #8df7c7;
-      --accent-2: #71b8ff;
-      --danger: #ff6b7a;
-      --warn: #ffd36e;
-      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-      --radius: 22px;
-      --radius-sm: 14px;
+      --bg-1: #e9f7ff;
+      --bg-2: #d8f0ff;
+      --bg-3: #c3e8ff;
+      --panel: rgba(255, 255, 255, 0.58);
+      --panel-strong: rgba(255, 255, 255, 0.72);
+      --line: rgba(71, 122, 160, 0.18);
+      --line-strong: rgba(71, 122, 160, 0.28);
+      --text: #17324a;
+      --muted: #5b7d97;
+      --accent: #67d7ff;
+      --accent-2: #8ef0ff;
+      --accent-3: #7caeff;
+      --success: #1fa96e;
+      --danger: #d65574;
+      --warn: #c68a17;
+      --shadow: 0 18px 60px rgba(77, 134, 176, 0.18);
+      --radius: 24px;
+      --radius-sm: 16px;
       --max: 1380px;
     }
 
@@ -31,13 +35,14 @@
     html, body {
       margin: 0;
       padding: 0;
-      background:
-        radial-gradient(circle at 15% 15%, rgba(113, 184, 255, 0.12), transparent 30%),
-        radial-gradient(circle at 85% 10%, rgba(141, 247, 199, 0.10), transparent 28%),
-        linear-gradient(180deg, #0b0e13 0%, #0f1319 100%);
+      min-height: 100%;
       color: var(--text);
       font-family: "Space Grotesk", sans-serif;
-      min-height: 100%;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(142, 240, 255, 0.65), transparent 24%),
+        radial-gradient(circle at 86% 12%, rgba(124, 174, 255, 0.42), transparent 22%),
+        radial-gradient(circle at 78% 86%, rgba(103, 215, 255, 0.28), transparent 18%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 48%, var(--bg-3) 100%);
     }
 
     body::before {
@@ -46,11 +51,11 @@
       inset: 0;
       pointer-events: none;
       background:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.26) 1px, transparent 1px);
       background-size: 28px 28px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.4));
-      opacity: .35;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.55));
+      opacity: .3;
     }
 
     a { color: inherit; text-decoration: none; }
@@ -68,8 +73,7 @@
       grid-template-columns: 1.2fr auto;
       gap: 16px;
       align-items: center;
-      padding: 12px 0 28px;
-      animation: rise .7s ease both;
+      padding: 10px 0 28px;
     }
 
     .brand {
@@ -80,15 +84,14 @@
     }
 
     .sigil {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
       position: relative;
       background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 32%),
-        linear-gradient(135deg, rgba(141,247,199,.25), rgba(113,184,255,.18)),
-        var(--panel-strong);
-      border: 1px solid var(--line);
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,.82), transparent 28%),
+        linear-gradient(135deg, rgba(142,240,255,.9), rgba(124,174,255,.76));
+      border: 1px solid rgba(255,255,255,.6);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
@@ -97,15 +100,15 @@
     .sigil::after {
       content: "";
       position: absolute;
-      inset: 11px;
-      border: 1px solid rgba(255,255,255,.14);
+      inset: 12px;
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 12px;
       transform: rotate(45deg);
-      border-radius: 10px;
     }
 
     .sigil::after {
-      inset: 18px;
-      border-color: rgba(141,247,199,.45);
+      inset: 19px;
+      border-color: rgba(23,50,74,.18);
     }
 
     .brand-copy { min-width: 0; }
@@ -114,15 +117,16 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: var(--accent);
+      color: #4f95c7;
       font-size: .78rem;
       letter-spacing: .18em;
       text-transform: uppercase;
+      font-weight: 700;
     }
 
     .eyebrow::before {
       content: "";
-      width: 26px;
+      width: 28px;
       height: 1px;
       background: currentColor;
       opacity: .85;
@@ -130,17 +134,17 @@
 
     .brand h1 {
       margin: 6px 0 0;
-      font-family: "Bebas Neue", cursive;
-      letter-spacing: .04em;
-      line-height: .9;
-      font-size: clamp(2.4rem, 6vw, 4.6rem);
-      font-weight: 400;
+      font-family: "Syne", sans-serif;
+      letter-spacing: -.03em;
+      line-height: .96;
+      font-size: clamp(2.1rem, 5.2vw, 4.3rem);
+      font-weight: 800;
     }
 
     .brand p {
       margin: 8px 0 0;
       color: var(--muted);
-      max-width: 62ch;
+      max-width: 68ch;
       font-size: .98rem;
     }
 
@@ -161,25 +165,31 @@
       font: inherit;
       font-weight: 700;
       color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.10);
-      transition: transform .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
-      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.5));
+      border: 1px solid rgba(255,255,255,.7);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(88, 154, 204, 0.12);
     }
 
-    .btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.2); }
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(103,215,255,.55);
+      box-shadow: 0 14px 30px rgba(88, 154, 204, 0.16);
+    }
+
     .btn:active { transform: translateY(0); }
 
     .btn-primary {
-      color: #07130f;
-      background: linear-gradient(135deg, var(--accent), #bafadb);
-      border-color: rgba(141,247,199,.55);
+      color: #0c3750;
+      background: linear-gradient(135deg, #bff6ff, #8fd8ff);
+      border-color: rgba(103,215,255,.55);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, rgba(255,107,122,.18), rgba(255,107,122,.08));
-      border-color: rgba(255,107,122,.35);
-      color: #ffd7dc;
+      color: #8a2d44;
+      background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(255,220,228,.76));
+      border-color: rgba(214,85,116,.26);
     }
 
     .status-strip {
@@ -187,16 +197,14 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
       margin-bottom: 22px;
-      animation: rise .8s ease both;
-      animation-delay: .08s;
     }
 
     .metric {
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 20px;
       padding: 16px;
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(16px);
       box-shadow: var(--shadow);
       min-height: 106px;
     }
@@ -207,6 +215,7 @@
       text-transform: uppercase;
       letter-spacing: .15em;
       margin-bottom: 12px;
+      font-weight: 700;
     }
 
     .metric-value {
@@ -215,7 +224,7 @@
       line-height: 1.1;
     }
 
-    .online { color: var(--accent); }
+    .online { color: var(--success); }
     .offline { color: var(--danger); }
     .warn { color: var(--warn); }
 
@@ -233,9 +242,9 @@
     .panel,
     .roster-panel {
       background: var(--panel);
-      border: 1px solid var(--line);
+      border: 1px solid rgba(255,255,255,.62);
       border-radius: var(--radius);
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(18px);
       box-shadow: var(--shadow);
     }
 
@@ -244,17 +253,15 @@
       overflow: hidden;
       position: relative;
       padding: 22px;
-      animation: rise .85s ease both;
-      animation-delay: .15s;
     }
 
     .hero-panel::after {
       content: "";
       position: absolute;
       inset: auto -10% -40% auto;
-      width: 260px;
-      height: 260px;
-      background: radial-gradient(circle, rgba(113,184,255,.16), transparent 65%);
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(103,215,255,.28), transparent 65%);
       pointer-events: none;
     }
 
@@ -267,11 +274,11 @@
 
     .hero-copy h2 {
       margin: 0 0 10px;
-      font-family: "Bebas Neue", cursive;
-      letter-spacing: .04em;
-      font-weight: 400;
-      font-size: clamp(2rem, 4vw, 3.4rem);
-      line-height: .92;
+      font-family: "Syne", sans-serif;
+      letter-spacing: -.03em;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: .98;
     }
 
     .hero-copy p {
@@ -279,14 +286,14 @@
       color: var(--muted);
       max-width: 60ch;
       font-size: 1rem;
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     .hero-box {
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,.42));
+      border: 1px solid rgba(255,255,255,.7);
       min-height: 100%;
     }
 
@@ -295,7 +302,7 @@
       font-size: .95rem;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: var(--accent-2);
+      color: #4f95c7;
     }
 
     .hero-list {
@@ -312,7 +319,7 @@
       justify-content: space-between;
       gap: 10px;
       padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      border-bottom: 1px solid rgba(71,122,160,.12);
     }
 
     .hero-list li:last-child {
@@ -324,8 +331,6 @@
       grid-area: main;
       display: grid;
       gap: 18px;
-      animation: rise .9s ease both;
-      animation-delay: .22s;
     }
 
     .roster-panel {
@@ -333,8 +338,6 @@
       padding: 18px;
       position: sticky;
       top: 16px;
-      animation: rise .95s ease both;
-      animation-delay: .28s;
     }
 
     .panel {
@@ -351,10 +354,10 @@
 
     .panel-title {
       margin: 0;
-      font-family: "Bebas Neue", cursive;
-      letter-spacing: .04em;
-      font-size: 2rem;
-      font-weight: 400;
+      font-family: "Syne", sans-serif;
+      letter-spacing: -.03em;
+      font-size: 1.9rem;
+      font-weight: 800;
       line-height: .95;
     }
 
@@ -369,9 +372,9 @@
       margin-bottom: 18px;
       padding: 14px 16px;
       border-radius: 16px;
-      border: 1px solid rgba(141,247,199,.2);
-      background: linear-gradient(135deg, rgba(141,247,199,.12), rgba(113,184,255,.08));
-      color: #dffef0;
+      border: 1px solid rgba(103,215,255,.28);
+      background: linear-gradient(135deg, rgba(255,255,255,.68), rgba(191,246,255,.42));
+      color: #1b536f;
     }
 
     .auth-banner.show { display: block; }
@@ -381,9 +384,9 @@
       gap: 12px;
       padding: 18px;
       border-radius: 18px;
-      border: 1px dashed rgba(255,255,255,.12);
+      border: 1px dashed rgba(71,122,160,.22);
       color: var(--muted);
-      background: rgba(255,255,255,.02);
+      background: rgba(255,255,255,.3);
     }
 
     .form-grid {
@@ -404,24 +407,39 @@
       color: var(--muted);
       letter-spacing: .08em;
       text-transform: uppercase;
+      font-weight: 700;
     }
 
     input, select {
       width: 100%;
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.82);
       color: var(--text);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
+      border: 1px solid rgba(103,215,255,.34);
+      border-radius: 16px;
       padding: 13px 14px;
       font: inherit;
       outline: none;
-      transition: border-color .18s ease, transform .18s ease, background .18s ease;
+      transition: border-color .18s ease, transform .18s ease, background .18s ease, box-shadow .18s ease;
+      appearance: none;
     }
 
     input:focus, select:focus {
-      border-color: rgba(141,247,199,.45);
-      background: rgba(255,255,255,.06);
+      border-color: rgba(103,215,255,.72);
+      background: rgba(255,255,255,.95);
       transform: translateY(-1px);
+      box-shadow: 0 0 0 4px rgba(103,215,255,.14);
+    }
+
+    select {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #4f95c7 50%),
+        linear-gradient(135deg, #4f95c7 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) calc(50% - 3px),
+        calc(100% - 12px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 38px;
     }
 
     .checkbox-row {
@@ -434,7 +452,7 @@
     .checkbox-row input[type="checkbox"] {
       width: 18px;
       height: 18px;
-      accent-color: var(--accent);
+      accent-color: #67d7ff;
     }
 
     .actions {
@@ -444,17 +462,13 @@
       margin-top: 16px;
     }
 
-    .muted {
-      color: var(--muted);
-    }
-
     .logbox {
       margin-top: 16px;
       min-height: 44px;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 12px 14px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.16);
+      border: 1px solid rgba(103,215,255,.22);
+      background: rgba(255,255,255,.42);
       color: var(--muted);
       white-space: pre-wrap;
     }
@@ -474,15 +488,15 @@
 
     .roster-item {
       padding: 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.72);
+      background: linear-gradient(180deg, rgba(255,255,255,.76), rgba(255,255,255,.5));
       transition: transform .18s ease, border-color .18s ease, background .18s ease;
     }
 
     .roster-item:hover {
       transform: translateY(-2px);
-      border-color: rgba(255,255,255,.16);
+      border-color: rgba(103,215,255,.4);
     }
 
     .roster-main {
@@ -512,8 +526,8 @@
       padding: 7px 10px;
       font-size: .8rem;
       font-weight: 700;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(103,215,255,.22);
       white-space: nowrap;
     }
 
@@ -526,8 +540,8 @@
 
     .mini-btn {
       appearance: none;
-      border: 1px solid rgba(255,255,255,.1);
-      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(103,215,255,.24);
+      background: rgba(255,255,255,.78);
       color: var(--text);
       border-radius: 12px;
       padding: 10px 12px;
@@ -537,16 +551,30 @@
       transition: transform .18s ease, border-color .18s ease;
     }
 
-    .mini-btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.18); }
-    .mini-btn.danger { color: #ffd7dc; border-color: rgba(255,107,122,.25); background: rgba(255,107,122,.08); }
-    .mini-btn.accent { color: #08150f; background: linear-gradient(135deg, var(--accent), #bafadb); border-color: rgba(141,247,199,.45); }
+    .mini-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(103,215,255,.48);
+    }
+
+    .mini-btn.danger {
+      color: #9d3750;
+      border-color: rgba(214,85,116,.22);
+      background: rgba(255,238,242,.92);
+    }
+
+    .mini-btn.accent {
+      color: #0c3750;
+      background: linear-gradient(135deg, #bff6ff, #8fd8ff);
+      border-color: rgba(103,215,255,.48);
+    }
 
     .empty {
       padding: 18px;
       border-radius: 16px;
       color: var(--muted);
-      border: 1px dashed rgba(255,255,255,.12);
+      border: 1px dashed rgba(71,122,160,.22);
       text-align: center;
+      background: rgba(255,255,255,.28);
     }
 
     .user-chip {
@@ -555,8 +583,9 @@
       gap: 10px;
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 8px 24px rgba(88, 154, 204, 0.12);
     }
 
     .user-chip.show { display: inline-flex; }
@@ -569,8 +598,8 @@
       place-items: center;
       font-size: .9rem;
       font-weight: 700;
-      color: #07110d;
-      background: linear-gradient(135deg, var(--accent), #d7fff0);
+      color: #0d4c67;
+      background: linear-gradient(135deg, #bff6ff, #9be2ff);
     }
 
     .fade-in {
@@ -619,7 +648,7 @@
       .shell { width: min(calc(100% - 18px), var(--max)); }
       .status-strip { grid-template-columns: 1fr; }
       .panel, .roster-panel, .hero-panel { padding: 16px; border-radius: 18px; }
-      .panel-title { font-size: 1.72rem; }
+      .panel-title { font-size: 1.6rem; }
       .btn { width: 100%; justify-content: center; }
       .actions { display: grid; }
     }
@@ -633,7 +662,7 @@
         <div class="brand-copy">
           <div class="eyebrow">Frosted Fang</div>
           <h1>Pearl Routing Console</h1>
-          <p>Manage routed players, assign computers, define signal direction, and trigger actions through a clean live control layer.</p>
+          <p>Manage routed players, assign computers, choose exact output side, and keep the roster pinned on the top-right for fast control.</p>
         </div>
       </div>
 
@@ -670,10 +699,10 @@
       <section class="hero-panel fade-in">
         <div class="hero-grid">
           <div class="hero-copy">
-            <h2>Direct control over pearl routes, computers, and output direction.</h2>
+            <h2>Frosted visuals, cleaner routing, and direct side-based signal control.</h2>
             <p>
-              Add players with a dedicated computer target, signal strength, and redstone direction.
-              The roster remains visible at the top-right so operators can monitor and act without losing context.
+              The direction selector now uses practical side names: left, right, top, bottom, front, and back.
+              The overall theme is rebuilt into a bright frosted style instead of the darker black look.
             </p>
           </div>
           <div class="hero-box">
@@ -692,7 +721,7 @@
         <div class="roster-topbar">
           <div>
             <h2 class="panel-title" style="margin:0;">Roster</h2>
-            <p class="panel-sub">Visible after login. Top-right quick operator list.</p>
+            <p class="panel-sub">Pinned on the top-right after login.</p>
           </div>
           <button id="refreshRosterBtn" class="btn">Refresh</button>
         </div>
@@ -707,7 +736,7 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Add / Edit Player</h2>
-              <p class="panel-sub">Admin-only panel for player routing entries.</p>
+              <p class="panel-sub">Admin-only panel with computer, signal, and side direction.</p>
             </div>
           </div>
 
@@ -742,12 +771,12 @@
               <div class="field">
                 <label for="direction">Direction</label>
                 <select id="direction" name="direction" required>
-                  <option value="north">North</option>
-                  <option value="south">South</option>
-                  <option value="east">East</option>
-                  <option value="west">West</option>
-                  <option value="up">Up</option>
-                  <option value="down">Down</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="front">Front</option>
+                  <option value="back">Back</option>
                 </select>
               </div>
 
@@ -780,7 +809,7 @@
           <div class="panel-head">
             <div>
               <h2 class="panel-title">Roster & Controls</h2>
-              <p class="panel-sub">Use the roster panel on the top-right for pull, edit, and delete actions.</p>
+              <p class="panel-sub">Use the pinned roster on the right for pull, edit, and delete actions.</p>
             </div>
           </div>
           <div class="logbox" id="actionLog">No actions yet.</div>
@@ -944,7 +973,7 @@
       editingId = null;
       playerForm.reset();
       signalStrength.value = 15;
-      direction.value = 'north';
+      direction.value = 'left';
       isAdmin.value = 'false';
       editingToggle.checked = false;
       setLog(formLog, 'Form reset.', 'muted');
@@ -956,7 +985,7 @@
       computerName.value = player.computer_name || '';
       channelName.value = player.channel_name || '';
       signalStrength.value = Number(player.signal_strength || 15);
-      direction.value = player.direction || 'north';
+      direction.value = player.direction || 'left';
       isAdmin.value = String(!!player.is_admin);
       editingToggle.checked = true;
       setLog(formLog, `Editing ${player.name}.`, 'online');
@@ -1000,7 +1029,7 @@
                 <div class="roster-meta">
                   Computer: ${escapeHtml(player.computer_name || 'Oil Rig')}<br>
                   Channel: ${escapeHtml(player.channel_name || 'N/A')}<br>
-                  Direction: ${escapeHtml(player.direction || 'north')}<br>
+                  Direction: ${escapeHtml(player.direction || 'left')}<br>
                   Signal: ${escapeHtml(player.signal_strength ?? 15)}
                 </div>
               </div>
@@ -1120,7 +1149,7 @@
           const sent = data.sent || {};
           setLog(
             actionLog,
-            `Pull sent for ${sent.player || player.name} | Computer: ${sent.computer_name || player.computer_name} | Direction: ${sent.direction || player.direction || 'north'} | Signal: ${sent.signal_strength ?? player.signal_strength ?? 15}`,
+            `Pull sent for ${sent.player || player.name} | Computer: ${sent.computer_name || player.computer_name} | Direction: ${sent.direction || player.direction || 'left'} | Signal: ${sent.signal_strength ?? player.signal_strength ?? 15}`,
             'online'
           );
         } catch (err) {
@@ -1161,6 +1190,7 @@
       await checkBackend();
       await loadAuth();
       await loadPlayers();
+      resetForm();
     }
 
     boot();
