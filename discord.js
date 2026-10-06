@@ -1,18 +1,19 @@
 require('dotenv').config();
 
 const fs = require('fs');
+const path = require('path');
 const {
   Client,
   GatewayIntentBits,
-  EmbedBuilder,
-  PermissionsBitField
+  EmbedBuilder
 } = require('discord.js');
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const BACKEND_URL = process.env.BACKEND_URL;
+const WEBSITE_URL = 'https://necroxeye.github.io/Backend-Website/';
 const STATUS_MESSAGE_FILE = process.env.STATUS_MESSAGE_FILE || './status_message_id.json';
-const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 15000);
+const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 10000);
 
 if (!DISCORD_BOT_TOKEN || !CHANNEL_ID || !BACKEND_URL) {
   console.error('Missing DISCORD_BOT_TOKEN, CHANNEL_ID, or BACKEND_URL in .env');
@@ -69,40 +70,84 @@ async function fetchStatus() {
 }
 
 function normalizeState(data) {
-  const players = Array.isArray(data.players)
+  const playersRaw = Array.isArray(data.players)
     ? data.players
     : Array.isArray(data.players_added)
       ? data.players_added
       : [];
 
+  const players = playersRaw.map(p => {
+    if (typeof p === 'string') {
+      return {
+        name: p,
+        computer_name: 'Oil Rig'
+      };
+    }
+
+    return {
+      name: String(p.name || p.username || 'Unknown'),
+      computer_name: String(p.computer_name || p.computer || 'Oil Rig')
+    };
+  });
+
+  const websiteStatus = String(data.website_status || data.website || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
+  const backendStatus = String(data.backend_status || data.backend || data.status || 'ON').toUpperCase() === 'ON' ? 'ON' : 'OFF';
+
   return {
-    status: String(data.status || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
-    backendStatus: String(data.backend_status || data.backend || 'OFF').toUpperCase() === 'ON' ? 'ON' : 'OFF',
-    computer: String(data.computer || data.computer_name || 'N/A'),
-    oilRig: String(data.oilRig || data.oil_rig || 'Offline'),
-    website: String(data.website || 'Working'),
+    websiteStatus,
+    backendStatus,
     players
   };
 }
 
-function buildEmbed(state) {
-  const statusEmoji = state.status === 'ON' ? '🟢' : '🔴';
-  const backendEmoji = state.backendStatus === 'ON' ? '🟢' : '🔴';
-  const oilRigOk = String(state.oilRig).toLowerCase() === 'working';
+function buildComputerLines(players) {
+  const computers = new Map();
 
-  return new EmbedBuilder()
+  for (const player of players) {
+    const computer = String(player.computer_name || 'Oil Rig').trim() || 'Oil Rig';
+    if (!computers.has(computer)) computers.set(computer, []);
+    computers.get(computer).push(player.name);
+  }
+
+  if (computers.size === 0) {
+    computers.set('Oil Rig', []);
+  }
+
+  const lines = [];
+  for (const [computer, names] of computers.entries()) {
+    const state = names.length > 0 ? 'ON' : 'OFF';
+    lines.push(`${computer} - ${state}`);
+  }
+
+  return lines.join('\n');
+}
+
+function buildPlayersLines(players) {
+  if (!players.length) return 'None';
+  return players.map(p => `• ${p.name}`).join('\n');
+}
+
+function buildEmbed(state) {
+  const computerLines = buildComputerLines(state.players);
+  const playersLines = buildPlayersLines(state.players);
+
+  const backendEmoji = state.backendStatus === 'ON' ? '🟢' : '🔴';
+  const websiteEmoji = state.websiteStatus === 'ON' ? '🟢' : '🔴';
+
+  const embed = new EmbedBuilder()
     .setTitle('System Status Panel')
-    .setColor(state.status === 'ON' ? 0x2ecc71 : 0xe74c3c)
+    .setColor(state.backendStatus === 'ON' ? 0x2ecc71 : 0xe74c3c)
     .addFields(
-      { name: 'Status', value: `${statusEmoji} ${state.status}`, inline: true },
-      { name: 'Players Added', value: state.players.length ? state.players.map(p => `• ${p}`).join('\n') : 'None', inline: false },
+      { name: 'Computers', value: computerLines || 'Oil Rig - OFF', inline: false },
+      { name: 'Players', value: playersLines, inline: false },
+      { name: 'Website Status', value: `${websiteEmoji} ${state.websiteStatus}`, inline: true },
       { name: 'Backend Status', value: `${backendEmoji} ${state.backendStatus}`, inline: true },
-      { name: 'Computer', value: state.computer, inline: true },
-      { name: 'Oil Rig', value: oilRigOk ? '🟢 Working' : '🔴 Offline', inline: true },
-      { name: 'Website', value: '🟢 Working', inline: true }
+      { name: 'Link', value: `[Frosted Fang](${WEBSITE_URL})`, inline: false }
     )
     .setFooter({ text: 'Auto-updating status panel' })
     .setTimestamp();
+
+  return embed;
 }
 
 async function getExistingMessage(channel) {
@@ -154,7 +199,6 @@ async function updatePanel() {
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
-
   await updatePanel();
   setInterval(updatePanel, POLL_INTERVAL_MS);
 });
