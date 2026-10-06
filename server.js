@@ -2,21 +2,25 @@ require('dotenv').config();
 
 const express = require('express');
 const session = require('express-session');
-const cors = require('cors');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
+const axios = require('axios');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 10000;
-
-const SESSION_SECRET = process.env.SESSION_SECRET;
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const DISCORD_CALLBACK_URL = process.env.DISCORD_CALLBACK_URL;
-const FRONTEND_URL = process.env.FRONTEND_URL;
-const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const {
+  SESSION_SECRET,
+  DISCORD_CLIENT_ID,
+  DISCORD_CLIENT_SECRET,
+  DISCORD_CALLBACK_URL,
+  FRONTEND_URL,
+  DISCORD_GUILD_ID,
+  DISCORD_BOT_TOKEN,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+} = process.env;
 
 const ADMIN_ROLE_ID = '1556390847191322806';
 const PULL_ROLE_ID = '1553856941204181162';
@@ -28,21 +32,18 @@ if (
   !DISCORD_CALLBACK_URL ||
   !FRONTEND_URL ||
   !DISCORD_GUILD_ID ||
-  !DISCORD_BOT_TOKEN
+  !DISCORD_BOT_TOKEN ||
+  !SUPABASE_URL ||
+  !SUPABASE_ANON_KEY
 ) {
   console.error('Missing required environment variables');
   process.exit(1);
 }
 
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 app.set('trust proxy', 1);
-
-app.use(cors({
-  origin: 'https://necroxeye.github.io',
-  credentials: true
-}));
-
 app.use(express.json());
-
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
@@ -62,23 +63,16 @@ passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
 async function fetchGuildMemberRoles(userId) {
-  const memberRes = await fetch(
+  const res = await axios.get(
     `https://discord.com/api/guilds/${DISCORD_GUILD_ID}/members/${userId}`,
     {
       headers: {
-        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`
       }
     }
   );
 
-  if (!memberRes.ok) {
-    const errText = await memberRes.text();
-    throw new Error(`Failed to fetch guild member: ${errText}`);
-  }
-
-  const memberData = await memberRes.json();
-  return Array.isArray(memberData.roles) ? memberData.roles : [];
+  return Array.isArray(res.data?.roles) ? res.data.roles : [];
 }
 
 passport.use(new DiscordStrategy(
@@ -92,19 +86,23 @@ passport.use(new DiscordStrategy(
     try {
       const roles = await fetchGuildMemberRoles(profile.id);
 
-      return done(null, {
+      done(null, {
         id: profile.id,
         username: profile.username,
         avatar: profile.avatar,
-        roles
+        roles,
+        isAdmin: roles.includes(ADMIN_ROLE_ID),
+        canPull: roles.includes(PULL_ROLE_ID) || roles.includes(ADMIN_ROLE_ID)
       });
     } catch (err) {
-      console.error('Discord auth error:', err);
-      return done(null, {
+      console.error('Discord auth error:', err.message);
+      done(null, {
         id: profile.id,
         username: profile.username,
         avatar: profile.avatar,
-        roles: []
+        roles: [],
+        isAdmin: false,
+        canPull: false
       });
     }
   }
@@ -115,35 +113,41 @@ function ensureAuth(req, res, next) {
   return res.status(401).json({ error: 'Not authenticated' });
 }
 
-function hasRole(req, roleId) {
-  return Array.isArray(req.user?.roles) && req.user.roles.includes(roleId);
-}
-
-function ensurePullRole(req, res, next) {
+function ensureAdmin(req, res, next) {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
+  if (req.user?.isAdmin) return next();
+  return res.status(403).json({ error: 'Missing admin role' });
+}
 
-  if (hasRole(req, PULL_ROLE_ID) || hasRole(req, ADMIN_ROLE_ID)) return next();
+function ensurePull(req, res, next) {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  if (req.user?.canPull) return next();
   return res.status(403).json({ error: 'Missing pull role' });
 }
 
-function ensureAdminRole(req, res, next) {
-  if (!req.isAuthenticated || !req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
-  if (hasRole(req, ADMIN_ROLE_ID)) return next();
-  return res.status(403).json({ error: 'Missing admin role' });
+function mapPlayer(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    computer_name: row.computer_name || 'Oil Rig',
+    channel_name: row.channel_name || '',
+    signal_strength: Number(row.signal_strength ?? 15),
+    direction: row.direction || 'left',
+    is_admin: !!row.is_admin,
+    created_at: row.created_at || null
+  };
 }
 
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
-app.get('/auth/discord/callback',
+app.get(
+  '/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: FRONTEND_URL }),
-  (req, res) => {
-    res.redirect(FRONTEND_URL);
-  }
+  (req, res) => res.redirect(FRONTEND_URL)
 );
 
 app.get('/auth/me', (req, res) => {
@@ -156,7 +160,9 @@ app.get('/auth/me', (req, res) => {
       id: req.user.id,
       username: req.user.username,
       avatar: req.user.avatar,
-      roles: req.user.roles || []
+      roles: req.user.roles || [],
+      isAdmin: !!req.user.isAdmin,
+      canPull: !!req.user.canPull
     }
   });
 });
@@ -178,22 +184,26 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ON' });
 });
 
-let players = [];
+app.get('/players', ensureAuth, async (req, res) => {
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .order('created_at', { ascending: true });
 
-function makeId() {
-  return Math.random().toString(36).slice(2, 10);
-}
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
 
-app.get('/players', ensureAuth, (req, res) => {
-  res.json(players);
+  return res.json((data || []).map(mapPlayer));
 });
 
-app.post('/players', ensureAdminRole, (req, res) => {
+app.post('/players', ensureAdmin, async (req, res) => {
   const {
     name,
-    signal_strength = 15,
+    computer_name = 'Oil Rig',
     channel_name = '',
-    computer_name = '',
+    signal_strength = 15,
+    direction = 'left',
     is_admin = false
   } = req.body || {};
 
@@ -201,32 +211,36 @@ app.post('/players', ensureAdminRole, (req, res) => {
     return res.status(400).json({ error: 'name is required' });
   }
 
-  const player = {
-    id: makeId(),
+  const payload = {
     name: String(name),
-    signal_strength: Number(signal_strength),
-    channel_name: String(channel_name),
     computer_name: String(computer_name),
+    channel_name: String(channel_name),
+    signal_strength: Number(signal_strength),
+    direction: String(direction),
     is_admin: !!is_admin
   };
 
-  players.push(player);
-  res.json(player);
-});
+  const { data, error } = await supabase
+    .from('players')
+    .insert([payload])
+    .select('*')
+    .single();
 
-app.put('/players/:id', ensureAdminRole, (req, res) => {
-  const { id } = req.params;
-  const index = players.findIndex(p => p.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ error: 'Player not found' });
+  if (error) {
+    return res.status(500).json({ error: error.message });
   }
 
+  return res.json(mapPlayer(data));
+});
+
+app.put('/players/:id', ensureAdmin, async (req, res) => {
+  const { id } = req.params;
   const {
     name,
-    signal_strength = 15,
+    computer_name = 'Oil Rig',
     channel_name = '',
-    computer_name = '',
+    signal_strength = 15,
+    direction = 'left',
     is_admin = false
   } = req.body || {};
 
@@ -234,58 +248,103 @@ app.put('/players/:id', ensureAdminRole, (req, res) => {
     return res.status(400).json({ error: 'name is required' });
   }
 
-  players[index] = {
-    ...players[index],
+  const payload = {
     name: String(name),
-    signal_strength: Number(signal_strength),
-    channel_name: String(channel_name),
     computer_name: String(computer_name),
+    channel_name: String(channel_name),
+    signal_strength: Number(signal_strength),
+    direction: String(direction),
     is_admin: !!is_admin
   };
 
-  res.json(players[index]);
+  const { data, error } = await supabase
+    .from('players')
+    .update(payload)
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  return res.json(mapPlayer(data));
 });
 
-app.delete('/players/:id', ensureAdminRole, (req, res) => {
+app.delete('/players/:id', ensureAdmin, async (req, res) => {
   const { id } = req.params;
-  const before = players.length;
-  players = players.filter(p => p.id !== id);
 
-  if (players.length === before) {
+  const { error } = await supabase
+    .from('players')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  return res.json({ ok: true });
+});
+
+app.post('/trigger/:id', ensurePull, async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-  res.json({ ok: true });
-});
+  const player = mapPlayer(data);
 
-app.post('/trigger/:id', ensurePullRole, (req, res) => {
-  const { id } = req.params;
-  const player = players.find(p => p.id === id);
-
-  if (!player) {
-    return res.status(404).json({ error: 'Player not found' });
-  }
-
-  res.json({
+  return res.json({
     ok: true,
     sent: {
       player: player.name,
-      signal_strength: player.signal_strength,
+      computer_name: player.computer_name,
       channel_name: player.channel_name,
-      computer_name: player.computer_name
+      signal_strength: player.signal_strength,
+      direction: player.direction
     }
   });
 });
 
-app.get('/status', (req, res) => {
-  res.json({
-    status: 'ON',
-    backend_status: 'ON',
-    computer: 'N/A',
-    oilRig: 'Working',
-    website: 'Working',
-    players: players.map(p => p.name)
-  });
+app.get('/status', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('players')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    const players = (data || []).map(mapPlayer);
+
+    return res.json({
+      status: 'ON',
+      backend_status: 'ON',
+      computer: 'N/A',
+      oilRig: 'Working',
+      website: 'Working',
+      players
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: 'OFF',
+      backend_status: 'OFF',
+      computer: 'N/A',
+      oilRig: 'Offline',
+      website: 'Offline',
+      players: [],
+      error: err.message
+    });
+  }
 });
 
 app.get('/', (req, res) => {
