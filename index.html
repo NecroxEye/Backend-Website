@@ -3,1096 +3,1167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang Control</title>
-  <meta name="description" content="Discord-auth gated roster and pull controls." />
+  <title>Frosted Fang Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#06111a;
-      --bg2:#091723;
-      --panel:rgba(172,240,255,.07);
-      --panel-2:rgba(172,240,255,.04);
-      --stroke:rgba(145,229,255,.18);
-      --text:#ebfcff;
-      --muted:#a5c9d3;
-      --cyan:#7cecff;
-      --ice:#dffaff;
-      --ok:#90ffd3;
-      --danger:#ff88b0;
-      --warn:#ffd7a1;
-      --radius:24px;
-      --shadow:0 24px 70px rgba(0,0,0,.35);
-      --max:1120px;
+    :root {
+      --bg: #0e1116;
+      --bg-soft: #151a22;
+      --panel: rgba(20, 25, 33, 0.82);
+      --panel-strong: rgba(16, 20, 28, 0.94);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #edf2f7;
+      --muted: #97a3b6;
+      --accent: #8df7c7;
+      --accent-2: #71b8ff;
+      --danger: #ff6b7a;
+      --warn: #ffd36e;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --max: 1380px;
     }
 
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      min-height:100vh;
-      color:var(--text);
-      font-family:Arial, sans-serif;
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
       background:
-        radial-gradient(circle at 12% 12%, rgba(124,236,255,.16), transparent 22%),
-        radial-gradient(circle at 88% 10%, rgba(124,236,255,.10), transparent 18%),
-        linear-gradient(180deg,var(--bg),var(--bg2));
-      overflow-x:hidden;
+        radial-gradient(circle at 15% 15%, rgba(113, 184, 255, 0.12), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(141, 247, 199, 0.10), transparent 28%),
+        linear-gradient(180deg, #0b0e13 0%, #0f1319 100%);
+      color: var(--text);
+      font-family: "Space Grotesk", sans-serif;
+      min-height: 100%;
     }
 
-    .shell{
-      width:min(var(--max), calc(100% - 28px));
-      margin-inline:auto;
-    }
-
-    .glass{
-      position:relative;
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg,var(--panel),var(--panel-2));
-      backdrop-filter:blur(18px);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .hide,[hidden]{display:none !important}
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:20;
-      background:linear-gradient(180deg, rgba(5,11,17,.86), rgba(5,11,17,.62));
-      border-bottom:1px solid rgba(124,236,255,.12);
-      backdrop-filter:blur(14px);
-    }
-
-    .topbar-inner{
-      min-height:76px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:14px 0;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
-
-    .brand-mark{
-      width:46px;
-      height:46px;
-      border-radius:14px;
-      border:1px solid rgba(145,229,255,.24);
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.45), transparent 22%),
-        linear-gradient(135deg, rgba(124,236,255,.26), rgba(69,216,238,.05));
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.4));
+      opacity: .35;
     }
 
-    .brand-copy h1{
-      margin:0;
-      font-size:1.1rem;
-      letter-spacing:.12em;
-      text-transform:uppercase;
+    a { color: inherit; text-decoration: none; }
+
+    .shell {
+      width: min(calc(100% - 28px), var(--max));
+      margin: 0 auto;
+      padding: 18px 0 50px;
+      position: relative;
+      z-index: 1;
     }
 
-    .brand-copy p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:.85rem;
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.2fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 0 28px;
+      animation: rise .7s ease both;
     }
 
-    .status-row{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-      gap:10px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
     }
 
-    .terminal-pill{
-      min-width:220px;
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid rgba(124,236,255,.16);
-      background:linear-gradient(180deg, rgba(10,22,33,.84), rgba(7,18,27,.72));
-      display:flex;
-      align-items:center;
-      gap:10px;
-      color:#d2f7ff;
-      font-size:.82rem;
-      white-space:nowrap;
-    }
-
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:#607d87;
-    }
-
-    .dot.online{
-      background:var(--ok);
-      box-shadow:0 0 0 7px rgba(144,255,211,.10), 0 0 18px rgba(144,255,211,.22);
-    }
-
-    .dot.offline{
-      background:var(--danger);
-      box-shadow:0 0 0 7px rgba(255,136,176,.08), 0 0 16px rgba(255,136,176,.16);
-    }
-
-    button{
-      border:none;
-      cursor:pointer;
-      font:inherit;
-      font-weight:700;
-      transition:.2s ease;
-      border-radius:999px;
-    }
-
-    .discord-btn,.logout-btn,.ghost-btn,.mini,.pull-btn,.primary-btn,.secondary-btn{
-      padding:11px 16px;
-    }
-
-    .discord-btn,.pull-btn,.primary-btn{
-      color:#041018;
-      background:linear-gradient(135deg,#ecfdff,#7cecff);
-      box-shadow:0 14px 28px rgba(124,236,255,.18);
-    }
-
-    .logout-btn,.ghost-btn,.mini,.secondary-btn{
-      color:var(--ice);
-      background:rgba(172,240,255,.06);
-      border:1px solid rgba(124,236,255,.16);
-    }
-
-    .mini.danger{
-      color:#ffdce8;
-      border-color:rgba(255,136,176,.22);
-      background:rgba(255,136,176,.08);
-    }
-
-    main{padding:28px 0 52px}
-
-    .hero{
-      padding:34px;
-      min-height:260px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:18px;
-    }
-
-    .eyebrow{
-      color:var(--cyan);
-      font-size:.76rem;
-      text-transform:uppercase;
-      letter-spacing:.18em;
-    }
-
-    .hero h2{
-      margin:10px 0 10px;
-      font-size:clamp(1.9rem,5vw,3.8rem);
-      line-height:1.02;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-      max-width:12ch;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      max-width:60ch;
-      line-height:1.7;
-      font-size:1rem;
-    }
-
-    .metrics{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:8px;
-    }
-
-    .metric{
-      min-width:150px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(124,236,255,.14);
-      background:rgba(8,21,31,.45);
-    }
-
-    .metric span{
-      display:block;
-      color:var(--muted);
-      font-size:.75rem;
-      text-transform:uppercase;
-      margin-bottom:6px;
-      letter-spacing:.08em;
-    }
-
-    .metric strong{
-      color:var(--ice);
-      font-size:1.15rem;
-    }
-
-    .stack{
-      display:grid;
-      gap:18px;
-      margin-top:18px;
-    }
-
-    .panel{
-      padding:22px;
-    }
-
-    .panel-head{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .panel-head h3{
-      margin:0;
-      font-size:1.2rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-
-    .panel-head p{
-      margin:7px 0 0;
-      color:var(--muted);
-      line-height:1.65;
-      font-size:.95rem;
-      max-width:48ch;
-    }
-
-    .lock-panel{
-      text-align:center;
-      padding:34px 24px;
-    }
-
-    .lock-panel h3{
-      margin:0 0 12px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-size:clamp(1.15rem,3vw,1.7rem);
-    }
-
-    .lock-panel p{
-      margin:0 auto 18px;
-      max-width:44ch;
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .terminal-status{
-      min-height:64px;
-      display:flex;
-      align-items:center;
-      padding:15px 16px;
-      border-radius:18px;
-      border:1px solid rgba(124,236,255,.14);
-      background:linear-gradient(180deg, rgba(7,18,27,.82), rgba(7,18,27,.66));
-      color:#d9fbff;
-      font-size:.88rem;
-      line-height:1.6;
-    }
-
-    .terminal-status.ok{color:#e7fff3;border-color:rgba(144,255,211,.18)}
-    .terminal-status.warn{color:#fff1d1;border-color:rgba(255,215,161,.20)}
-    .terminal-status.error{color:#ffe4ec;border-color:rgba(255,136,176,.20)}
-
-    .roster{
-      display:grid;
-      gap:12px;
-    }
-
-    .player-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:14px;
-      align-items:center;
-      padding:16px;
-      border-radius:20px;
-      border:1px solid rgba(124,236,255,.12);
-      background:linear-gradient(180deg, rgba(9,21,31,.68), rgba(8,19,28,.48));
-    }
-
-    .player-main{
-      display:grid;
-      gap:10px;
-      min-width:0;
-    }
-
-    .player-top{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
-
-    .player-name{
-      margin:0;
-      color:var(--ice);
-      font-size:1.05rem;
-      font-weight:700;
-    }
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(124,236,255,.14);
-      background:rgba(172,240,255,.05);
-      color:#bfeaf2;
-      font-size:.75rem;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-    }
-
-    .player-meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .player-actions{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      gap:8px;
-    }
-
-    .empty{
-      padding:28px 20px;
-      border-radius:20px;
-      border:1px dashed rgba(124,236,255,.22);
-      background:rgba(172,240,255,.03);
-      color:var(--muted);
-      text-align:center;
-    }
-
-    .admin-wrap{
-      margin-top:4px;
-      padding:18px;
-      border-radius:20px;
-      border:1px solid rgba(124,236,255,.14);
-      background:linear-gradient(180deg, rgba(7,18,27,.75), rgba(7,18,27,.58));
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .field{
-      display:grid;
-      gap:8px;
-    }
-
-    .field.full{grid-column:1 / -1}
-
-    label{
-      color:#c5eef6;
-      font-size:.8rem;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-    }
-
-    input{
-      width:100%;
-      padding:14px 14px;
-      border-radius:16px;
-      border:1px solid rgba(124,236,255,.14);
-      background:linear-gradient(180deg, rgba(6,17,26,.92), rgba(7,18,27,.84));
-      color:var(--ice);
-      font:inherit;
-      outline:none;
-    }
-
-    input:focus{
-      border-color:rgba(124,236,255,.34);
-      box-shadow:0 0 0 4px rgba(124,236,255,.08);
-    }
-
-    .toggle{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(124,236,255,.14);
-      background:rgba(7,18,27,.62);
-    }
-
-    .toggle span{
-      color:#cbeef5;
-      font-size:.88rem;
-    }
-
-    .toggle input[type="checkbox"]{
-      width:20px;
-      height:20px;
-      accent-color:var(--cyan);
-    }
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:18px;
-    }
-
-    .eye-overlay{
-      position:fixed;
-      inset:0;
-      z-index:99;
-      display:grid;
-      place-items:center;
-      background:rgba(3,10,16,.34);
-      backdrop-filter:blur(10px);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .25s ease;
-    }
-
-    .eye-overlay.active{
-      opacity:1;
-      pointer-events:auto;
-    }
-
-    .eye-panel{
-      width:min(540px, calc(100% - 34px));
-      min-height:280px;
-      border-radius:30px;
-      border:1px solid rgba(124,236,255,.18);
+    .sigil {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      position: relative;
       background:
-        radial-gradient(circle at 50% 40%, rgba(124,236,255,.15), transparent 28%),
-        linear-gradient(180deg, rgba(172,240,255,.12), rgba(172,240,255,.06));
-      backdrop-filter:blur(20px);
-      box-shadow:0 28px 80px rgba(0,0,0,.42);
-      display:grid;
-      place-items:center;
-      transform:translateY(16px) scale(.95);
-      transition:transform .28s ease;
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 32%),
+        linear-gradient(135deg, rgba(141,247,199,.25), rgba(113,184,255,.18)),
+        var(--panel-strong);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
-    .eye-overlay.active .eye-panel{transform:translateY(0) scale(1)}
-
-    .eye-wrap{
-      display:grid;
-      place-items:center;
-      text-align:center;
-      gap:18px;
-      padding:28px;
+    .sigil::before,
+    .sigil::after {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      border: 1px solid rgba(255,255,255,.14);
+      transform: rotate(45deg);
+      border-radius: 10px;
     }
 
-    .eye-wrap svg{
-      width:min(220px, 50vw);
-      height:auto;
-      filter:drop-shadow(0 0 20px rgba(69,216,238,.22));
-      animation:eyePulse 1s ease-in-out infinite alternate;
+    .sigil::after {
+      inset: 18px;
+      border-color: rgba(141,247,199,.45);
     }
 
-    .eye-wrap h4{
-      margin:0;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-size:1rem;
-      color:var(--ice);
+    .brand-copy { min-width: 0; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: .78rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
     }
 
-    .eye-wrap p{
-      margin:0;
-      color:var(--muted);
-      font-size:.88rem;
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 1px;
+      background: currentColor;
+      opacity: .85;
     }
 
-    @keyframes eyePulse{
-      from{transform:scale(.98)}
-      to{transform:scale(1.04)}
+    .brand h1 {
+      margin: 6px 0 0;
+      font-family: "Bebas Neue", cursive;
+      letter-spacing: .04em;
+      line-height: .9;
+      font-size: clamp(2.4rem, 6vw, 4.6rem);
+      font-weight: 400;
     }
 
-    @media (max-width:760px){
-      .topbar-inner{flex-direction:column;align-items:flex-start}
-      .status-row{width:100%;justify-content:flex-start}
-      .form-grid{grid-template-columns:1fr}
-      .player-row{grid-template-columns:1fr}
-      .player-actions{justify-content:flex-start}
-      .hero h2{max-width:none}
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      max-width: 62ch;
+      font-size: .98rem;
+    }
+
+    .auth-cluster {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font: inherit;
+      font-weight: 700;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.2); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      color: #07130f;
+      background: linear-gradient(135deg, var(--accent), #bafadb);
+      border-color: rgba(141,247,199,.55);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, rgba(255,107,122,.18), rgba(255,107,122,.08));
+      border-color: rgba(255,107,122,.35);
+      color: #ffd7dc;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+      animation: rise .8s ease both;
+      animation-delay: .08s;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      min-height: 106px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .online { color: var(--accent); }
+    .offline { color: var(--danger); }
+    .warn { color: var(--warn); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) 360px;
+      grid-template-areas:
+        "hero roster"
+        "main roster";
+      gap: 18px;
+      align-items: start;
+    }
+
+    .hero-panel,
+    .panel,
+    .roster-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel {
+      grid-area: hero;
+      overflow: hidden;
+      position: relative;
+      padding: 22px;
+      animation: rise .85s ease both;
+      animation-delay: .15s;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -40% auto;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(113,184,255,.16), transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .9fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .hero-copy h2 {
+      margin: 0 0 10px;
+      font-family: "Bebas Neue", cursive;
+      letter-spacing: .04em;
+      font-weight: 400;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: .92;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 60ch;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .hero-box {
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      min-height: 100%;
+    }
+
+    .hero-box h3 {
+      margin: 0 0 12px;
+      font-size: .95rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+    }
+
+    .hero-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: var(--text);
+    }
+
+    .hero-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .hero-list li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .main-stack {
+      grid-area: main;
+      display: grid;
+      gap: 18px;
+      animation: rise .9s ease both;
+      animation-delay: .22s;
+    }
+
+    .roster-panel {
+      grid-area: roster;
+      padding: 18px;
+      position: sticky;
+      top: 16px;
+      animation: rise .95s ease both;
+      animation-delay: .28s;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: "Bebas Neue", cursive;
+      letter-spacing: .04em;
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: .95;
+    }
+
+    .panel-sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .auth-banner {
+      display: none;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(141,247,199,.2);
+      background: linear-gradient(135deg, rgba(141,247,199,.12), rgba(113,184,255,.08));
+      color: #dffef0;
+    }
+
+    .auth-banner.show { display: block; }
+
+    .locked-note {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,.12);
+      color: var(--muted);
+      background: rgba(255,255,255,.02);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: .85rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font: inherit;
+      outline: none;
+      transition: border-color .18s ease, transform .18s ease, background .18s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(141,247,199,.45);
+      background: rgba(255,255,255,.06);
+      transform: translateY(-1px);
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 6px;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .logbox {
+      margin-top: 16px;
+      min-height: 44px;
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.16);
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .roster-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .roster-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .roster-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .roster-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .roster-main {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .roster-name {
+      font-weight: 700;
+      font-size: 1.02rem;
+    }
+
+    .roster-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: .8rem;
+      font-weight: 700;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      white-space: nowrap;
+    }
+
+    .roster-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .mini-btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .mini-btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.18); }
+    .mini-btn.danger { color: #ffd7dc; border-color: rgba(255,107,122,.25); background: rgba(255,107,122,.08); }
+    .mini-btn.accent { color: #08150f; background: linear-gradient(135deg, var(--accent), #bafadb); border-color: rgba(141,247,199,.45); }
+
+    .empty {
+      padding: 18px;
+      border-radius: 16px;
+      color: var(--muted);
+      border: 1px dashed rgba(255,255,255,.12);
+      text-align: center;
+    }
+
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .user-chip.show { display: inline-flex; }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .9rem;
+      font-weight: 700;
+      color: #07110d;
+      background: linear-gradient(135deg, var(--accent), #d7fff0);
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    .fade-in.visible {
+      animation: rise .65s ease forwards;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "hero"
+          "roster"
+          "main";
+      }
+
+      .roster-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .status-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .topbar { grid-template-columns: 1fr; }
+      .auth-cluster { justify-content: flex-start; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(calc(100% - 18px), var(--max)); }
+      .status-strip { grid-template-columns: 1fr; }
+      .panel, .roster-panel, .hero-panel { padding: 16px; border-radius: 18px; }
+      .panel-title { font-size: 1.72rem; }
+      .btn { width: 100%; justify-content: center; }
+      .actions { display: grid; }
     }
   </style>
 </head>
 <body>
-  <div class="eye-overlay" id="eyeOverlay" aria-hidden="true">
-    <div class="eye-panel">
-      <div class="eye-wrap">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M6 32C12.5 21 21.5 15 32 15C42.5 15 51.5 21 58 32C51.5 43 42.5 49 32 49C21.5 49 12.5 43 6 32Z" fill="url(#g1)" stroke="#071821" stroke-width="2.5"/>
-          <circle cx="32" cy="32" r="10" fill="#04141D"/>
-          <circle cx="32" cy="32" r="6" fill="#91F6FF"/>
-          <circle cx="29.5" cy="29.5" r="2" fill="#F2FFFF"/>
-          <defs>
-            <linearGradient id="g1" x1="6" y1="15" x2="58" y2="49" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#EDFDFF"/>
-              <stop offset="1" stop-color="#7CEEFF"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <h4 id="eyeTitle">Routing Pearl</h4>
-        <p id="eyeText">Stand by for trigger.</p>
-      </div>
-    </div>
-  </div>
-
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand fade-in">
+        <div class="sigil" aria-hidden="true"></div>
         <div class="brand-copy">
-          <h1>Frosted Fang</h1>
-          <p>pearl routing panel</p>
+          <div class="eyebrow">Frosted Fang</div>
+          <h1>Pearl Routing Console</h1>
+          <p>Manage routed players, assign computers, define signal direction, and trigger actions through a clean live control layer.</p>
         </div>
       </div>
 
-      <div class="status-row">
-        <div class="terminal-pill">
-          <span>$</span>
-          <span class="dot offline" id="backendDot"></span>
-          <span id="backendStatus">backend.check()</span>
+      <div class="auth-cluster fade-in">
+        <div id="userChip" class="user-chip" aria-live="polite">
+          <div class="avatar" id="userAvatar">U</div>
+          <div id="userLabel">Guest</div>
         </div>
-        <div class="terminal-pill">
-          <span>&gt;</span>
-          <span class="dot offline" id="authDot"></span>
-          <span id="authStatus">auth.locked()</span>
-        </div>
-        <button class="discord-btn" id="loginBtn" type="button">Login with Discord</button>
-        <button class="logout-btn hide" id="logoutBtn" type="button">Logout</button>
+        <a id="loginBtn" class="btn btn-primary" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
+        <button id="logoutBtn" class="btn btn-danger" style="display:none;">Logout</button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="shell">
-    <section class="glass hero">
-      <div>
-        <div class="eyebrow">Frosted Cyan Surface • Auth Gated</div>
-        <h2>Roster and pull controls stay hidden until login.</h2>
-        <p>
-          This page checks your backend session from the Render server.
-          If you're logged in, it will show roster and pull controls.
-          Admin tools only show for the configured admin role.
-        </p>
-      </div>
-
-      <div class="metrics">
-        <div class="metric">
-          <span>Backend</span>
-          <strong id="backendMetric">Checking…</strong>
-        </div>
-        <div class="metric">
-          <span>Players Loaded</span>
-          <strong id="playerCount">0</strong>
-        </div>
-        <div class="metric">
-          <span>Access</span>
-          <strong id="accessMetric">Locked</strong>
-        </div>
-      </div>
+    <section class="status-strip">
+      <article class="metric fade-in">
+        <div class="metric-label">Website</div>
+        <div class="metric-value" id="websiteStatus">Checking...</div>
+      </article>
+      <article class="metric fade-in">
+        <div class="metric-label">Backend</div>
+        <div class="metric-value" id="backendStatus">Checking...</div>
+      </article>
+      <article class="metric fade-in">
+        <div class="metric-label">Access</div>
+        <div class="metric-value" id="accessStatus">Guest</div>
+      </article>
+      <article class="metric fade-in">
+        <div class="metric-label">Players in Roster</div>
+        <div class="metric-value" id="playerCount">0</div>
+      </article>
     </section>
 
-    <section class="stack">
-      <section class="glass panel" id="lockedPanel">
-        <div class="lock-panel">
-          <h3>Access Locked</h3>
-          <p>Login with Discord first. Until then, roster, pull controls, and admin tools remain hidden.</p>
-          <button class="discord-btn" id="heroLoginBtn" type="button">Login with Discord</button>
+    <main class="layout">
+      <section class="hero-panel fade-in">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <h2>Direct control over pearl routes, computers, and output direction.</h2>
+            <p>
+              Add players with a dedicated computer target, signal strength, and redstone direction.
+              The roster remains visible at the top-right so operators can monitor and act without losing context.
+            </p>
+          </div>
+          <div class="hero-box">
+            <h3>Routing Summary</h3>
+            <ul class="hero-list">
+              <li><span>Login Access</span><strong id="summaryAuth">Waiting</strong></li>
+              <li><span>Pull Permission</span><strong id="summaryPull">Unknown</strong></li>
+              <li><span>Admin Permission</span><strong id="summaryAdmin">Unknown</strong></li>
+              <li><span>Tracked Computers</span><strong id="summaryComputers">Oil Rig</strong></li>
+            </ul>
+          </div>
         </div>
       </section>
 
-      <section class="glass panel hide" id="authedPanel" hidden aria-hidden="true">
-        <div class="panel-head">
+      <aside class="roster-panel fade-in">
+        <div class="roster-topbar">
           <div>
-            <h3>Roster & Controls</h3>
-            <p id="rosterSubtitle">Authenticated session active.</p>
+            <h2 class="panel-title" style="margin:0;">Roster</h2>
+            <p class="panel-sub">Visible after login. Top-right quick operator list.</p>
           </div>
-          <button class="ghost-btn" id="refreshBtn" type="button">Refresh</button>
+          <button id="refreshRosterBtn" class="btn">Refresh</button>
         </div>
-
-        <div class="terminal-status" id="liveStatus" role="status" aria-live="polite">
-          [ready] authenticated session required
+        <div id="rosterGate" class="locked-note">
+          Log in to see the roster and controls.
         </div>
+        <div id="rosterList" class="roster-list" style="display:none;"></div>
+      </aside>
 
-        <div class="roster" id="playerList"></div>
-
-        <section class="admin-wrap hide" id="adminPanel" hidden aria-hidden="true">
-          <div class="panel-head" style="margin-bottom:14px;">
+      <section class="main-stack">
+        <article class="panel fade-in">
+          <div class="panel-head">
             <div>
-              <h3 id="formTitle">Add Player</h3>
-              <p>Only visible for the configured admin role.</p>
+              <h2 class="panel-title">Add / Edit Player</h2>
+              <p class="panel-sub">Admin-only panel for player routing entries.</p>
             </div>
           </div>
 
-          <form id="playerForm" novalidate>
-            <input type="hidden" id="playerId" />
+          <div id="authBanner" class="auth-banner"></div>
 
+          <div id="adminGate" class="locked-note">
+            Log in with the website admin role to add, edit, or remove players.
+          </div>
+
+          <form id="playerForm" style="display:none;">
             <div class="form-grid">
               <div class="field">
-                <label for="name">Player Name</label>
-                <input id="name" type="text" placeholder="FrostedFang" required />
+                <label for="playerName">Player Name</label>
+                <input id="playerName" name="name" type="text" placeholder="Necrox" required />
               </div>
 
               <div class="field">
-                <label for="signal_strength">Signal Strength</label>
-                <input id="signal_strength" type="number" min="0" max="15" value="15" required />
+                <label for="computerName">Computer</label>
+                <input id="computerName" name="computer_name" type="text" placeholder="Oil Rig" required />
               </div>
 
               <div class="field">
-                <label for="channel_name">Channel Name</label>
-                <input id="channel_name" type="text" placeholder="pearl-main" />
+                <label for="channelName">Channel Name</label>
+                <input id="channelName" name="channel_name" type="text" placeholder="main_channel" />
               </div>
 
               <div class="field">
-                <label for="computer_name">Computer Name</label>
-                <input id="computer_name" type="text" placeholder="shared-pearl-computer" />
+                <label for="signalStrength">Signal Strength</label>
+                <input id="signalStrength" name="signal_strength" type="number" min="1" max="15" value="15" required />
+              </div>
+
+              <div class="field">
+                <label for="direction">Direction</label>
+                <select id="direction" name="direction" required>
+                  <option value="north">North</option>
+                  <option value="south">South</option>
+                  <option value="east">East</option>
+                  <option value="west">West</option>
+                  <option value="up">Up</option>
+                  <option value="down">Down</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="isAdmin">Website Admin Flag</label>
+                <select id="isAdmin" name="is_admin">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
               </div>
 
               <div class="field full">
-                <div class="toggle">
-                  <span>Admin Permission</span>
-                  <input id="is_admin" type="checkbox" />
+                <div class="checkbox-row">
+                  <input id="editingToggle" type="checkbox" disabled />
+                  <label for="editingToggle" style="margin:0; letter-spacing:.04em; text-transform:none; color:var(--text);">Editing existing player</label>
                 </div>
               </div>
             </div>
 
             <div class="actions">
-              <button class="primary-btn" id="saveBtn" type="submit">Save Player</button>
-              <button class="secondary-btn" id="resetBtn" type="button">Clear Form</button>
+              <button type="submit" class="btn btn-primary" id="saveBtn">Save Player</button>
+              <button type="button" class="btn" id="resetBtn">Reset Form</button>
             </div>
           </form>
 
-          <div class="terminal-status" id="feedback">[ready] admin tools locked</div>
-        </section>
+          <div class="logbox" id="formLog">Waiting.</div>
+        </article>
+
+        <article class="panel fade-in">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">Roster & Controls</h2>
+              <p class="panel-sub">Use the roster panel on the top-right for pull, edit, and delete actions.</p>
+            </div>
+          </div>
+          <div class="logbox" id="actionLog">No actions yet.</div>
+        </article>
       </section>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <script>
-    const API_BASE = 'https://backend-website-syxe.onrender.com';
-
-    const CONFIG = {
-      authMeUrl: `${API_BASE}/auth/me`,
-      loginUrl: `${API_BASE}/auth/discord/login`,
-      logoutUrl: `${API_BASE}/auth/logout`,
-      healthUrl: `${API_BASE}/health`,
-      playersUrl: `${API_BASE}/players`,
-      adminRoleId: '1556390847191322806',
-      pullRoleId: '1553856941204181162'
-    };
-
-    const els = {
-      backendDot: document.getElementById('backendDot'),
-      authDot: document.getElementById('authDot'),
-      backendStatus: document.getElementById('backendStatus'),
-      authStatus: document.getElementById('authStatus'),
-      backendMetric: document.getElementById('backendMetric'),
-      accessMetric: document.getElementById('accessMetric'),
-      playerCount: document.getElementById('playerCount'),
-      loginBtn: document.getElementById('loginBtn'),
-      heroLoginBtn: document.getElementById('heroLoginBtn'),
-      logoutBtn: document.getElementById('logoutBtn'),
-      lockedPanel: document.getElementById('lockedPanel'),
-      authedPanel: document.getElementById('authedPanel'),
-      adminPanel: document.getElementById('adminPanel'),
-      rosterSubtitle: document.getElementById('rosterSubtitle'),
-      liveStatus: document.getElementById('liveStatus'),
-      playerList: document.getElementById('playerList'),
-      refreshBtn: document.getElementById('refreshBtn'),
-      playerForm: document.getElementById('playerForm'),
-      playerId: document.getElementById('playerId'),
-      name: document.getElementById('name'),
-      signal_strength: document.getElementById('signal_strength'),
-      channel_name: document.getElementById('channel_name'),
-      computer_name: document.getElementById('computer_name'),
-      is_admin: document.getElementById('is_admin'),
-      saveBtn: document.getElementById('saveBtn'),
-      resetBtn: document.getElementById('resetBtn'),
-      formTitle: document.getElementById('formTitle'),
-      feedback: document.getElementById('feedback'),
-      eyeOverlay: document.getElementById('eyeOverlay'),
-      eyeTitle: document.getElementById('eyeTitle'),
-      eyeText: document.getElementById('eyeText')
-    };
+    const API = 'https://backend-website-syxe.onrender.com';
+    const ADMIN_ROLE_ID = '1556390847191322806';
+    const PULL_ROLE_ID = '1553856941204181162';
 
     let currentUser = null;
     let players = [];
-    let eyeTimer = null;
+    let editingId = null;
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userChip = document.getElementById('userChip');
+    const userAvatar = document.getElementById('userAvatar');
+    const userLabel = document.getElementById('userLabel');
 
-    function setVisible(el, visible) {
-      if (!el) return;
-      el.hidden = !visible;
-      el.classList.toggle('hide', !visible);
-      el.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    }
+    const websiteStatus = document.getElementById('websiteStatus');
+    const backendStatus = document.getElementById('backendStatus');
+    const accessStatus = document.getElementById('accessStatus');
+    const playerCount = document.getElementById('playerCount');
+
+    const summaryAuth = document.getElementById('summaryAuth');
+    const summaryPull = document.getElementById('summaryPull');
+    const summaryAdmin = document.getElementById('summaryAdmin');
+    const summaryComputers = document.getElementById('summaryComputers');
+
+    const authBanner = document.getElementById('authBanner');
+    const adminGate = document.getElementById('adminGate');
+    const rosterGate = document.getElementById('rosterGate');
+    const rosterList = document.getElementById('rosterList');
+
+    const playerForm = document.getElementById('playerForm');
+    const playerName = document.getElementById('playerName');
+    const computerName = document.getElementById('computerName');
+    const channelName = document.getElementById('channelName');
+    const signalStrength = document.getElementById('signalStrength');
+    const direction = document.getElementById('direction');
+    const isAdmin = document.getElementById('isAdmin');
+    const editingToggle = document.getElementById('editingToggle');
+
+    const formLog = document.getElementById('formLog');
+    const actionLog = document.getElementById('actionLog');
+    const refreshRosterBtn = document.getElementById('refreshRosterBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
     function hasRole(roleId) {
-      return !!currentUser?.roles?.includes(roleId);
+      return Array.isArray(currentUser?.roles) && currentUser.roles.includes(roleId);
     }
 
-    function isLoggedIn() {
-      return !!currentUser;
+    function hasAdmin() {
+      return hasRole(ADMIN_ROLE_ID);
     }
 
-    function canAdmin() {
-      return isLoggedIn() && hasRole(CONFIG.adminRoleId);
+    function hasPull() {
+      return hasRole(PULL_ROLE_ID) || hasAdmin();
     }
 
-    function canPull() {
-      return isLoggedIn() && (hasRole(CONFIG.pullRoleId) || hasRole(CONFIG.adminRoleId));
+    function setLog(el, msg, kind = 'muted') {
+      el.textContent = msg;
+      el.classList.remove('online', 'offline', 'warn');
+      if (kind === 'online') el.classList.add('online');
+      if (kind === 'offline') el.classList.add('offline');
+      if (kind === 'warn') el.classList.add('warn');
     }
 
-    function setBackend(ok) {
-      els.backendDot.className = 'dot ' + (ok ? 'online' : 'offline');
-      els.backendStatus.textContent = ok ? 'backend.online()' : 'backend.offline()';
-      els.backendMetric.textContent = ok ? 'Online' : 'Offline';
-    }
-
-    function setAuth(ok, label) {
-      els.authDot.className = 'dot ' + (ok ? 'online' : 'offline');
-      els.authStatus.textContent = label;
-    }
-
-    function setLiveStatus(text, type = '') {
-      els.liveStatus.textContent = text;
-      els.liveStatus.className = 'terminal-status' + (type ? ' ' + type : '');
-    }
-
-    function setFeedback(text, type = '') {
-      els.feedback.textContent = text;
-      els.feedback.className = 'terminal-status' + (type ? ' ' + type : '');
-    }
-
-    function showEye(title, text) {
-      clearTimeout(eyeTimer);
-      els.eyeTitle.textContent = title;
-      els.eyeText.textContent = text;
-      els.eyeOverlay.classList.add('active');
-      els.eyeOverlay.setAttribute('aria-hidden', 'false');
-    }
-
-    function hideEye() {
-      els.eyeOverlay.classList.remove('active');
-      els.eyeOverlay.setAttribute('aria-hidden', 'true');
-    }
-
-    function pulseEye(title, text, duration = 1400) {
-      showEye(title, text);
-      eyeTimer = setTimeout(hideEye, duration);
-    }
-
-    async function fetchJson(url, options = {}) {
-      const res = await fetch(url, {
-        method: options.method || 'GET',
-        headers: {
-          ...(options.headers || {})
-        },
-        body: options.body,
+    async function api(path, options = {}) {
+      const res = await fetch(API + path, {
+        ...options,
         credentials: 'include',
-        mode: 'cors'
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        }
       });
 
-      const text = await res.text();
       let data = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {}
+      const text = await res.text();
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
 
-      if (!res.ok) throw new Error(data.error || text || `Request failed (${res.status})`);
+      if (!res.ok) {
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
+
       return data;
     }
 
     async function checkBackend() {
       try {
-        await fetchJson(CONFIG.healthUrl);
-        setBackend(true);
+        await api('/health', { method: 'GET' });
+        backendStatus.textContent = 'ON';
+        backendStatus.className = 'metric-value online';
       } catch {
-        setBackend(false);
+        backendStatus.textContent = 'OFFLINE';
+        backendStatus.className = 'metric-value offline';
       }
+
+      websiteStatus.textContent = 'ON';
+      websiteStatus.className = 'metric-value online';
     }
 
-    async function checkAuth() {
-      try {
-        const data = await fetchJson(CONFIG.authMeUrl);
-        currentUser = data.user || null;
-      } catch {
-        currentUser = null;
-      }
-      updateAuthUi();
-    }
+    function updateUserUI() {
+      if (currentUser) {
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-flex';
+        userChip.classList.add('show');
+        userAvatar.textContent = (currentUser.username || 'U').slice(0, 1).toUpperCase();
+        userLabel.textContent = currentUser.username || 'User';
+        accessStatus.textContent = hasAdmin() ? 'Admin' : (hasPull() ? 'Pull Access' : 'Authenticated');
+        accessStatus.className = 'metric-value online';
 
-    function updateAuthUi() {
-      const loggedIn = isLoggedIn();
-      const admin = canAdmin();
-      const pull = canPull();
+        summaryAuth.textContent = 'Authenticated';
+        summaryPull.textContent = hasPull() ? 'Granted' : 'Missing';
+        summaryPull.className = hasPull() ? 'online' : 'warn';
+        summaryAdmin.textContent = hasAdmin() ? 'Granted' : 'Missing';
+        summaryAdmin.className = hasAdmin() ? 'online' : 'warn';
 
-      els.loginBtn.classList.toggle('hide', loggedIn);
-      els.logoutBtn.classList.toggle('hide', !loggedIn);
+        authBanner.classList.add('show');
+        authBanner.textContent = hasAdmin()
+          ? 'Authenticated with admin access. You can manage player entries.'
+          : hasPull()
+            ? 'Authenticated with pull access. Roster is visible, but admin controls are locked.'
+            : 'Authenticated, but no recognized admin/pull website role was found.';
 
-      setVisible(els.lockedPanel, !loggedIn);
-      setVisible(els.authedPanel, loggedIn);
-      setVisible(els.adminPanel, loggedIn && admin);
+        rosterGate.style.display = 'none';
+        rosterList.style.display = 'grid';
 
-      if (!loggedIn) {
-        setAuth(false, 'auth.locked()');
-        els.accessMetric.textContent = 'Locked';
-        setLiveStatus('[ready] authenticated session required');
-      } else if (admin) {
-        setAuth(true, 'auth.admin()');
-        els.accessMetric.textContent = 'Admin';
-        els.rosterSubtitle.textContent = 'Authenticated. Admin access active.';
-        setLiveStatus('[ok] admin session verified', 'ok');
-        setFeedback('[ok] admin tools unlocked', 'ok');
-      } else if (pull) {
-        setAuth(true, 'auth.pull()');
-        els.accessMetric.textContent = 'Pull';
-        els.rosterSubtitle.textContent = 'Authenticated. Pull access active.';
-        setLiveStatus('[ok] pull access verified', 'ok');
+        if (hasAdmin()) {
+          adminGate.style.display = 'none';
+          playerForm.style.display = 'block';
+        } else {
+          adminGate.style.display = 'grid';
+          playerForm.style.display = 'none';
+        }
       } else {
-        setAuth(true, 'auth.user()');
-        els.accessMetric.textContent = 'User';
-        els.rosterSubtitle.textContent = 'Authenticated. No pull role found.';
-        setLiveStatus('[warn] authenticated but missing pull role', 'warn');
+        loginBtn.style.display = 'inline-flex';
+        logoutBtn.style.display = 'none';
+        userChip.classList.remove('show');
+        accessStatus.textContent = 'Guest';
+        accessStatus.className = 'metric-value warn';
+
+        summaryAuth.textContent = 'Guest';
+        summaryPull.textContent = 'Locked';
+        summaryAdmin.textContent = 'Locked';
+
+        authBanner.classList.remove('show');
+        rosterGate.style.display = 'grid';
+        rosterList.style.display = 'none';
+        adminGate.style.display = 'grid';
+        playerForm.style.display = 'none';
       }
     }
 
-    function renderPlayers() {
-      els.playerCount.textContent = players.length;
+    function resetForm() {
+      editingId = null;
+      playerForm.reset();
+      signalStrength.value = 15;
+      direction.value = 'north';
+      isAdmin.value = 'false';
+      editingToggle.checked = false;
+      setLog(formLog, 'Form reset.', 'muted');
+    }
 
-      if (!isLoggedIn()) {
-        els.playerList.innerHTML = '';
+    function fillForm(player) {
+      editingId = player.id;
+      playerName.value = player.name || '';
+      computerName.value = player.computer_name || '';
+      channelName.value = player.channel_name || '';
+      signalStrength.value = Number(player.signal_strength || 15);
+      direction.value = player.direction || 'north';
+      isAdmin.value = String(!!player.is_admin);
+      editingToggle.checked = true;
+      setLog(formLog, `Editing ${player.name}.`, 'online');
+      window.scrollTo({ top: document.body.scrollHeight * 0.15, behavior: 'smooth' });
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function renderRoster() {
+      playerCount.textContent = String(players.length);
+
+      const computers = [...new Set(players.map(p => (p.computer_name || 'Oil Rig').trim()).filter(Boolean))];
+      summaryComputers.textContent = computers.length ? computers.join(', ') : 'Oil Rig';
+
+      if (!currentUser) {
+        rosterList.innerHTML = '';
         return;
       }
 
       if (!players.length) {
-        els.playerList.innerHTML = '<div class="empty">No players saved yet.</div>';
+        rosterList.innerHTML = '<div class="empty">No players yet.</div>';
         return;
       }
 
-      const showPull = canPull();
-      const showAdmin = canAdmin();
+      rosterList.innerHTML = players.map(player => {
+        const canPull = hasPull();
+        const canAdmin = hasAdmin();
 
-      els.playerList.innerHTML = players.map(player => `
-        <article class="player-row">
-          <div class="player-main">
-            <div class="player-top">
-              <h4 class="player-name">${escapeHtml(player.name)}</h4>
-              <span class="chip">sig ${escapeHtml(player.signal_strength ?? 15)}</span>
-              ${player.is_admin ? '<span class="chip">admin</span>' : ''}
+        return `
+          <article class="roster-item">
+            <div class="roster-main">
+              <div>
+                <div class="roster-name">${escapeHtml(player.name || 'Unknown')}</div>
+                <div class="roster-meta">
+                  Computer: ${escapeHtml(player.computer_name || 'Oil Rig')}<br>
+                  Channel: ${escapeHtml(player.channel_name || 'N/A')}<br>
+                  Direction: ${escapeHtml(player.direction || 'north')}<br>
+                  Signal: ${escapeHtml(player.signal_strength ?? 15)}
+                </div>
+              </div>
+              <div class="pill">${player.is_admin ? 'Admin Flag' : 'Player'}</div>
             </div>
-            <div class="player-meta">
-              <span class="chip">channel ${escapeHtml(player.channel_name || '—')}</span>
-              <span class="chip">computer ${escapeHtml(player.computer_name || '—')}</span>
+            <div class="roster-actions">
+              <button class="mini-btn accent" data-action="pull" data-id="${player.id}" ${canPull ? '' : 'disabled'}>Pull Pearl</button>
+              <button class="mini-btn" data-action="edit" data-id="${player.id}" ${canAdmin ? '' : 'disabled'}>Edit</button>
+              <button class="mini-btn danger" data-action="delete" data-id="${player.id}" ${canAdmin ? '' : 'disabled'}>Delete</button>
             </div>
-          </div>
-          <div class="player-actions">
-            ${showPull ? `<button class="pull-btn" type="button" data-action="trigger" data-id="${escapeHtml(player.id)}">Pull Pearl</button>` : ''}
-            ${showAdmin ? `<button class="mini" type="button" data-action="edit" data-id="${escapeHtml(player.id)}">Edit</button>` : ''}
-            ${showAdmin ? `<button class="mini danger" type="button" data-action="delete" data-id="${escapeHtml(player.id)}">Remove</button>` : ''}
-          </div>
-        </article>
-      `).join('');
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function loadAuth() {
+      try {
+        const data = await api('/auth/me');
+        currentUser = data.user || null;
+      } catch {
+        currentUser = null;
+      }
+      updateUserUI();
     }
 
     async function loadPlayers() {
-      if (!isLoggedIn()) {
+      if (!currentUser) {
         players = [];
-        renderPlayers();
+        renderRoster();
         return;
       }
 
       try {
-        const data = await fetchJson(CONFIG.playersUrl);
+        const data = await api('/players');
         players = Array.isArray(data) ? data : [];
-        renderPlayers();
+        renderRoster();
+        setLog(actionLog, 'Roster loaded.', 'online');
       } catch (err) {
         players = [];
-        renderPlayers();
-        setLiveStatus(`[error] ${err.message}`, 'error');
+        renderRoster();
+        setLog(actionLog, `[warn] ${err.message}`, 'warn');
       }
     }
 
-    function goLogin() {
-      window.location.href = CONFIG.loginUrl;
-    }
-
-    async function logout() {
-      try { await fetchJson(CONFIG.logoutUrl, { method: 'POST' }); } catch {}
-      currentUser = null;
-      players = [];
-      updateAuthUi();
-      renderPlayers();
-      hideEye();
-    }
-
-    function resetForm() {
-      els.playerId.value = '';
-      els.name.value = '';
-      els.signal_strength.value = '15';
-      els.channel_name.value = '';
-      els.computer_name.value = '';
-      els.is_admin.checked = false;
-      els.formTitle.textContent = 'Add Player';
-      els.saveBtn.textContent = 'Save Player';
-    }
-
-    function fillForm(player) {
-      if (!canAdmin()) return;
-      els.playerId.value = player.id || '';
-      els.name.value = player.name || '';
-      els.signal_strength.value = player.signal_strength ?? 15;
-      els.channel_name.value = player.channel_name || '';
-      els.computer_name.value = player.computer_name || '';
-      els.is_admin.checked = !!player.is_admin;
-      els.formTitle.textContent = 'Edit Player';
-      els.saveBtn.textContent = 'Update Player';
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-
-    async function savePlayer(event) {
-      event.preventDefault();
-      if (!canAdmin()) return;
+    playerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
       const payload = {
-        name: els.name.value.trim(),
-        signal_strength: Number(els.signal_strength.value),
-        channel_name: els.channel_name.value.trim(),
-        computer_name: els.computer_name.value.trim(),
-        is_admin: els.is_admin.checked
+        name: playerName.value.trim(),
+        computer_name: computerName.value.trim(),
+        channel_name: channelName.value.trim(),
+        signal_strength: Number(signalStrength.value),
+        direction: direction.value,
+        is_admin: isAdmin.value === 'true'
       };
 
-      if (!payload.name) return setFeedback('[error] player name is required', 'error');
-      if (Number.isNaN(payload.signal_strength) || payload.signal_strength < 0 || payload.signal_strength > 15) {
-        return setFeedback('[error] signal strength must be between 0 and 15', 'error');
-      }
-
-      const id = els.playerId.value.trim();
-      const isEdit = !!id;
-      const url = isEdit ? `${CONFIG.playersUrl}/${id}` : CONFIG.playersUrl;
-      const method = isEdit ? 'PUT' : 'POST';
-
       try {
-        await fetchJson(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        if (editingId) {
+          await api(`/players/${editingId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          setLog(formLog, `Updated ${payload.name}.`, 'online');
+        } else {
+          await api('/players', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          setLog(formLog, `Added ${payload.name}.`, 'online');
+        }
 
-        setFeedback(isEdit ? '[ok] player updated' : '[ok] player saved', 'ok');
         resetForm();
         await loadPlayers();
       } catch (err) {
-        setFeedback(`[error] ${err.message}`, 'error');
+        setLog(formLog, `[error] ${err.message}`, 'offline');
       }
-    }
+    });
 
-    async function deletePlayer(id) {
-      if (!canAdmin()) return;
+    resetBtn.addEventListener('click', resetForm);
 
+    refreshRosterBtn.addEventListener('click', async () => {
+      await loadPlayers();
+    });
+
+    rosterList.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
       const player = players.find(p => p.id === id);
-      const label = player?.name || 'this player';
+      if (!player) return;
 
-      if (!confirm(`Remove ${label}?`)) return;
-
-      try {
-        await fetchJson(`${CONFIG.playersUrl}/${id}`, { method: 'DELETE' });
-        setFeedback(`[ok] removed ${label}`, 'ok');
-        await loadPlayers();
-      } catch (err) {
-        setFeedback(`[error] ${err.message}`, 'error');
-      }
-    }
-
-    async function triggerPlayer(id) {
-      if (!canPull()) {
-        setLiveStatus('[warn] missing pull role', 'warn');
+      if (action === 'edit') {
+        fillForm(player);
         return;
       }
 
-      const player = players.find(p => p.id === id);
-      const label = player?.name || 'Player';
+      if (action === 'delete') {
+        const ok = confirm(`Delete ${player.name}?`);
+        if (!ok) return;
 
-      pulseEye('Routing Pearl', `${label} :: stand by`);
+        try {
+          await api(`/players/${id}`, { method: 'DELETE' });
+          setLog(actionLog, `Deleted ${player.name}.`, 'online');
+          await loadPlayers();
+          if (editingId === id) resetForm();
+        } catch (err) {
+          setLog(actionLog, `[error] ${err.message}`, 'offline');
+        }
+        return;
+      }
 
+      if (action === 'pull') {
+        try {
+          const data = await api(`/trigger/${id}`, { method: 'POST' });
+          const sent = data.sent || {};
+          setLog(
+            actionLog,
+            `Pull sent for ${sent.player || player.name} | Computer: ${sent.computer_name || player.computer_name} | Direction: ${sent.direction || player.direction || 'north'} | Signal: ${sent.signal_strength ?? player.signal_strength ?? 15}`,
+            'online'
+          );
+        } catch (err) {
+          setLog(actionLog, `[warn] ${err.message}`, 'warn');
+        }
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
       try {
-        await fetchJson(`${API_BASE}/trigger/${id}`, {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json' }
+        await api('/auth/logout', { method: 'POST' });
+      } catch {}
+      currentUser = null;
+      players = [];
+      resetForm();
+      updateUserUI();
+      renderRoster();
+      setLog(actionLog, 'Logged out.', 'muted');
+    });
+
+    function setupReveal() {
+      const els = document.querySelectorAll('.fade-in');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            entry.target.style.animationDelay = `${index * 0.06}s`;
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
         });
+      }, { threshold: 0.12 });
 
-        pulseEye('Pearl Triggered', `${label} :: signal sent`, 1500);
-        setLiveStatus(`[ok] pull sent for ${label}`, 'ok');
-      } catch (err) {
-        pulseEye('Trigger Failed', err.message, 1800);
-        setLiveStatus(`[error] ${err.message}`, 'error');
-      }
+      els.forEach(el => io.observe(el));
     }
 
-    els.loginBtn.addEventListener('click', goLogin);
-    els.heroLoginBtn.addEventListener('click', goLogin);
-    els.logoutBtn.addEventListener('click', logout);
-    els.refreshBtn.addEventListener('click', async () => {
+    async function boot() {
+      setupReveal();
       await checkBackend();
-      await checkAuth();
-      await loadPlayers();
-    });
-    els.eyeOverlay.addEventListener('click', hideEye);
-    els.playerForm.addEventListener('submit', savePlayer);
-    els.resetBtn.addEventListener('click', () => {
-      resetForm();
-      setFeedback('[ready] form cleared', 'ok');
-    });
-
-    els.playerList.addEventListener('click', async (event) => {
-      const button = event.target.closest('button[data-action]');
-      if (!button) return;
-
-      const action = button.dataset.action;
-      const id = button.dataset.id;
-      if (!id) return;
-
-      if (action === 'trigger') await triggerPlayer(id);
-      if (action === 'edit') {
-        const player = players.find(p => p.id === id);
-        if (player) fillForm(player);
-      }
-      if (action === 'delete') await deletePlayer(id);
-    });
-
-    async function init() {
-      setVisible(els.lockedPanel, true);
-      setVisible(els.authedPanel, false);
-      setVisible(els.adminPanel, false);
-      resetForm();
-      await checkBackend();
-      await checkAuth();
+      await loadAuth();
       await loadPlayers();
     }
 
-    init();
+    boot();
   </script>
 </body>
 </html>
