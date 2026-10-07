@@ -11,8 +11,8 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
 
-// IMPORTANT: GitHub Pages repo URL, not root domain
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://necroxeye.github.io/Backend-Website/';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://necroxeye.github.io';
+const FRONTEND_REDIRECT = process.env.FRONTEND_REDIRECT || 'https://necroxeye.github.io/Backend-Website/';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
@@ -37,11 +37,10 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Render fix for secure cookies behind proxy
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: FRONTEND_ORIGIN,
   credentials: true
 }));
 
@@ -116,14 +115,13 @@ function mapPlayer(row) {
   };
 }
 
-// Auth routes
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
   '/auth/discord/callback',
-  passport.authenticate('discord', { failureRedirect: FRONTEND_URL }),
+  passport.authenticate('discord', { failureRedirect: FRONTEND_REDIRECT }),
   (req, res) => {
-    res.redirect(FRONTEND_URL);
+    res.redirect(FRONTEND_REDIRECT);
   }
 );
 
