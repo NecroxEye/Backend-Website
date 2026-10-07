@@ -13,8 +13,6 @@
       --bg-top:#0a0b0d;
       --bg-mid:#11181c;
       --bg-bottom:#bdf8ff;
-      --panel:rgba(255,255,255,.08);
-      --panel-2:rgba(255,255,255,.12);
       --line:rgba(255,255,255,.14);
       --text:#f1fdff;
       --muted:#b7d1d6;
@@ -22,7 +20,6 @@
       --accent-2:#eefeff;
       --ok:#8effbe;
       --bad:#ff8096;
-      --ink:#071317;
       --shadow:0 18px 60px rgba(0,0,0,.30);
       --radius:24px;
       --cyan-soft:#bff8ff;
@@ -108,7 +105,7 @@
       flex-wrap:wrap;
     }
 
-    .btn,.btn-secondary,.btn-logout{
+    .btn,.btn-logout{
       appearance:none;
       border:none;
       text-decoration:none;
@@ -136,19 +133,18 @@
       box-shadow:0 18px 34px rgba(151,245,255,.34);
     }
 
-    .btn-secondary,.btn-logout{
+    .btn-logout{
       color:var(--text);
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.12);
       backdrop-filter:blur(12px);
+      display:none;
     }
 
-    .btn-secondary:hover,.btn-logout:hover{
+    .btn-logout:hover{
       transform:translateY(-1px);
       background:rgba(255,255,255,.09);
     }
-
-    .btn-logout{display:none}
 
     main{padding:34px 0 72px}
 
@@ -157,7 +153,7 @@
       grid-template-columns:1.15fr .85fr;
       gap:22px;
       align-items:stretch;
-      min-height:64vh;
+      min-height:52vh;
     }
 
     .panel{
@@ -206,37 +202,16 @@
     }
 
     h1{
-      font-size:clamp(2.6rem, 7vw, 5.7rem);
-      max-width:11ch;
+      font-size:clamp(2.8rem, 7vw, 6rem);
+      max-width:10ch;
     }
 
     .lead{
-      margin:20px 0 0;
-      max-width:62ch;
+      margin:18px 0 0;
+      max-width:48ch;
       color:var(--muted);
       line-height:1.75;
       font-size:clamp(1rem, 1.3vw, 1.08rem);
-    }
-
-    .eye-block{
-      margin-top:22px;
-      padding:18px 20px;
-      border-radius:22px;
-      background:rgba(255,255,255,.045);
-      border:1px solid rgba(255,255,255,.11);
-      width:max-content;
-      max-width:100%;
-    }
-
-    .eye-lines{
-      margin:0;
-      color:#eefdff;
-      font-family:"Orbitron", monospace;
-      font-size:clamp(.55rem, 1.3vw, .8rem);
-      line-height:1.35;
-      letter-spacing:.08em;
-      white-space:pre;
-      text-shadow:0 0 18px rgba(151,245,255,.16);
     }
 
     .meta-grid{
@@ -593,7 +568,7 @@
       gap:8px;
     }
 
-    .panel-kamui{
+    .trigger-toast{
       position:fixed;
       inset:0;
       z-index:999;
@@ -602,38 +577,47 @@
       pointer-events:none;
       opacity:0;
       visibility:hidden;
-      background:radial-gradient(circle at center, rgba(151,245,255,.18), rgba(7,19,23,.12) 35%, rgba(0,0,0,.28) 72%, rgba(0,0,0,.5) 100%);
-      transition:opacity .18s ease, visibility .18s ease;
+      background:radial-gradient(circle at center, rgba(151,245,255,.18), rgba(7,19,23,.12) 34%, rgba(0,0,0,.34) 74%, rgba(0,0,0,.52) 100%);
+      transition:opacity .2s ease, visibility .2s ease;
     }
 
-    .panel-kamui.show{
+    .trigger-toast.show{
       opacity:1;
       visibility:visible;
     }
 
-    .panel-kamui-box{
-      padding:24px 30px;
+    .trigger-toast-box{
+      width:min(420px, calc(100vw - 32px));
+      padding:24px 24px 22px;
+      text-align:center;
       border-radius:28px;
       border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(14,25,31,.72), rgba(10,18,22,.54));
-      backdrop-filter:blur(16px);
+      background:linear-gradient(180deg, rgba(14,25,31,.84), rgba(10,18,22,.68));
+      backdrop-filter:blur(18px);
       box-shadow:0 24px 64px rgba(0,0,0,.38);
-      text-align:center;
     }
 
-    .panel-kamui-box .eye-lines{
-      font-size:clamp(.7rem, 1.8vw, 1rem);
-      line-height:1.5;
-      display:block;
+    .trigger-toast-label{
+      font-family:"Orbitron", sans-serif;
+      text-transform:uppercase;
+      letter-spacing:.22em;
+      font-size:.76rem;
+      color:var(--accent-2);
       margin-bottom:10px;
     }
 
-    .panel-kamui-text{
+    .trigger-toast-title{
+      margin:0;
       font-family:"Orbitron", sans-serif;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--accent-2);
-      font-size:.82rem;
+      font-size:clamp(1.25rem, 3vw, 1.7rem);
+      letter-spacing:.02em;
+    }
+
+    .trigger-toast-text{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.96rem;
+      line-height:1.6;
     }
 
     .footer-note{
@@ -681,14 +665,11 @@
   </style>
 </head>
 <body>
-  <div class="panel-kamui" id="triggerOverlay" aria-hidden="true">
-    <div class="panel-kamui-box">
-      <pre class="eye-lines">          ─────────   
-  ╱                              ╲  
- ┃                 █                  ┃
-  ╲                               ╱  
-         ─────────</pre>
-      <div class="panel-kamui-text" id="triggerOverlayText">Pearl pull engaged</div>
+  <div class="trigger-toast" id="triggerOverlay" aria-hidden="true">
+    <div class="trigger-toast-box">
+      <div class="trigger-toast-label">Frosted Fang</div>
+      <h3 class="trigger-toast-title">Pulled Pearl</h3>
+      <div class="trigger-toast-text" id="triggerOverlayText">Signal sent</div>
     </div>
   </div>
 
@@ -724,19 +705,11 @@
     <section class="hero">
       <article class="panel hero-copy reveal">
         <div>
-          <div class="eyebrow">Welcome, Fang</div>
-          <h1>Frosted Fang Pull System</h1>
+          <div class="eyebrow">Cold signal / live access</div>
+          <h1>Frosted Fang</h1>
           <p class="lead">
-            Below Zero, Above All.
+            Precision pull control, kept sharp, quiet, and always within reach.
           </p>
-
-          <div class="eye-block">
-            <pre class="eye-lines">          ─────────   
-  ╱                              ╲  
- ┃                 █                  ┃
-  ╲                               ╱  
-         ─────────</pre>
-          </div>
         </div>
 
         <div class="meta-grid">
@@ -1169,12 +1142,12 @@
     }
 
     function showTriggerOverlay(name) {
-      triggerOverlayText.textContent = `${name} • Pearl Pull`;
+      triggerOverlayText.textContent = `${name} signal sent`;
       triggerOverlay.classList.add('show');
       clearTimeout(showTriggerOverlay.timer);
       showTriggerOverlay.timer = setTimeout(() => {
         triggerOverlay.classList.remove('show');
-      }, 1500);
+      }, 1400);
     }
 
     logoutBtn.addEventListener('click', async () => {
