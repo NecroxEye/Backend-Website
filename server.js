@@ -5,6 +5,8 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
+const http = require('http');
+const { WebSocketServer } = require('ws');
 const DiscordStrategy = require('passport-discord').Strategy;
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
@@ -20,6 +22,7 @@ const {
 } = require('discord.js');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
 const {
@@ -177,7 +180,7 @@ function mapPlayer(row) {
   };
 }
 
-app.get('/auth/discord/login', passport.authenticate('discord'));
+('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
   '/auth/discord/callback',
@@ -338,7 +341,7 @@ app.post('/trigger/:id', ensurePull, async (req, res) => {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-  const player = mapPlayer(data);
+   = mapPlayer(data);
 
   return res.json({
     ok: true,
@@ -351,6 +354,7 @@ app.post('/trigger/:id', ensurePull, async (req, res) => {
     }
   });
 });
+
 
 app.get('/status', async (req, res) => {
   try {
@@ -372,16 +376,25 @@ app.get('/status', async (req, res) => {
       });
     }
 
-    const players = (data || []).map(mapPlayer);
+  const player = mapPlayer(data);
 
-    return res.json({
-      status: 'ON',
-      backend_status: 'ON',
-      computer: 'N/A',
-      oilRig: 'Working',
-      website: 'Working',
-      players
-    });
+  const delivered = sendToComputer(player.computer_name, {
+    type: 'trigger',
+    direction: player.direction,
+    signal_strength: player.signal_strength
+  });
+
+  return res.json({
+    ok: true,
+    sent: {
+      player: player.name,
+      computer_name: player.computer_name,
+      channel_name: player.channel_name,
+      signal_strength: player.signal_strength,
+      direction: player.direction,
+      delivered
+    }
+  });
   } catch (err) {
     console.error('/status error:', err);
     return res.status(500).json({
@@ -394,6 +407,51 @@ app.get('/status', async (req, res) => {
       error: err.message
     });
   }
+});
+
+const wss = new WebSocketServer({ server, path: '/ws' });
+const connectedComputers = new Map();
+
+function sendToComputer(computerName, payload) {
+  const ws = connectedComputers.get(computerName);
+  if (!ws || ws.readyState !== 1) return false;
+
+  ws.send(JSON.stringify(payload));
+  return true;
+}
+
+wss.on('connection', (ws) => {
+  console.log('[WS] client connected');
+
+  ws.on('message', (buf) => {
+    try {
+      const msg = JSON.parse(buf.toString());
+
+      if (msg.type === 'register') {
+        const name = String(msg.computer_name || 'unknown');
+        connectedComputers.set(name, ws);
+
+        ws.send(JSON.stringify({
+          type: 'welcome',
+          computer_name: name
+        }));
+
+        console.log(`[WS] registered computer: ${name}`);
+      }
+    } catch (err) {
+      console.error('[WS] message error:', err.message);
+    }
+  });
+
+  ws.on('close', () => {
+    for (const [name, sock] of connectedComputers.entries()) {
+      if (sock === ws) {
+        connectedComputers.delete(name);
+        console.log(`[WS] disconnected computer: ${name}`);
+        break;
+      }
+    }
+  });
 });
 
 app.get('/', (req, res) => {
@@ -608,7 +666,7 @@ client.on('error', err => console.error('[bot] client error:', err));
 process.on('unhandledRejection', err => console.error('[process] unhandled rejection:', err));
 process.on('uncaughtException', err => console.error('[process] uncaught exception:', err));
 
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   console.log(`[server] Server running on port ${PORT}`);
 
   if (!panelStarted) {
