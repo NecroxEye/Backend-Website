@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
-const session = require('express-session');
 const cors = require('cors');
+const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const { createClient } = require('@supabase/supabase-js');
@@ -14,15 +14,17 @@ const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const DISCORD_CALLBACK_URL = process.env.DISCORD_CALLBACK_URL || `${FRONTEND_URL}/auth/discord/callback`;
+const DISCORD_CALLBACK_URL =
+  process.env.DISCORD_CALLBACK_URL ||
+  'https://backend-website-syxe.onrender.com/auth/discord/callback';
 
-const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-secret';
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('Missing Supabase env vars');
   process.exit(1);
 }
@@ -32,11 +34,11 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --------------------
-// Middleware
-// --------------------
+// Important for Render / secure cookies
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true
@@ -48,19 +50,18 @@ app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
     httpOnly: true,
     secure: true,
-    sameSite: 'none'
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// --------------------
-// Passport
-// --------------------
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
@@ -69,7 +70,7 @@ passport.use(new DiscordStrategy(
     clientID: DISCORD_CLIENT_ID,
     clientSecret: DISCORD_CLIENT_SECRET,
     callbackURL: DISCORD_CALLBACK_URL,
-    scope: ['identify', 'email']
+    scope: ['identify']
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -77,8 +78,11 @@ passport.use(new DiscordStrategy(
         id: profile.id,
         username: profile.username,
         avatar: profile.avatar,
-        email: profile.email || null
+        roles: [],
+        isAdmin: false,
+        canPull: true
       };
+
       return done(null, user);
     } catch (err) {
       return done(err);
@@ -86,9 +90,6 @@ passport.use(new DiscordStrategy(
   }
 ));
 
-// --------------------
-// Auth helpers
-// --------------------
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) return next();
   return res.status(401).json({ error: 'Not authenticated' });
@@ -108,9 +109,6 @@ function ensurePull(req, res, next) {
   return res.status(403).json({ error: 'No permission' });
 }
 
-// --------------------
-// Data mapping
-// --------------------
 function mapPlayer(row) {
   return {
     id: row.id,
@@ -124,17 +122,11 @@ function mapPlayer(row) {
   };
 }
 
-// --------------------
-// WebSocket setup
-// --------------------
 const connectedComputers = new Map();
 
 function sendToComputer(computerName, payload) {
   const ws = connectedComputers.get(computerName);
-  if (!ws || ws.readyState !== 1) {
-    return false;
-  }
-
+  if (!ws || ws.readyState !== 1) return false;
   ws.send(JSON.stringify(payload));
   return true;
 }
@@ -188,15 +180,14 @@ wss.on('connection', (ws) => {
   });
 });
 
-// --------------------
-// Auth routes
-// --------------------
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
   '/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: FRONTEND_URL }),
-  (req, res) => res.redirect(FRONTEND_URL)
+  (req, res) => {
+    res.redirect(FRONTEND_URL);
+  }
 );
 
 app.get('/auth/me', (req, res) => {
@@ -229,9 +220,6 @@ app.post('/auth/logout', (req, res) => {
   });
 });
 
-// --------------------
-// Health routes
-// --------------------
 app.get('/health', (req, res) => {
   res.json({ status: 'ON' });
 });
@@ -258,9 +246,6 @@ app.get('/status', async (req, res) => {
   }
 });
 
-// --------------------
-// Player routes
-// --------------------
 app.get('/players', ensureAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('players')
@@ -367,11 +352,10 @@ app.delete('/players/:id', ensureAdmin, async (req, res) => {
   return res.json({ ok: true });
 });
 
-// --------------------
-// Trigger route
-// --------------------
 app.post('/trigger/:id', ensurePull, async (req, res) => {
   const { id } = req.params;
+
+  console.log('[TRIGGER] route called for id:', id);
 
   const { data, error } = await supabase
     .from('players')
@@ -412,16 +396,10 @@ app.post('/trigger/:id', ensurePull, async (req, res) => {
   });
 });
 
-// --------------------
-// Root
-// --------------------
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
 
-// --------------------
-// Start server
-// --------------------
 server.listen(PORT, () => {
-  console.log(`[server] running on port ${PORT}`);
+  console.log('[server] running on port ' + PORT);
 });
