@@ -205,18 +205,6 @@ app.get('/auth/me', (req, res) => {
   });
 });
 
-  return res.json({
-    user: {
-      id: req.user.id,
-      username: req.user.username,
-      avatar: req.user.avatar,
-      roles: req.user.roles || [],
-      isAdmin: !!req.user.isAdmin,
-      canPull: !!req.user.canPull
-    }
-  });
-});
-
 app.post('/auth/logout', (req, res) => {
   req.logout(() => {
     req.session.destroy(() => {
