@@ -4,6 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
+const { WebSocketServer } = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -115,6 +116,76 @@ function mapPlayer(row) {
   };
 }
 
+// WebSocket server
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+const computers = new Map();
+
+function sendJSON(ws, obj) {
+  if (ws.readyState === ws.OPEN) {
+    ws.send(JSON.stringify(obj));
+  }
+}
+
+wss.on('connection', (ws, req) => {
+  console.log('[WS] client connected from', req.socket.remoteAddress);
+
+  ws.computerName = null;
+
+  sendJSON(ws, {
+    type: 'welcome',
+    message: 'connected'
+  });
+
+  ws.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      console.log('[WS] received:', msg);
+
+      if (msg.type === 'register') {
+        const name = String(msg.computer_name || '').trim();
+        if (!name) {
+          sendJSON(ws, { type: 'error', message: 'computer_name is required' });
+          return;
+        }
+
+        ws.computerName = name;
+        computers.set(name, ws);
+
+        sendJSON(ws, {
+          type: 'welcome',
+          computer_name: name
+        });
+
+        console.log('[WS] registered:', name);
+        return;
+      }
+
+      if (msg.type === 'ping') {
+        sendJSON(ws, { type: 'pong' });
+        return;
+      }
+
+      sendJSON(ws, { type: 'error', message: 'unknown message type' });
+    } catch (err) {
+      console.error('[WS] bad message:', err.message);
+      sendJSON(ws, { type: 'error', message: 'invalid json' });
+    }
+  });
+
+  ws.on('close', () => {
+    if (ws.computerName && computers.get(ws.computerName) === ws) {
+      computers.delete(ws.computerName);
+    }
+    console.log('[WS] client disconnected');
+  });
+
+  ws.on('error', (err) => {
+    console.error('[WS] error:', err.message);
+  });
+});
+
+// Auth routes
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
