@@ -180,7 +180,7 @@ function mapPlayer(row) {
   };
 }
 
-('/auth/discord/login', passport.authenticate('discord'));
+app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
   '/auth/discord/callback',
@@ -192,6 +192,18 @@ app.get('/auth/me', (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.json({ user: null });
   }
+
+  return res.json({
+    user: {
+      id: req.user.id,
+      username: req.user.username,
+      avatar: req.user.avatar,
+      roles: req.user.roles || [],
+      isAdmin: !!req.user.isAdmin,
+      canPull: !!req.user.canPull
+    }
+  });
+});
 
   return res.json({
     user: {
