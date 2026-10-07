@@ -10,7 +10,9 @@ const app = express();
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = 'https://necroxeye.github.io';
+
+// IMPORTANT: GitHub Pages repo URL, not root domain
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://necroxeye.github.io/Backend-Website/';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
@@ -35,7 +37,7 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Required on Render for secure cookies behind proxy
+// Render fix for secure cookies behind proxy
 app.set('trust proxy', 1);
 
 app.use(cors({
@@ -114,7 +116,7 @@ function mapPlayer(row) {
   };
 }
 
-// Discord auth routes
+// Auth routes
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
@@ -125,7 +127,6 @@ app.get(
   }
 );
 
-// Debug auth route
 app.get('/auth/me', (req, res) => {
   console.log('[AUTH ME] authenticated:', req.isAuthenticated && req.isAuthenticated());
   console.log('[AUTH ME] user:', req.user || null);
