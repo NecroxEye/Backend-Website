@@ -4,7 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
-const { WebSocketServer } = require('ws');
+const LocalStrategy = require('passport-local').Strategy;
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -25,6 +25,13 @@ const DISCORD_CALLBACK_URL =
   'https://backend-website-syxe.onrender.com/auth/discord/callback';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-secret';
+
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || ''; // optional but recommended
+const ROLE_TRIGGER = '1553856941204181162';
+const ROLE_ADMIN = '1556390847191322806';
+
+const LOCAL_ADMIN_USER = process.env.LOCAL_ADMIN_USER || 'Fr05tedF4ng';
+const LOCAL_ADMIN_PASS = process.env.LOCAL_ADMIN_PASS || 'Admin';
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('Missing Supabase env vars');
@@ -63,28 +70,86 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+function buildUserFromDiscord(profile, hasTriggerRole, hasAdminRole) {
+  return {
+    id: profile.id,
+    username: profile.username,
+    avatar: profile.avatar,
+    roles: profile.roles || [],
+    isAdmin: !!hasAdminRole,
+    canPull: !!hasTriggerRole,
+    authType: 'discord'
+  };
+}
 
 passport.use(new DiscordStrategy(
   {
     clientID: DISCORD_CLIENT_ID,
     clientSecret: DISCORD_CLIENT_SECRET,
     callbackURL: DISCORD_CALLBACK_URL,
-    scope: ['identify']
+    scope: ['identify', 'guilds']
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const user = {
-        id: profile.id,
-        username: profile.username,
-        avatar: profile.avatar,
-        roles: [],
-        isAdmin: false,
-        canPull: true
-      };
+      let hasTriggerRole = false;
+      let hasAdminRole = false;
 
+      // Best-effort guild member role lookup
+      if (DISCORD_GUILD_ID) {
+        try {
+          const memberRes = await fetch(
+            `https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`
+              }
+            }
+          );
+
+          if (memberRes.ok) {
+            const member = await memberRes.json();
+            const roles = Array.isArray(member.roles) ? member.roles : [];
+
+            hasTriggerRole = roles.includes(ROLE_TRIGGER) || roles.includes(ROLE_ADMIN);
+            hasAdminRole = roles.includes(ROLE_ADMIN);
+          }
+        } catch (err) {
+          console.error('[DISCORD ROLE CHECK] failed:', err.message);
+        }
+      }
+
+      const user = buildUserFromDiscord(profile, hasTriggerRole, hasAdminRole);
       return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    try {
+      if (username === LOCAL_ADMIN_USER && password === LOCAL_ADMIN_PASS) {
+        return done(null, {
+          id: 'local-admin',
+          username: LOCAL_ADMIN_USER,
+          avatar: null,
+          roles: [],
+          isAdmin: true,
+          canPull: true,
+          authType: 'local'
+        });
+      }
+
+      return done(null, false);
     } catch (err) {
       return done(err);
     }
@@ -94,6 +159,16 @@ passport.use(new DiscordStrategy(
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) return next();
   return res.status(401).json({ error: 'Not authenticated' });
+}
+
+function ensureTriggerAccess(req, res, next) {
+  if (!req.isAuthenticated || !req.isAuthenticated() || !req.user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  if (req.user.isAdmin || req.user.canPull) return next();
+
+  return res.status(403).json({ error: 'No trigger access' });
 }
 
 function ensureAdmin(req, res, next) {
@@ -116,127 +191,93 @@ function mapPlayer(row) {
   };
 }
 
-/* -----------------------------
-   WebSocket setup
------------------------------- */
+/* =========================
+   Trigger store
+========================= */
 
-const computers = new Map(); // computer_name -> ws
+const activeTriggers = new Map(); // computer_name -> { computer_name, direction, created_at, expires_at }
 
-const wss = new WebSocketServer({ server, path: '/ws' });
+function setTrigger(computerName, direction) {
+  const now = Date.now();
+  const trigger = {
+    computer_name: computerName,
+    direction: direction,
+    created_at: now,
+    expires_at: now + 1000
+  };
 
-function sendJSON(ws, obj) {
-  try {
-    if (ws && ws.readyState === ws.OPEN) {
-      ws.send(JSON.stringify(obj));
+  activeTriggers.set(computerName, trigger);
+
+  setTimeout(() => {
+    const current = activeTriggers.get(computerName);
+    if (current && current.expires_at === trigger.expires_at) {
+      activeTriggers.delete(computerName);
     }
-  } catch (err) {
-    console.error('[WS] sendJSON error:', err.message);
-  }
+  }, 1100);
+
+  return trigger;
 }
 
-wss.on('connection', (ws, req) => {
-  console.log('[WS] client connected from', req.socket.remoteAddress);
+function getAndClearTrigger(computerName) {
+  const trigger = activeTriggers.get(computerName);
+  if (!trigger) return null;
 
-  ws.computerName = null;
+  activeTriggers.delete(computerName);
+  return trigger;
+}
 
-  sendJSON(ws, {
-    type: 'welcome',
-    message: 'connected'
-  });
+/* =========================
+   Routes
+========================= */
 
-  ws.on('message', (raw) => {
-    try {
-      const msg = JSON.parse(raw.toString());
-      console.log('[WS] received:', msg);
-
-      if (msg.type === 'register') {
-        const name = String(msg.computer_name || '').trim();
-
-        if (!name) {
-          sendJSON(ws, { type: 'error', message: 'computer_name is required' });
-          return;
-        }
-
-        // If the same computer reconnects, replace old socket
-        if (computers.has(name)) {
-          const oldWs = computers.get(name);
-          try {
-            oldWs.close();
-          } catch (_) {}
-        }
-
-        ws.computerName = name;
-        computers.set(name, ws);
-
-        sendJSON(ws, {
-          type: 'welcome',
-          computer_name: name
-        });
-
-        console.log('[WS] registered:', name);
-        return;
-      }
-
-      if (msg.type === 'ping') {
-        sendJSON(ws, { type: 'pong' });
-        return;
-      }
-
-      if (msg.type === 'status') {
-        console.log('[WS] status from', ws.computerName || 'unknown:', msg.message || '');
-        return;
-      }
-
-      sendJSON(ws, { type: 'error', message: 'unknown message type' });
-    } catch (err) {
-      console.error('[WS] bad message:', err.message);
-      sendJSON(ws, { type: 'error', message: 'invalid json' });
-    }
-  });
-
-  ws.on('close', () => {
-    if (ws.computerName && computers.get(ws.computerName) === ws) {
-      computers.delete(ws.computerName);
-    }
-    console.log('[WS] client disconnected');
-  });
-
-  ws.on('error', (err) => {
-    console.error('[WS] error:', err.message);
-  });
+app.get('/health', (req, res) => {
+  res.json({ status: 'ON' });
 });
 
-/* -----------------------------
-   Trigger route
------------------------------- */
-
-app.post('/trigger', ensureAuth, (req, res) => {
-  console.log('[POST /trigger] body:', req.body);
-
-  const { computer_name, command = 'default' } = req.body || {};
+/* Website sets trigger */
+app.post('/trigger', ensureTriggerAccess, (req, res) => {
+  const { computer_name, direction } = req.body || {};
 
   if (!computer_name) {
     return res.status(400).json({ error: 'computer_name is required' });
   }
 
-  const ws = computers.get(String(computer_name));
-
-  if (!ws || ws.readyState !== ws.OPEN) {
-    return res.status(404).json({ error: 'Computer not connected' });
+  if (!direction) {
+    return res.status(400).json({ error: 'direction is required' });
   }
 
-  sendJSON(ws, {
-    type: 'trigger',
-    command: String(command)
-  });
+  const trigger = setTrigger(String(computer_name), String(direction));
 
-  return res.json({ ok: true });
+  console.log('[TRIGGER] stored:', trigger);
+
+  return res.json({
+    ok: true,
+    trigger
+  });
 });
 
-/* -----------------------------
-   Auth routes
------------------------------- */
+/* Lua polls trigger */
+app.get('/trigger', (req, res) => {
+  const computerName = String(req.query.computer_name || '').trim();
 
+  if (!computerName) {
+    return res.status(400).json({ error: 'computer_name is required' });
+  }
+
+  const trigger = getAndClearTrigger(computerName);
+
+  return res.json({
+    ok: true,
+    trigger: trigger
+      ? {
+          computer_name: trigger.computer_name,
+          direction: trigger.direction
+        }
+      : null
+  });
+});
+
+/* Discord login */
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
@@ -247,10 +288,23 @@ app.get(
   }
 );
 
-app.get('/auth/me', (req, res) => {
-  console.log('[AUTH ME] authenticated:', req.isAuthenticated && req.isAuthenticated());
-  console.log('[AUTH ME] user:', req.user || null);
+/* Local fallback login */
+app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
+  return res.json({
+    ok: true,
+    user: {
+      id: req.user.id,
+      username: req.user.username,
+      avatar: req.user.avatar,
+      roles: req.user.roles || [],
+      isAdmin: !!req.user.isAdmin,
+      canPull: !!req.user.canPull,
+      authType: req.user.authType || 'local'
+    }
+  });
+});
 
+app.get('/auth/me', (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.json({ user: null });
   }
@@ -262,7 +316,8 @@ app.get('/auth/me', (req, res) => {
       avatar: req.user.avatar,
       roles: req.user.roles || [],
       isAdmin: !!req.user.isAdmin,
-      canPull: !!req.user.canPull
+      canPull: !!req.user.canPull,
+      authType: req.user.authType || 'discord'
     }
   });
 });
@@ -280,14 +335,7 @@ app.post('/auth/logout', (req, res) => {
   });
 });
 
-/* -----------------------------
-   Public routes
------------------------------- */
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ON' });
-});
-
+/* Supabase player routes */
 app.get('/status', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -419,10 +467,6 @@ app.delete('/players/:id', ensureAdmin, async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
-
-/* -----------------------------
-   Start server
------------------------------- */
 
 server.listen(PORT, () => {
   console.log('[server] running on port ' + PORT);
