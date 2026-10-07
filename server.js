@@ -5,13 +5,12 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const { createClient } = require('@supabase/supabase-js');
-const { WebSocketServer } = require('ws');
 
 const app = express();
 const server = http.createServer(app);
 
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = 'https://necroxeye.github.io';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
@@ -36,7 +35,7 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Important for Render / secure cookies
+// Required on Render for secure cookies behind proxy
 app.set('trust proxy', 1);
 
 app.use(cors({
@@ -102,18 +101,11 @@ function ensureAdmin(req, res, next) {
   return res.status(403).json({ error: 'Admin only' });
 }
 
-function ensurePull(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user && req.user.canPull) {
-    return next();
-  }
-  return res.status(403).json({ error: 'No permission' });
-}
-
 function mapPlayer(row) {
   return {
     id: row.id,
     name: row.name,
-    computer_name: row.computer_name || 'Oil Rig',
+    computer_name: row.computer_name || 'Unknown',
     channel_name: row.channel_name || '',
     signal_strength: Number(row.signal_strength ?? 15),
     direction: row.direction || 'left',
@@ -122,64 +114,7 @@ function mapPlayer(row) {
   };
 }
 
-const connectedComputers = new Map();
-
-function sendToComputer(computerName, payload) {
-  const ws = connectedComputers.get(computerName);
-  if (!ws || ws.readyState !== 1) return false;
-  ws.send(JSON.stringify(payload));
-  return true;
-}
-
-const wss = new WebSocketServer({ server, path: '/ws' });
-
-wss.on('connection', (ws) => {
-  console.log('[WS] client connected');
-
-  ws.on('message', (buf) => {
-    try {
-      const msg = JSON.parse(buf.toString());
-
-      if (msg.type === 'register') {
-        const computerName = String(msg.computer_name || '').trim();
-
-        if (!computerName) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            message: 'computer_name is required'
-          }));
-          return;
-        }
-
-        connectedComputers.set(computerName, ws);
-
-        ws.send(JSON.stringify({
-          type: 'welcome',
-          computer_name: computerName
-        }));
-
-        console.log('[WS] registered computer:', computerName);
-      }
-    } catch (err) {
-      console.error('[WS] invalid message:', err.message);
-    }
-  });
-
-  ws.on('close', () => {
-    for (const [name, sock] of connectedComputers.entries()) {
-      if (sock === ws) {
-        connectedComputers.delete(name);
-        console.log('[WS] disconnected computer:', name);
-        break;
-      }
-    }
-  });
-
-  ws.on('error', (err) => {
-    console.error('[WS] socket error:', err.message);
-  });
-});
-
+// Discord auth routes
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
@@ -190,7 +125,11 @@ app.get(
   }
 );
 
+// Debug auth route
 app.get('/auth/me', (req, res) => {
+  console.log('[AUTH ME] authenticated:', req.isAuthenticated && req.isAuthenticated());
+  console.log('[AUTH ME] user:', req.user || null);
+
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.json({ user: null });
   }
@@ -263,7 +202,7 @@ app.get('/players', ensureAuth, async (req, res) => {
 app.post('/players', ensureAdmin, async (req, res) => {
   const {
     name,
-    computer_name = 'Oil Rig',
+    computer_name = 'Unknown',
     channel_name = '',
     signal_strength = 15,
     direction = 'left',
@@ -301,7 +240,7 @@ app.put('/players/:id', ensureAdmin, async (req, res) => {
   const { id } = req.params;
   const {
     name,
-    computer_name = 'Oil Rig',
+    computer_name = 'Unknown',
     channel_name = '',
     signal_strength = 15,
     direction = 'left',
@@ -350,50 +289,6 @@ app.delete('/players/:id', ensureAdmin, async (req, res) => {
   }
 
   return res.json({ ok: true });
-});
-
-app.post('/trigger/:id', ensurePull, async (req, res) => {
-  const { id } = req.params;
-
-  console.log('[TRIGGER] route called for id:', id);
-
-  const { data, error } = await supabase
-    .from('players')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !data) {
-    return res.status(404).json({ error: 'Player not found' });
-  }
-
-  const player = mapPlayer(data);
-
-  const delivered = sendToComputer(player.computer_name, {
-    type: 'trigger',
-    direction: player.direction,
-    signal_strength: player.signal_strength
-  });
-
-  console.log('[TRIGGER]', {
-    id,
-    computer_name: player.computer_name,
-    direction: player.direction,
-    signal_strength: player.signal_strength,
-    delivered
-  });
-
-  return res.json({
-    ok: true,
-    delivered,
-    sent: {
-      player: player.name,
-      computer_name: player.computer_name,
-      channel_name: player.channel_name,
-      signal_strength: player.signal_strength,
-      direction: player.direction
-    }
-  });
 });
 
 app.get('/', (req, res) => {
