@@ -116,14 +116,21 @@ function mapPlayer(row) {
   };
 }
 
-// WebSocket server
+/* -----------------------------
+   WebSocket setup
+------------------------------ */
+
+const computers = new Map(); // computer_name -> ws
+
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-const computers = new Map();
-
 function sendJSON(ws, obj) {
-  if (ws.readyState === ws.OPEN) {
-    ws.send(JSON.stringify(obj));
+  try {
+    if (ws && ws.readyState === ws.OPEN) {
+      ws.send(JSON.stringify(obj));
+    }
+  } catch (err) {
+    console.error('[WS] sendJSON error:', err.message);
   }
 }
 
@@ -144,9 +151,18 @@ wss.on('connection', (ws, req) => {
 
       if (msg.type === 'register') {
         const name = String(msg.computer_name || '').trim();
+
         if (!name) {
           sendJSON(ws, { type: 'error', message: 'computer_name is required' });
           return;
+        }
+
+        // If the same computer reconnects, replace old socket
+        if (computers.has(name)) {
+          const oldWs = computers.get(name);
+          try {
+            oldWs.close();
+          } catch (_) {}
         }
 
         ws.computerName = name;
@@ -163,6 +179,11 @@ wss.on('connection', (ws, req) => {
 
       if (msg.type === 'ping') {
         sendJSON(ws, { type: 'pong' });
+        return;
+      }
+
+      if (msg.type === 'status') {
+        console.log('[WS] status from', ws.computerName || 'unknown:', msg.message || '');
         return;
       }
 
@@ -185,29 +206,37 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-// Trigger route
+/* -----------------------------
+   Trigger route
+------------------------------ */
+
 app.post('/trigger', ensureAuth, (req, res) => {
+  console.log('[POST /trigger] body:', req.body);
+
   const { computer_name, command = 'default' } = req.body || {};
 
   if (!computer_name) {
     return res.status(400).json({ error: 'computer_name is required' });
   }
 
-  const ws = computers.get(computer_name);
+  const ws = computers.get(String(computer_name));
 
   if (!ws || ws.readyState !== ws.OPEN) {
     return res.status(404).json({ error: 'Computer not connected' });
   }
 
-  ws.send(JSON.stringify({
+  sendJSON(ws, {
     type: 'trigger',
-    command
-  }));
+    command: String(command)
+  });
 
   return res.json({ ok: true });
 });
 
-// Auth routes
+/* -----------------------------
+   Auth routes
+------------------------------ */
+
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
 app.get(
@@ -250,6 +279,10 @@ app.post('/auth/logout', (req, res) => {
     });
   });
 });
+
+/* -----------------------------
+   Public routes
+------------------------------ */
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ON' });
@@ -386,6 +419,10 @@ app.delete('/players/:id', ensureAdmin, async (req, res) => {
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
+
+/* -----------------------------
+   Start server
+------------------------------ */
 
 server.listen(PORT, () => {
   console.log('[server] running on port ' + PORT);
