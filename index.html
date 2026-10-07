@@ -3,40 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang</title>
-  <meta name="description" content="Frosted Fang pull system with Discord auth, floating player control, and role-aware admin tools." />
+  <title>Backend Website</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg-top:#0a0b0d;
-      --bg-mid:#11181c;
-      --bg-bottom:#bdf8ff;
-      --line:rgba(255,255,255,.14);
-      --text:#f1fdff;
-      --muted:#b7d1d6;
-      --accent:#97f5ff;
-      --accent-2:#eefeff;
-      --ok:#8effbe;
-      --bad:#ff8096;
-      --shadow:0 18px 60px rgba(0,0,0,.30);
-      --radius:24px;
-      --cyan-soft:#bff8ff;
-      --cyan-deep:#0e2f39;
+      --bg:#07090f;
+      --bg-2:#0c111b;
+      --panel:rgba(15,20,31,.78);
+      --panel-strong:rgba(10,14,23,.9);
+      --line:rgba(123,162,255,.18);
+      --line-strong:rgba(123,162,255,.35);
+      --text:#edf3ff;
+      --muted:#9aa7c2;
+      --cyan:#5ee7ff;
+      --blue:#7ba2ff;
+      --violet:#a77bff;
+      --green:#63f5b0;
+      --red:#ff6f91;
+      --amber:#ffca6b;
+      --shadow:0 20px 60px rgba(0,0,0,.35);
+      --radius:18px;
+      --radius-sm:12px;
+      --max:1200px;
     }
 
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{
       margin:0;
-      min-height:100vh;
       color:var(--text);
-      font-family:"Inter", sans-serif;
       background:
-        radial-gradient(circle at 16% 10%, rgba(255,255,255,.05), transparent 24%),
-        radial-gradient(circle at 78% 28%, rgba(151,245,255,.16), transparent 30%),
-        linear-gradient(180deg, var(--bg-top) 0%, #111315 18%, var(--bg-mid) 44%, #28434b 71%, #73dbe9 89%, var(--bg-bottom) 100%);
+        radial-gradient(circle at 15% 20%, rgba(94,231,255,.08), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(167,123,255,.08), transparent 28%),
+        radial-gradient(circle at 50% 100%, rgba(123,162,255,.08), transparent 35%),
+        linear-gradient(180deg, #06070b 0%, #0a0f18 100%);
+      font-family:"Inter", sans-serif;
+      min-height:100vh;
       overflow-x:hidden;
     }
 
@@ -45,376 +49,362 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.18;
-      background:
-        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-      background-size:34px 34px;
-      mask-image:radial-gradient(circle at center, black 40%, transparent 82%);
+      opacity:.22;
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.17)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
+      background-size:180px 208px;
+      background-position:center top;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.95), rgba(0,0,0,.55));
+      z-index:-1;
     }
 
-    .wrap{
-      width:min(1180px, calc(100% - 28px));
-      margin-inline:auto;
+    .orb{
+      position:fixed;
+      border-radius:50%;
+      filter:blur(60px);
+      pointer-events:none;
+      z-index:-1;
+      opacity:.22;
+    }
+    .orb.one{width:280px;height:280px;left:-60px;top:80px;background:var(--cyan)}
+    .orb.two{width:320px;height:320px;right:-80px;top:180px;background:var(--violet)}
+    .orb.three{width:260px;height:260px;left:35%;bottom:-80px;background:var(--blue)}
+
+    .wrap{width:min(var(--max), calc(100% - 32px));margin-inline:auto}
+
+    .reveal{
+      opacity:0;
+      transform:translateY(18px);
+      animation:reveal .8s cubic-bezier(.2,.65,.2,1) forwards;
+    }
+    .reveal:nth-child(2){animation-delay:.08s}
+    .reveal:nth-child(3){animation-delay:.16s}
+    .reveal:nth-child(4){animation-delay:.24s}
+    .reveal:nth-child(5){animation-delay:.32s}
+
+    @keyframes reveal{
+      to{opacity:1;transform:translateY(0)}
     }
 
-    header{
+    .topbar{
       position:sticky;
       top:0;
-      z-index:30;
-      backdrop-filter:blur(18px);
-      background:linear-gradient(to bottom, rgba(8,12,15,.8), rgba(8,12,15,.38), transparent);
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:linear-gradient(180deg, rgba(7,9,15,.82), rgba(7,9,15,.45));
       border-bottom:1px solid rgba(255,255,255,.05);
     }
 
-    nav{
+    .topbar-inner{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:18px;
-      padding:18px 0;
+      gap:16px;
+      padding:14px 0;
     }
 
     .brand{
       display:flex;
       align-items:center;
       gap:12px;
-      color:var(--text);
-      text-decoration:none;
+      min-width:0;
     }
 
-    .brand-mark{
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background:linear-gradient(135deg, #fff, var(--accent));
-      box-shadow:0 0 24px rgba(151,245,255,.6);
+    .brand-badge{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      background:
+        linear-gradient(135deg, rgba(94,231,255,.2), rgba(123,162,255,.12)),
+        rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.25);
+      display:grid;
+      place-items:center;
+      position:relative;
+      overflow:hidden;
     }
 
-    .brand span{
-      font-family:"Orbitron", sans-serif;
-      letter-spacing:.16em;
+    .brand-badge svg{width:24px;height:24px}
+    .brand-text{min-width:0}
+    .eyebrow{
+      display:block;
+      color:var(--cyan);
+      font-size:.72rem;
+      letter-spacing:.2em;
       text-transform:uppercase;
-      font-size:.84rem;
+      margin-bottom:2px;
     }
 
-    .nav-actions{
+    .title{
+      margin:0;
+      font-family:"Orbitron", sans-serif;
+      font-weight:800;
+      font-size:clamp(1rem, 1vw + .8rem, 1.25rem);
+      letter-spacing:.06em;
+      white-space:nowrap;
+    }
+
+    .statusbar{
       display:flex;
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
-    .btn,.btn-logout{
-      appearance:none;
-      border:none;
-      text-decoration:none;
-      cursor:pointer;
-      font:inherit;
-      border-radius:999px;
-      min-height:46px;
-      padding:12px 18px;
+    .pill{
       display:inline-flex;
       align-items:center;
-      justify-content:center;
-      gap:10px;
-      transition:.22s ease;
+      gap:8px;
+      min-height:40px;
+      padding:0 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      color:var(--muted);
+      font-size:.92rem;
+      backdrop-filter:blur(10px);
     }
+
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background:var(--amber);
+      box-shadow:0 0 0 4px rgba(255,202,107,.1);
+    }
+
+    .dot.online{background:var(--green);box-shadow:0 0 0 4px rgba(99,245,176,.12)}
+    .dot.offline{background:var(--red);box-shadow:0 0 0 4px rgba(255,111,145,.12)}
 
     .btn{
-      color:#071b1f;
-      font-weight:700;
-      background:linear-gradient(135deg, #fbffff, var(--accent));
-      box-shadow:0 12px 28px rgba(151,245,255,.24);
-    }
-
-    .btn:hover{
-      transform:translateY(-2px) scale(1.01);
-      box-shadow:0 18px 34px rgba(151,245,255,.34);
-    }
-
-    .btn-logout{
+      appearance:none;
+      border:none;
+      cursor:pointer;
       color:var(--text);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      backdrop-filter:blur(12px);
-      display:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      min-height:44px;
+      padding:0 16px;
+      font:600 .95rem "Inter", sans-serif;
+      transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      box-shadow:0 8px 24px rgba(0,0,0,.2);
     }
-
-    .btn-logout:hover{
-      transform:translateY(-1px);
-      background:rgba(255,255,255,.09);
+    .btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
+    .btn:active{transform:translateY(0) scale(.985)}
+    .btn-primary{
+      background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));
+      border-color:rgba(94,231,255,.28);
+      box-shadow:0 10px 30px rgba(94,231,255,.12);
     }
+    .btn-danger{
+      background:linear-gradient(135deg, rgba(255,111,145,.16), rgba(255,202,107,.1));
+      border-color:rgba(255,111,145,.28);
+    }
+    .btn-ghost{background:rgba(255,255,255,.04)}
 
-    main{padding:34px 0 72px}
+    main{padding:28px 0 56px}
 
     .hero{
       display:grid;
       grid-template-columns:1.15fr .85fr;
       gap:22px;
       align-items:stretch;
-      min-height:52vh;
+      margin:10px 0 24px;
     }
 
+    .hero-panel,
     .panel{
       position:relative;
       overflow:hidden;
-      border-radius:var(--radius);
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.055));
-      backdrop-filter:blur(18px);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02)),
+        var(--panel);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:24px;
       box-shadow:var(--shadow);
+      backdrop-filter:blur(14px);
     }
 
-    .panel::after{
+    .hero-panel::before,
+    .panel::before{
       content:"";
       position:absolute;
-      right:-90px;
-      bottom:-120px;
-      width:320px;
-      height:320px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(151,245,255,.18), transparent 68%);
+      inset:0;
       pointer-events:none;
+      background:linear-gradient(120deg, rgba(255,255,255,.06), transparent 35%, transparent 65%, rgba(94,231,255,.05));
     }
 
     .hero-copy{
-      padding:clamp(26px, 4vw, 44px);
+      padding:32px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
+      min-height:280px;
     }
 
-    .eyebrow{
-      font-family:"Orbitron", sans-serif;
+    .hero-kicker{
+      color:var(--cyan);
       text-transform:uppercase;
-      letter-spacing:.18em;
-      font-size:.8rem;
-      color:var(--accent-2);
-      margin-bottom:16px;
+      letter-spacing:.22em;
+      font-size:.74rem;
+      margin:0 0 12px;
     }
 
-    h1,h2{
-      margin:0;
+    .hero h1{
+      margin:0 0 14px;
       font-family:"Orbitron", sans-serif;
-      letter-spacing:-.04em;
-      line-height:.96;
-    }
-
-    h1{
-      font-size:clamp(2.8rem, 7vw, 6rem);
+      font-size:clamp(2rem, 4vw, 4.25rem);
+      line-height:.95;
+      letter-spacing:.03em;
+      text-transform:uppercase;
       max-width:10ch;
     }
 
-    .lead{
-      margin:18px 0 0;
-      max-width:48ch;
+    .hero p{
+      margin:0;
+      max-width:60ch;
       color:var(--muted);
-      line-height:1.75;
-      font-size:clamp(1rem, 1.3vw, 1.08rem);
-    }
-
-    .meta-grid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0,1fr));
-      gap:12px;
-      margin-top:30px;
-    }
-
-    .meta{
-      padding:16px;
-      border-radius:18px;
-      background:rgba(255,255,255,.055);
-      border:1px solid rgba(255,255,255,.12);
-    }
-
-    .meta strong{
-      display:block;
-      margin-bottom:5px;
+      line-height:1.65;
       font-size:1rem;
     }
 
-    .meta span{
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .hero-side{
-      display:grid;
-      gap:16px;
-      padding:18px;
-    }
-
-    .status-box{
-      padding:18px;
-      border-radius:18px;
-      background:rgba(6,20,24,.34);
-      border:1px solid rgba(255,255,255,.12);
-    }
-
-    .status-label{
-      color:var(--muted);
-      font-size:.8rem;
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      margin-bottom:10px;
-    }
-
-    .status-value{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      font-size:1rem;
-      font-weight:700;
-    }
-
-    .status-value::before{
-      content:"";
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:var(--bad);
-      box-shadow:0 0 14px rgba(255,128,150,.45);
-    }
-
-    .status-value.ok::before{
-      background:var(--ok);
-      box-shadow:0 0 16px rgba(142,255,190,.6);
-    }
-
-    .user{
+    .hero-meta{
       display:flex;
-      align-items:center;
-      gap:14px;
-    }
-
-    .avatar{
-      width:58px;
-      height:58px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(151,245,255,.18));
-      display:grid;
-      place-items:center;
-      font-family:"Orbitron", sans-serif;
-      color:#fff;
-      font-size:1rem;
-      overflow:hidden;
-      flex:0 0 auto;
-    }
-
-    .avatar img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
-    .user-meta strong{
-      display:block;
-      font-size:1rem;
-    }
-
-    .user-meta span{
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
-    .grid{
-      display:grid;
-      gap:22px;
+      gap:12px;
+      flex-wrap:wrap;
       margin-top:24px;
     }
 
-    .section{padding:24px}
-
-    .section-head{
-      display:flex;
-      align-items:end;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-      margin-bottom:20px;
-    }
-
-    .section-head p{
-      margin:0;
-      color:var(--muted);
-      max-width:65ch;
-      line-height:1.7;
-    }
-
-    .two-col{
+    .hero-side{
+      padding:22px;
       display:grid;
-      grid-template-columns:1.08fr .92fr;
-      gap:22px;
+      gap:14px;
+      align-content:space-between;
     }
 
-    .list{
-      display:grid;
-      gap:12px;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns:1.2fr .85fr .8fr;
-      gap:12px;
-      align-items:center;
-      padding:14px 16px;
-      border-radius:18px;
-      background:rgba(255,255,255,.045);
-      border:1px solid rgba(255,255,255,.1);
-    }
-
-    .row strong{
-      display:block;
-      font-size:.98rem;
-    }
-
-    .row span{
-      color:var(--muted);
-      font-size:.9rem;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:max-content;
-      padding:8px 12px;
-      border-radius:999px;
-      font-size:.82rem;
-      font-weight:700;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-    }
-
-    .badge.ok{
-      color:#052415;
-      background:linear-gradient(135deg, #ecfff3, #8effbe);
-      border:none;
-    }
-
-    .badge.off{
-      color:#fff;
-      background:rgba(255,128,150,.14);
-      border-color:rgba(255,128,150,.35);
-    }
-
-    .empty{
+    .mini-stat{
       padding:18px;
       border-radius:18px;
-      color:var(--muted);
-      border:1px dashed rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.06);
       background:rgba(255,255,255,.03);
     }
 
-    .admin-tools{display:none}
-    .admin-tools.show{display:block}
+    .mini-stat .label{
+      color:var(--muted);
+      font-size:.82rem;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      margin-bottom:8px;
+    }
+
+    .mini-stat .value{
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.2rem, 2vw, 2rem);
+      letter-spacing:.04em;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:22px;
+      align-items:start;
+    }
+
+    .stack{display:grid;gap:22px}
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:14px;
+      padding:24px 24px 0;
+    }
+    .section-head h2{
+      margin:0;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.05rem, 1.8vw, 1.5rem);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .section-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .panel-body{padding:24px}
+
+    .roster{
+      display:grid;
+      gap:14px;
+    }
+
+    .player{
+      display:grid;
+      grid-template-columns:1.2fr .95fr .8fr auto;
+      gap:14px;
+      align-items:center;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      transition:transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .player:hover{
+      transform:translateY(-2px);
+      border-color:var(--line-strong);
+      background:rgba(255,255,255,.04);
+    }
+
+    .player-main strong{
+      display:block;
+      font-size:1rem;
+      margin-bottom:4px;
+    }
+    .player-main span,
+    .player-meta span{
+      color:var(--muted);
+      font-size:.92rem;
+      word-break:break-word;
+    }
+    .player-meta{
+      display:grid;
+      gap:4px;
+    }
+
+    .dir-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid rgba(94,231,255,.18);
+      background:rgba(94,231,255,.08);
+      color:var(--cyan);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-size:.78rem;
+    }
+
+    .player-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+
+    .icon-btn{
+      min-width:42px;
+      height:42px;
+      border-radius:12px;
+      padding:0 14px;
+    }
 
     .form-grid{
       display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
       gap:14px;
     }
 
@@ -423,847 +413,706 @@
       gap:8px;
     }
 
-    .field.full{grid-column:1 / -1}
-
-    label{
+    .field label{
       color:var(--muted);
-      font-size:.9rem;
+      font-size:.86rem;
+      text-transform:uppercase;
+      letter-spacing:.13em;
     }
 
-    input,select{
+    .input,
+    .select{
       width:100%;
-      border:none;
-      outline:none;
-      font:inherit;
+      min-height:48px;
+      padding:0 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
       color:var(--text);
-      padding:14px 14px;
-      border-radius:16px;
-      background:rgba(6,20,24,.34);
-      border:1px solid rgba(255,255,255,.12);
+      outline:none;
+      font:500 .96rem "Inter", sans-serif;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
 
-    input::placeholder{color:#98b1b6}
-
-    #direction,
-    #isAdminPlayer{
-      background:linear-gradient(180deg, #d7fcff, var(--cyan-soft));
-      color:var(--cyan-deep);
-      border:1px solid rgba(14,47,57,.14);
-      font-weight:700;
-    }
-
-    #direction option,
-    #isAdminPlayer option{
-      color:#0d3340;
-      background:#dfffff;
+    .input::placeholder{color:#7f8aa3}
+    .input:focus,
+    .select:focus{
+      border-color:rgba(94,231,255,.35);
+      box-shadow:0 0 0 4px rgba(94,231,255,.08);
+      background:rgba(255,255,255,.05);
     }
 
     .actions{
       display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .mini{
-      appearance:none;
-      border:none;
-      cursor:pointer;
-      font:inherit;
-      font-weight:700;
-      padding:10px 14px;
-      border-radius:14px;
-      transition:.2s ease;
-    }
-
-    .mini.primary{
-      color:#071b1f;
-      background:linear-gradient(135deg, #fbffff, var(--accent));
-    }
-
-    .mini.secondary{
-      color:var(--text);
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-    }
-
-    .mini.danger{
-      color:#ffe5ea;
-      background:rgba(255,128,150,.14);
-      border:1px solid rgba(255,128,150,.34);
-    }
-
-    .mini:hover{transform:translateY(-1px)}
-
-    .floating-pull{
-      position:fixed;
-      top:94px;
-      right:18px;
-      width:min(360px, calc(100vw - 24px));
-      max-height:calc(100vh - 112px);
-      overflow:auto;
-      z-index:40;
-      padding:16px;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(10,19,24,.82), rgba(18,31,37,.7));
-      backdrop-filter:blur(18px);
-      box-shadow:0 20px 48px rgba(0,0,0,.34);
-    }
-
-    .floating-head{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
       gap:12px;
-      margin-bottom:14px;
-    }
-
-    .floating-head strong{
-      display:block;
-      font-family:"Orbitron", sans-serif;
-      font-size:1rem;
-      letter-spacing:.04em;
-    }
-
-    .floating-head span{
-      color:var(--muted);
-      font-size:.86rem;
-    }
-
-    .pull-list{
-      display:grid;
-      gap:10px;
-    }
-
-    .pull-item{
-      padding:12px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.1);
-      background:rgba(255,255,255,.05);
-      display:grid;
-      gap:10px;
-    }
-
-    .pull-top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-
-    .pull-top strong{
-      display:block;
-      font-size:.98rem;
-    }
-
-    .pull-top span{
-      color:var(--muted);
-      font-size:.86rem;
-    }
-
-    .pull-actions{
-      display:flex;
       flex-wrap:wrap;
-      gap:8px;
     }
 
-    .trigger-toast{
-      position:fixed;
-      inset:0;
-      z-index:999;
-      display:grid;
-      place-items:center;
-      pointer-events:none;
-      opacity:0;
-      visibility:hidden;
-      background:radial-gradient(circle at center, rgba(151,245,255,.18), rgba(7,19,23,.12) 34%, rgba(0,0,0,.34) 74%, rgba(0,0,0,.52) 100%);
-      transition:opacity .2s ease, visibility .2s ease;
-    }
-
-    .trigger-toast.show{
-      opacity:1;
-      visibility:visible;
-    }
-
-    .trigger-toast-box{
-      width:min(420px, calc(100vw - 32px));
-      padding:24px 24px 22px;
-      text-align:center;
-      border-radius:28px;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(14,25,31,.84), rgba(10,18,22,.68));
-      backdrop-filter:blur(18px);
-      box-shadow:0 24px 64px rgba(0,0,0,.38);
-    }
-
-    .trigger-toast-label{
-      font-family:"Orbitron", sans-serif;
-      text-transform:uppercase;
-      letter-spacing:.22em;
-      font-size:.76rem;
-      color:var(--accent-2);
-      margin-bottom:10px;
-    }
-
-    .trigger-toast-title{
-      margin:0;
-      font-family:"Orbitron", sans-serif;
-      font-size:clamp(1.25rem, 3vw, 1.7rem);
-      letter-spacing:.02em;
-    }
-
-    .trigger-toast-text{
-      margin-top:10px;
+    .message{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);
       color:var(--muted);
-      font-size:.96rem;
-      line-height:1.6;
+      min-height:52px;
+      display:flex;
+      align-items:center;
+    }
+
+    .message.success{border-color:rgba(99,245,176,.28);color:#caffeb;background:rgba(99,245,176,.08)}
+    .message.error{border-color:rgba(255,111,145,.28);color:#ffd3de;background:rgba(255,111,145,.08)}
+    .message.info{border-color:rgba(94,231,255,.24);color:#d8fbff;background:rgba(94,231,255,.07)}
+
+    .trigger-flash{
+      display:none;
+      margin-top:12px;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(94,231,255,.22);
+      background:rgba(94,231,255,.08);
+      color:#dffcff;
+      font-weight:600;
+    }
+    .trigger-flash.show{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      animation:flashIn .25s ease;
+    }
+
+    @keyframes flashIn{
+      from{opacity:0;transform:translateY(6px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .login-grid{
+      display:grid;
+      gap:14px;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
     }
 
     .footer-note{
-      text-align:center;
-      color:#0b2d31;
-      font-weight:700;
-      padding:18px 0 8px;
+      color:var(--muted);
+      font-size:.85rem;
+      line-height:1.5;
+      margin-top:10px;
     }
 
-    .reveal{
-      opacity:0;
-      transform:translateY(22px);
-      animation:rise .7s ease forwards;
-    }
-
-    .d1{animation-delay:.08s}
-    .d2{animation-delay:.16s}
-    .d3{animation-delay:.24s}
-    .d4{animation-delay:.32s}
-
-    @keyframes rise{
-      to{opacity:1;transform:none}
-    }
-
-    @media (max-width: 1180px){
-      .floating-pull{
-        position:static;
-        width:100%;
-        max-height:none;
-        margin:0 0 22px;
-      }
-    }
+    .hidden{display:none !important}
 
     @media (max-width: 980px){
-      .hero,.two-col{grid-template-columns:1fr}
-      h1{max-width:none}
+      .hero,
+      .layout{
+        grid-template-columns:1fr;
+      }
+      .player{
+        grid-template-columns:1fr;
+        align-items:start;
+      }
+      .player-actions{justify-content:flex-start}
     }
 
-    @media (max-width: 720px){
-      nav{flex-direction:column;align-items:flex-start}
-      .meta-grid,.form-grid{grid-template-columns:1fr}
-      .row{grid-template-columns:1fr}
-      .actions{justify-content:flex-start}
+    @media (max-width: 640px){
+      .wrap{width:min(var(--max), calc(100% - 20px))}
+      .hero-copy,
+      .hero-side,
+      .panel-body{padding:18px}
+      .section-head{padding:18px 18px 0}
+      .topbar-inner{align-items:flex-start;flex-direction:column}
+      .statusbar{justify-content:flex-start}
+      .split{grid-template-columns:1fr}
+      .actions > *{flex:1 1 auto}
     }
   </style>
 </head>
 <body>
-  <div class="trigger-toast" id="triggerOverlay" aria-hidden="true">
-    <div class="trigger-toast-box">
-      <div class="trigger-toast-label">Frosted Fang</div>
-      <h3 class="trigger-toast-title">Pulled Pearl</h3>
-      <div class="trigger-toast-text" id="triggerOverlayText">Signal sent</div>
-    </div>
-  </div>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
 
-  <header>
-    <div class="wrap">
-      <nav>
-        <a class="brand" href="#">
-          <span class="brand-mark"></span>
-          <span>Frosted Fang</span>
-        </a>
-
-        <div class="nav-actions">
-          <a class="btn" id="loginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
-          <button class="btn-logout" id="logoutBtn" type="button">Logout</button>
+  <header class="topbar">
+    <div class="wrap topbar-inner reveal">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l7.5 4.3v8.4L12 19l-7.5-4.3V6.3L12 2z" stroke="url(#g)" stroke-width="1.5"/>
+            <path d="M12 7.2l3.2 1.8v3.6L12 14.4l-3.2-1.8V9L12 7.2z" stroke="url(#g)" stroke-width="1.5"/>
+            <defs>
+              <linearGradient id="g" x1="4.5" y1="2" x2="20" y2="19" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#5ee7ff"/>
+                <stop offset="1" stop-color="#a77bff"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
-      </nav>
+        <div class="brand-text">
+          <span class="eyebrow">Control Panel</span>
+          <h1 class="title">Pearl Trigger Network</h1>
+        </div>
+      </div>
+
+      <div class="statusbar">
+        <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
+        <div class="pill" id="authPill">Guest</div>
+        <button class="btn btn-ghost" id="logoutBtn">Logout</button>
+      </div>
     </div>
   </header>
 
   <main class="wrap">
-    <aside class="floating-pull reveal d1" id="floatingPullPanel">
-      <div class="floating-head">
-        <div>
-          <strong>Player Pull Panel</strong>
-          <span>Quick trigger access</span>
-        </div>
-      </div>
-      <div class="pull-list" id="quickPullList">
-        <div class="empty">Checking authentication...</div>
-      </div>
-    </aside>
-
-    <section class="hero">
-      <article class="panel hero-copy reveal">
-        <div>
-          <div class="eyebrow">Cold signal / live access</div>
-          <h1>Frosted Fang</h1>
-          <p class="lead">
-            Precision pull control, kept sharp, quiet, and always within reach.
-          </p>
-        </div>
-
-        <div class="meta-grid">
-          <div class="meta">
-            <strong id="heroWebsite">Checking...</strong>
-            <span>Website status</span>
+    <section class="hero reveal">
+      <article class="hero-panel">
+        <div class="hero-copy">
+          <div>
+            <p class="hero-kicker">Operational Control</p>
+            <h1>Pearl Pull Trigger Hub</h1>
+            <p>
+              Trigger assigned computers by name and direction, manage roster entries, and monitor access from one place.
+              Computers only care about their own <strong>computer_name</strong> and <strong>direction</strong>.
+            </p>
           </div>
-          <div class="meta">
-            <strong id="heroBackend">Checking...</strong>
-            <span>Backend status</span>
-          </div>
-          <div class="meta">
-            <strong id="heroPlayers">0</strong>
-            <span>Tracked players</span>
+
+          <div class="hero-meta">
+            <div class="pill">Game-side logic: <strong>poll /trigger</strong></div>
+            <div class="pill">Pulse: <strong>0.5s</strong></div>
+            <div class="pill">Trigger TTL: <strong>1s</strong></div>
           </div>
         </div>
       </article>
 
-      <aside class="panel hero-side reveal d2">
-        <div class="status-box">
-          <div class="status-label">Session state</div>
-          <div class="status-value" id="authState">Checking...</div>
-        </div>
-
-        <div class="status-box">
-          <div class="status-label">Current user</div>
-          <div class="user">
-            <div class="avatar" id="avatarBox">FF</div>
-            <div class="user-meta">
-              <strong id="usernameText">Guest</strong>
-              <span id="roleText">Waiting for auth check</span>
-            </div>
+      <aside class="hero-panel">
+        <div class="hero-side">
+          <div class="mini-stat">
+            <div class="label">Players in roster</div>
+            <div class="value" id="playerCount">0</div>
+          </div>
+          <div class="mini-stat">
+            <div class="label">Trigger access</div>
+            <div class="value" id="triggerAccess">Locked</div>
+          </div>
+          <div class="mini-stat">
+            <div class="label">Admin access</div>
+            <div class="value" id="adminAccess">No</div>
           </div>
         </div>
       </aside>
     </section>
 
-    <section class="grid">
-      <article class="panel section reveal d3">
-        <div class="section-head">
-          <div>
-            <h2>System Snapshot</h2>
-            <p>Live values loaded from the backend status route.</p>
+    <section class="layout">
+      <div class="stack">
+        <article class="panel reveal">
+          <div class="section-head">
+            <div>
+              <h2>Roster</h2>
+              <p>Stored players and trigger directions from the backend list.</p>
+            </div>
+            <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
           </div>
-        </div>
-
-        <div class="two-col">
-          <div class="list" id="computersList">
-            <div class="empty">Waiting for status data.</div>
+          <div class="panel-body">
+            <div id="roster" class="roster"></div>
+            <div id="rosterEmpty" class="message info hidden">No players found.</div>
           </div>
+        </article>
+      </div>
 
-          <div class="list">
-            <div class="row">
-              <div>
-                <strong>Website</strong>
-                <span>Frontend availability</span>
+      <div class="stack">
+        <article class="panel reveal">
+          <div class="section-head">
+            <div>
+              <h2>Trigger</h2>
+              <p>Send only the fields the in-game computer actually needs.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="triggerForm" class="form-grid">
+              <div class="field">
+                <label for="triggerComputerName">Computer name</label>
+                <input class="input" id="triggerComputerName" name="computer_name" placeholder="Oil Rig" required />
               </div>
-              <div><span id="websiteText">Checking...</span></div>
-              <div><span class="badge" id="websiteBadge">...</span></div>
-            </div>
 
-            <div class="row">
-              <div>
-                <strong>Backend</strong>
-                <span>API connection</span>
+              <div class="field">
+                <label for="triggerDirection">Direction</label>
+                <select class="select" id="triggerDirection" name="direction" required>
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                  <option value="top">top</option>
+                  <option value="bottom">bottom</option>
+                  <option value="front">front</option>
+                  <option value="back">back</option>
+                </select>
               </div>
-              <div><span id="backendText">Checking...</span></div>
-              <div><span class="badge" id="backendBadge">...</span></div>
-            </div>
 
-            <div class="row">
-              <div>
-                <strong>Oil Rig</strong>
-                <span>Primary machine</span>
-              </div>
-              <div><span id="oilRigText">Checking...</span></div>
-              <div><span class="badge" id="oilRigBadge">...</span></div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="panel section admin-tools reveal d4" id="adminTools">
-        <div class="section-head">
-          <div>
-            <h2>Player Admin Panel</h2>
-            <p>Only visible for users with <strong>isAdmin: true</strong>.</p>
-          </div>
-        </div>
-
-        <form id="playerForm">
-          <input type="hidden" id="playerId" />
-
-          <div class="form-grid">
-            <div class="field">
-              <label for="playerName">Player name</label>
-              <input id="playerName" type="text" placeholder="Enter player name" required />
-            </div>
-
-            <div class="field">
-              <label for="computerName">Computer name</label>
-              <input id="computerName" type="text" placeholder="Oil Rig" />
-            </div>
-
-            <div class="field">
-              <label for="channelName">Channel name</label>
-              <input id="channelName" type="text" placeholder="voice-room-1" />
-            </div>
-
-            <div class="field">
-              <label for="signalStrength">Signal strength</label>
-              <input id="signalStrength" type="number" min="0" max="100" value="15" />
-            </div>
-
-            <div class="field">
-              <label for="direction">Direction</label>
-              <select id="direction">
-                <option value="left">left</option>
-                <option value="right">right</option>
-                <option value="up">up</option>
-                <option value="down">down</option>
-                <option value="front">front</option>
-                <option value="back">back</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="isAdminPlayer">Player admin flag</label>
-              <select id="isAdminPlayer">
-                <option value="false">false</option>
-                <option value="true">true</option>
-              </select>
-            </div>
-
-            <div class="field full">
               <div class="actions">
-                <button class="mini primary" id="saveBtn" type="submit">Save player</button>
-                <button class="mini secondary" id="resetBtn" type="button">Reset form</button>
+                <button class="btn btn-primary" type="submit" id="triggerBtn">Trigger</button>
               </div>
+            </form>
+
+            <div id="triggerFlash" class="trigger-flash"></div>
+            <div id="triggerMessage" class="message">Ready.</div>
+          </div>
+        </article>
+
+        <article class="panel reveal" id="playerAdminPanel">
+          <div class="section-head">
+            <div>
+              <h2>Add player</h2>
+              <p>Admin-only roster management.</p>
             </div>
           </div>
-        </form>
-      </article>
-    </section>
+          <div class="panel-body">
+            <form id="playerForm" class="form-grid">
+              <input type="hidden" id="playerId" />
 
-    <div class="footer-note">Matte black to frosted cyan.</div>
+              <div class="field">
+                <label for="name">Player name</label>
+                <input class="input" id="name" name="name" placeholder="Player name" required />
+              </div>
+
+              <div class="field">
+                <label for="computer_name">Computer name</label>
+                <input class="input" id="computer_name" name="computer_name" placeholder="Oil Rig" required />
+              </div>
+
+              <div class="field">
+                <label for="channel_name">Channel name</label>
+                <input class="input" id="channel_name" name="channel_name" placeholder="Optional channel" />
+              </div>
+
+              <div class="split">
+                <div class="field">
+                  <label for="direction">Direction</label>
+                  <select class="select" id="direction" name="direction">
+                    <option value="left">left</option>
+                    <option value="right">right</option>
+                    <option value="top">top</option>
+                    <option value="bottom">bottom</option>
+                    <option value="front">front</option>
+                    <option value="back">back</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="signal_strength">Signal strength</label>
+                  <input class="input" type="number" id="signal_strength" name="signal_strength" min="1" max="15" value="15" />
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" type="submit" id="savePlayerBtn">Save player</button>
+                <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
+              </div>
+            </form>
+
+            <div id="playerMessage" class="message">Admin panel ready.</div>
+          </div>
+        </article>
+
+        <article class="panel reveal" id="loginPanel">
+          <div class="section-head">
+            <div>
+              <h2>Login</h2>
+              <p>Discord or fallback local admin access.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="login-grid">
+              <div class="actions">
+                <a class="btn btn-primary" id="discordLoginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
+              </div>
+
+              <form id="localLoginForm" class="form-grid">
+                <div class="field">
+                  <label for="localUsername">Username</label>
+                  <input class="input" id="localUsername" name="username" placeholder="Fr05tedF4ng" />
+                </div>
+                <div class="field">
+                  <label for="localPassword">Password</label>
+                  <input class="input" id="localPassword" name="password" type="password" placeholder="Admin" />
+                </div>
+                <div class="actions">
+                  <button class="btn" type="submit">Local admin login</button>
+                </div>
+              </form>
+
+              <div id="loginMessage" class="message">Not logged in.</div>
+              <p class="footer-note">
+                Trigger access depends on Discord roles or local admin fallback. Roster add/remove requires admin access.
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
   </main>
 
   <script>
-    const API_BASE = 'https://backend-website-syxe.onrender.com';
+    const API = 'https://backend-website-syxe.onrender.com';
 
-    let currentUser = null;
-    let currentPlayers = [];
+    const state = {
+      user: null,
+      players: []
+    };
 
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const authState = document.getElementById('authState');
-    const usernameText = document.getElementById('usernameText');
-    const roleText = document.getElementById('roleText');
-    const avatarBox = document.getElementById('avatarBox');
-    const playersContainer = document.getElementById('quickPullList');
-    const adminTools = document.getElementById('adminTools');
-    const triggerOverlay = document.getElementById('triggerOverlay');
-    const triggerOverlayText = document.getElementById('triggerOverlayText');
+    const els = {
+      backendDot: document.getElementById('backendDot'),
+      backendText: document.getElementById('backendText'),
+      authPill: document.getElementById('authPill'),
+      logoutBtn: document.getElementById('logoutBtn'),
 
-    const heroWebsite = document.getElementById('heroWebsite');
-    const heroBackend = document.getElementById('heroBackend');
-    const heroPlayers = document.getElementById('heroPlayers');
+      playerCount: document.getElementById('playerCount'),
+      triggerAccess: document.getElementById('triggerAccess'),
+      adminAccess: document.getElementById('adminAccess'),
 
-    const websiteText = document.getElementById('websiteText');
-    const backendText = document.getElementById('backendText');
-    const oilRigText = document.getElementById('oilRigText');
-    const websiteBadge = document.getElementById('websiteBadge');
-    const backendBadge = document.getElementById('backendBadge');
-    const oilRigBadge = document.getElementById('oilRigBadge');
-    const computersList = document.getElementById('computersList');
+      roster: document.getElementById('roster'),
+      rosterEmpty: document.getElementById('rosterEmpty'),
+      refreshBtn: document.getElementById('refreshBtn'),
 
-    const playerForm = document.getElementById('playerForm');
-    const playerId = document.getElementById('playerId');
-    const playerName = document.getElementById('playerName');
-    const computerName = document.getElementById('computerName');
-    const channelName = document.getElementById('channelName');
-    const signalStrength = document.getElementById('signalStrength');
-    const direction = document.getElementById('direction');
-    const isAdminPlayer = document.getElementById('isAdminPlayer');
-    const resetBtn = document.getElementById('resetBtn');
+      triggerForm: document.getElementById('triggerForm'),
+      triggerComputerName: document.getElementById('triggerComputerName'),
+      triggerDirection: document.getElementById('triggerDirection'),
+      triggerBtn: document.getElementById('triggerBtn'),
+      triggerMessage: document.getElementById('triggerMessage'),
+      triggerFlash: document.getElementById('triggerFlash'),
+
+      playerAdminPanel: document.getElementById('playerAdminPanel'),
+      playerForm: document.getElementById('playerForm'),
+      playerId: document.getElementById('playerId'),
+      playerMessage: document.getElementById('playerMessage'),
+      clearPlayerBtn: document.getElementById('clearPlayerBtn'),
+
+      loginPanel: document.getElementById('loginPanel'),
+      localLoginForm: document.getElementById('localLoginForm'),
+      loginMessage: document.getElementById('loginMessage')
+    };
+
+    function setMessage(el, text, type = '') {
+      el.textContent = text;
+      el.className = 'message' + (type ? ' ' + type : '');
+    }
 
     function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function setBadge(el, ok, onText = 'ON', offText = 'OFF') {
-      el.textContent = ok ? onText : offText;
-      el.className = `badge ${ok ? 'ok' : 'off'}`;
-    }
-
-    function setPulse(el, ok, text) {
-      el.textContent = text;
-      el.className = `status-value ${ok ? 'ok' : ''}`;
-    }
-
-    function initials(name) {
-      if (!name) return 'FF';
-      return name
-        .split(/[\s._-]+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map(part => part[0].toUpperCase())
-        .join('') || 'FF';
-    }
-
-    function avatarUrl(user) {
-      if (!user || !user.id || !user.avatar) return '';
-      return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
-    }
-
-    function resetForm() {
-      playerId.value = '';
-      playerName.value = '';
-      computerName.value = 'Oil Rig';
-      channelName.value = '';
-      signalStrength.value = '15';
-      direction.value = 'left';
-      isAdminPlayer.value = 'false';
-      document.getElementById('saveBtn').textContent = 'Save player';
+      return String(str ?? '').replace(/[&<>"']/g, s => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[s]);
     }
 
     async function api(path, options = {}) {
-      const response = await fetch(`${API_BASE}${path}`, {
-        method: options.method || 'GET',
+      const res = await fetch(API + path, {
         credentials: 'include',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
           ...(options.headers || {})
         },
-        body: options.body
+        ...options
       });
 
-      const text = await response.text();
-      let data = {};
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
 
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = { raw: text };
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed: ${response.status}`);
+      if (!res.ok) {
+        const msg = data && data.error ? data.error : `Request failed: ${res.status}`;
+        throw new Error(msg);
       }
 
       return data;
     }
 
-    function renderLoggedOut(message = 'Not logged in') {
-      currentUser = null;
-      loginBtn.style.display = 'inline-flex';
-      logoutBtn.style.display = 'none';
-      setPulse(authState, false, message);
-      usernameText.textContent = 'Guest';
-      roleText.textContent = 'No active session';
-      avatarBox.innerHTML = 'FF';
-      adminTools.classList.remove('show');
-      playersContainer.innerHTML = '<div class="empty">Log in to load players.</div>';
-    }
+    function updateAuthUI() {
+      const user = state.user;
 
-    function renderLoggedIn(user) {
-      currentUser = user;
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-flex';
-      setPulse(authState, true, 'Logged in');
-      usernameText.textContent = user.username || 'Unknown User';
-
-      const labels = [];
-      if (user.isAdmin) labels.push('Admin');
-      if (user.canPull) labels.push('Pearl Pull Allowed');
-      if (!labels.length) labels.push('Authenticated User');
-      roleText.textContent = labels.join(' • ');
-
-      const img = avatarUrl(user);
-      if (img) {
-        avatarBox.innerHTML = `<img alt="Discord avatar" src="${img}">`;
-      } else {
-        avatarBox.textContent = initials(user.username);
+      if (!user) {
+        els.authPill.textContent = 'Guest';
+        els.triggerAccess.textContent = 'Locked';
+        els.adminAccess.textContent = 'No';
+        els.playerAdminPanel.classList.add('hidden');
+        return;
       }
 
-      if (user.isAdmin) {
-        adminTools.classList.add('show');
-      } else {
-        adminTools.classList.remove('show');
+      const parts = [user.username || 'User'];
+      if (user.authType) parts.push(`via ${user.authType}`);
+      if (user.isAdmin) parts.push('Admin');
+      else if (user.canPull) parts.push('Trigger');
+
+      els.authPill.textContent = parts.join(' • ');
+      els.triggerAccess.textContent = user.canPull || user.isAdmin ? 'Granted' : 'Locked';
+      els.adminAccess.textContent = user.isAdmin ? 'Yes' : 'No';
+
+      if (user.isAdmin) els.playerAdminPanel.classList.remove('hidden');
+      else els.playerAdminPanel.classList.add('hidden');
+    }
+
+    function showTriggerFlash(computerName, direction) {
+      els.triggerFlash.textContent = `Triggered ${computerName} → ${direction}`;
+      els.triggerFlash.classList.add('show');
+      setTimeout(() => {
+        els.triggerFlash.classList.remove('show');
+        els.triggerFlash.textContent = '';
+      }, 1000);
+    }
+
+    function fillTriggerForm(player) {
+      els.triggerComputerName.value = player.computer_name || '';
+      els.triggerDirection.value = player.direction || 'left';
+    }
+
+    function fillPlayerForm(player) {
+      els.playerId.value = player.id || '';
+      document.getElementById('name').value = player.name || '';
+      document.getElementById('computer_name').value = player.computer_name || '';
+      document.getElementById('channel_name').value = player.channel_name || '';
+      document.getElementById('direction').value = player.direction || 'left';
+      document.getElementById('signal_strength').value = Number(player.signal_strength ?? 15);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearPlayerForm() {
+      els.playerForm.reset();
+      els.playerId.value = '';
+      document.getElementById('signal_strength').value = 15;
+      document.getElementById('direction').value = 'left';
+    }
+
+    function renderRoster() {
+      const players = state.players || [];
+      els.playerCount.textContent = String(players.length);
+
+      if (!players.length) {
+        els.roster.innerHTML = '';
+        els.rosterEmpty.classList.remove('hidden');
+        return;
+      }
+
+      els.rosterEmpty.classList.add('hidden');
+      els.roster.innerHTML = players.map(player => {
+        const adminControls = state.user && state.user.isAdmin ? `
+          <button class="btn icon-btn btn-ghost" data-edit="${player.id}">Edit</button>
+          <button class="btn icon-btn btn-danger" data-delete="${player.id}">Delete</button>
+        ` : '';
+
+        return `
+          <article class="player">
+            <div class="player-main">
+              <strong>${escapeHtml(player.name)}</strong>
+              <span>Computer: ${escapeHtml(player.computer_name || 'Unknown')}</span>
+            </div>
+
+            <div class="player-meta">
+              <span>Channel: ${escapeHtml(player.channel_name || '-')}</span>
+              <span>Signal: ${escapeHtml(player.signal_strength)}</span>
+            </div>
+
+            <div>
+              <span class="dir-badge">${escapeHtml(player.direction || 'left')}</span>
+            </div>
+
+            <div class="player-actions">
+              <button class="btn btn-primary" data-trigger="${player.id}">Trigger</button>
+              ${adminControls}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function loadHealth() {
+      try {
+        const data = await api('/health', { method: 'GET' });
+        if (data && data.status === 'ON') {
+          els.backendDot.className = 'dot online';
+          els.backendText.textContent = 'Backend online';
+        } else {
+          els.backendDot.className = 'dot offline';
+          els.backendText.textContent = 'Backend issue';
+        }
+      } catch (err) {
+        els.backendDot.className = 'dot offline';
+        els.backendText.textContent = 'Backend offline';
       }
     }
 
     async function loadAuth() {
       try {
-        const data = await api('/auth/me');
-        if (data && data.user) {
-          renderLoggedIn(data.user);
-          return true;
-        }
-        renderLoggedOut();
-        return false;
+        const data = await api('/auth/me', { method: 'GET' });
+        state.user = data.user || null;
+        updateAuthUI();
+        setMessage(els.loginMessage, state.user ? `Logged in as ${state.user.username}` : 'Not logged in.', state.user ? 'success' : '');
       } catch (err) {
-        console.error('[auth] failed:', err);
-        renderLoggedOut('Auth check failed');
-        return false;
-      }
-    }
-
-    function renderStatus(data) {
-      const websiteOk = String(data.website || '').toLowerCase() === 'working' || data.status === 'ON';
-      const backendOk = String(data.backend_status || '').toUpperCase() === 'ON';
-      const oilRigOk = String(data.oilRig || '').toLowerCase() === 'working';
-      const players = Array.isArray(data.players) ? data.players : [];
-
-      heroWebsite.textContent = websiteOk ? 'Working' : 'Offline';
-      heroBackend.textContent = backendOk ? 'Online' : 'Offline';
-      heroPlayers.textContent = String(players.length);
-
-      websiteText.textContent = websiteOk ? 'Operational' : 'Unavailable';
-      backendText.textContent = backendOk ? 'Connected' : 'Unavailable';
-      oilRigText.textContent = oilRigOk ? 'Working' : 'Offline';
-
-      setBadge(websiteBadge, websiteOk, 'WORKING', 'OFFLINE');
-      setBadge(backendBadge, backendOk, 'ON', 'OFF');
-      setBadge(oilRigBadge, oilRigOk, 'WORKING', 'OFFLINE');
-
-      if (!players.length) {
-        computersList.innerHTML = `
-          <div class="row">
-            <div>
-              <strong>Oil Rig</strong>
-              <span>No active users</span>
-            </div>
-            <div><span>0 users</span></div>
-            <div><span class="badge ${oilRigOk ? 'ok' : 'off'}">${oilRigOk ? 'ON' : 'OFF'}</span></div>
-          </div>
-        `;
-        return;
-      }
-
-      const grouped = new Map();
-      players.forEach(player => {
-        const key = player.computer_name || 'Oil Rig';
-        if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key).push(player);
-      });
-
-      computersList.innerHTML = [...grouped.entries()].map(([name, list]) => `
-        <div class="row">
-          <div>
-            <strong>${escapeHtml(name)}</strong>
-            <span>${list.map(p => escapeHtml(p.name)).join(', ')}</span>
-          </div>
-          <div><span>${list.length} user${list.length === 1 ? '' : 's'}</span></div>
-          <div><span class="badge ok">ON</span></div>
-        </div>
-      `).join('');
-    }
-
-    function renderPlayers(players) {
-      currentPlayers = players || [];
-
-      if (!currentUser) {
-        playersContainer.innerHTML = '<div class="empty">Log in to load players.</div>';
-        return;
-      }
-
-      if (!currentPlayers.length) {
-        playersContainer.innerHTML = '<div class="empty">No players found.</div>';
-        return;
-      }
-
-      playersContainer.innerHTML = currentPlayers.map(player => `
-        <div class="pull-item">
-          <div class="pull-top">
-            <div>
-              <strong>${escapeHtml(player.name)}</strong>
-              <span>${escapeHtml(player.computer_name || 'Oil Rig')} • ${escapeHtml(player.channel_name || 'No channel')}</span>
-            </div>
-            <span>${escapeHtml(player.direction || 'left')}</span>
-          </div>
-          <div class="pull-actions">
-            ${currentUser?.canPull ? `<button class="mini primary" type="button" onclick="triggerPlayer('${player.id}', '${escapeHtml(player.name)}')">Trigger</button>` : ''}
-            ${currentUser?.isAdmin ? `<button class="mini secondary" type="button" onclick="editPlayer('${player.id}')">Edit</button>` : ''}
-            ${currentUser?.isAdmin ? `<button class="mini danger" type="button" onclick="deletePlayerEntry('${player.id}')">Delete</button>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function loadStatus() {
-      try {
-        const data = await api('/status');
-        renderStatus(data);
-      } catch (err) {
-        console.error('[status] failed:', err);
-        heroWebsite.textContent = 'Offline';
-        heroBackend.textContent = 'Offline';
-        heroPlayers.textContent = '0';
-        websiteText.textContent = 'Unavailable';
-        backendText.textContent = 'Unavailable';
-        oilRigText.textContent = 'Unavailable';
-        setBadge(websiteBadge, false, 'WORKING', 'OFFLINE');
-        setBadge(backendBadge, false, 'ON', 'OFF');
-        setBadge(oilRigBadge, false, 'WORKING', 'OFFLINE');
-        computersList.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
+        state.user = null;
+        updateAuthUI();
+        setMessage(els.loginMessage, 'Not logged in.', '');
       }
     }
 
     async function loadPlayers() {
-      if (!currentUser) {
-        renderPlayers([]);
-        return;
-      }
-
       try {
-        const data = await api('/players');
-        renderPlayers(Array.isArray(data) ? data : []);
+        const data = await api('/status', { method: 'GET' });
+        state.players = data.players || [];
+        renderRoster();
       } catch (err) {
-        console.error('[players] failed:', err);
-        playersContainer.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
+        state.players = [];
+        renderRoster();
+        setMessage(els.triggerMessage, err.message, 'error');
       }
     }
 
-    function showTriggerOverlay(name) {
-      triggerOverlayText.textContent = `${name} signal sent`;
-      triggerOverlay.classList.add('show');
-      clearTimeout(showTriggerOverlay.timer);
-      showTriggerOverlay.timer = setTimeout(() => {
-        triggerOverlay.classList.remove('show');
-      }, 1400);
+    async function sendTrigger(computer_name, direction) {
+      const data = await api('/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ computer_name, direction })
+      });
+
+      setMessage(els.triggerMessage, `Triggered ${computer_name} (${direction})`, 'success');
+      showTriggerFlash(computer_name, direction);
+      return data;
     }
 
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await api('/auth/logout', { method: 'POST' });
-      } catch (err) {
-        console.error('[logout] failed:', err);
-      }
-      renderLoggedOut();
+    els.refreshBtn.addEventListener('click', async () => {
+      setMessage(els.triggerMessage, 'Refreshing roster…', 'info');
+      await loadPlayers();
+      setMessage(els.triggerMessage, 'Roster refreshed.', 'success');
     });
 
-    playerForm.addEventListener('submit', async (e) => {
+    els.triggerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const computer_name = els.triggerComputerName.value.trim();
+      const direction = els.triggerDirection.value;
+
+      try {
+        await sendTrigger(computer_name, direction);
+      } catch (err) {
+        setMessage(els.triggerMessage, err.message, 'error');
+      }
+    });
+
+    els.roster.addEventListener('click', async (e) => {
+      const triggerBtn = e.target.closest('[data-trigger]');
+      const editBtn = e.target.closest('[data-edit]');
+      const deleteBtn = e.target.closest('[data-delete]');
+
+      if (triggerBtn) {
+        const id = triggerBtn.getAttribute('data-trigger');
+        const player = state.players.find(p => String(p.id) === String(id));
+        if (!player) return;
+
+        fillTriggerForm(player);
+
+        try {
+          await sendTrigger(player.computer_name, player.direction || 'left');
+        } catch (err) {
+          setMessage(els.triggerMessage, err.message, 'error');
+        }
+      }
+
+      if (editBtn) {
+        const id = editBtn.getAttribute('data-edit');
+        const player = state.players.find(p => String(p.id) === String(id));
+        if (!player) return;
+        fillPlayerForm(player);
+        setMessage(els.playerMessage, `Editing ${player.name}`, 'info');
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-delete');
+        const player = state.players.find(p => String(p.id) === String(id));
+        if (!player) return;
+
+        if (!confirm(`Delete ${player.name}?`)) return;
+
+        try {
+          await api(`/players/${id}`, { method: 'DELETE' });
+          setMessage(els.playerMessage, `${player.name} deleted.`, 'success');
+          await loadPlayers();
+        } catch (err) {
+          setMessage(els.playerMessage, err.message, 'error');
+        }
+      }
+    });
+
+    els.playerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const payload = {
-        name: playerName.value.trim(),
-        computer_name: computerName.value.trim() || 'Oil Rig',
-        channel_name: channelName.value.trim(),
-        signal_strength: Number(signalStrength.value || 15),
-        direction: direction.value,
-        is_admin: isAdminPlayer.value === 'true'
+        name: document.getElementById('name').value.trim(),
+        computer_name: document.getElementById('computer_name').value.trim(),
+        channel_name: document.getElementById('channel_name').value.trim(),
+        direction: document.getElementById('direction').value,
+        signal_strength: Number(document.getElementById('signal_strength').value || 15)
       };
 
       try {
-        if (playerId.value) {
-          await api(`/players/${playerId.value}`, {
+        const id = els.playerId.value.trim();
+
+        if (id) {
+          await api(`/players/${id}`, {
             method: 'PUT',
             body: JSON.stringify(payload)
           });
+          setMessage(els.playerMessage, 'Player updated.', 'success');
         } else {
           await api('/players', {
             method: 'POST',
             body: JSON.stringify(payload)
           });
+          setMessage(els.playerMessage, 'Player added.', 'success');
         }
 
-        resetForm();
+        clearPlayerForm();
         await loadPlayers();
-        await loadStatus();
       } catch (err) {
-        alert(err.message);
+        setMessage(els.playerMessage, err.message, 'error');
       }
     });
 
-    resetBtn.addEventListener('click', resetForm);
-
-    window.editPlayer = function(id) {
-      const player = currentPlayers.find(p => String(p.id) === String(id));
-      if (!player) return;
-
-      playerId.value = player.id;
-      playerName.value = player.name || '';
-      computerName.value = player.computer_name || 'Oil Rig';
-      channelName.value = player.channel_name || '';
-      signalStrength.value = Number(player.signal_strength ?? 15);
-      direction.value = player.direction || 'left';
-      isAdminPlayer.value = String(!!player.is_admin);
-      document.getElementById('saveBtn').textContent = 'Update player';
-      adminTools.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-
-    window.deletePlayerEntry = async function(id) {
-      if (!confirm('Delete this player?')) return;
-
-      try {
-        await api(`/players/${id}`, { method: 'DELETE' });
-        await loadPlayers();
-        await loadStatus();
-      } catch (err) {
-        alert(err.message);
-      }
-    };
-
-    window.triggerPlayer = async function(id, name = 'Player') {
-      try {
-        const data = await api(`/trigger/${id}`, { method: 'POST' });
-        showTriggerOverlay(data.sent?.player || name);
-      } catch (err) {
-        alert(err.message);
-      }
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.animationPlayState = 'running';
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.14 });
-
-    document.querySelectorAll('.reveal').forEach(el => {
-      el.style.animationPlayState = 'paused';
-      observer.observe(el);
+    els.clearPlayerBtn.addEventListener('click', () => {
+      clearPlayerForm();
+      setMessage(els.playerMessage, 'Form cleared.', 'info');
     });
 
-    async function boot() {
-      resetForm();
-      await loadStatus();
-      const authed = await loadAuth();
-      if (authed) {
-        await loadPlayers();
-      } else {
-        renderPlayers([]);
-      }
-    }
+    els.localLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-    window.addEventListener('load', boot);
+      const username = document.getElementById('localUsername').value.trim();
+      const password = document.getElementById('localPassword').value;
 
-    setInterval(loadStatus, 10000);
-    setInterval(async () => {
-      const authed = await loadAuth();
-      if (authed) {
+      try {
+        await api('/auth/local/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
+        await loadAuth();
         await loadPlayers();
+      } catch (err) {
+        setMessage(els.loginMessage, err.message, 'error');
       }
-    }, 15000);
+    });
+
+    els.logoutBtn.addEventListener('click', async () => {
+      try {
+        await api('/auth/logout', { method: 'POST' });
+        state.user = null;
+        updateAuthUI();
+        setMessage(els.loginMessage, 'Logged out.', 'info');
+      } catch (err) {
+        setMessage(els.loginMessage, err.message, 'error');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadHealth();
+      await loadAuth();
+      await loadPlayers();
+    });
   </script>
 </body>
 </html>
