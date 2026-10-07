@@ -341,7 +341,7 @@ app.post('/trigger/:id', ensurePull, async (req, res) => {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-   = mapPlayer(data);
+  const player = mapPlayer(data);
 
   return res.json({
     ok: true,
