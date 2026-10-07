@@ -9,23 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#07090f;
-      --bg-2:#0c111b;
-      --panel:rgba(15,20,31,.78);
-      --panel-strong:rgba(10,14,23,.9);
+      --bg:#05060a;
+      --bg-2:#0b0d15;
+      --panel:rgba(12,15,24,.82);
+      --panel-strong:rgba(8,10,18,.94);
       --line:rgba(123,162,255,.18);
       --line-strong:rgba(123,162,255,.35);
       --text:#edf3ff;
-      --muted:#9aa7c2;
+      --muted:#98a5bf;
       --cyan:#5ee7ff;
       --blue:#7ba2ff;
-      --violet:#a77bff;
+      --violet:#7a32ff;
+      --violet-deep:#31105e;
       --green:#63f5b0;
       --red:#ff6f91;
       --amber:#ffca6b;
-      --shadow:0 20px 60px rgba(0,0,0,.35);
+      --shadow:0 20px 60px rgba(0,0,0,.38);
       --radius:18px;
-      --radius-sm:12px;
       --max:1200px;
     }
 
@@ -34,14 +34,15 @@
     body{
       margin:0;
       color:var(--text);
-      background:
-        radial-gradient(circle at 15% 20%, rgba(94,231,255,.08), transparent 30%),
-        radial-gradient(circle at 85% 10%, rgba(167,123,255,.08), transparent 28%),
-        radial-gradient(circle at 50% 100%, rgba(123,162,255,.08), transparent 35%),
-        linear-gradient(180deg, #06070b 0%, #0a0f18 100%);
       font-family:"Inter", sans-serif;
       min-height:100vh;
       overflow-x:hidden;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(94,231,255,.05), transparent 26%),
+        radial-gradient(circle at 85% 14%, rgba(122,50,255,.10), transparent 28%),
+        radial-gradient(circle at 50% 100%, rgba(123,162,255,.06), transparent 35%),
+        linear-gradient(180deg, #04050a 0%, #090b13 50%, #0a0d16 100%);
+      position:relative;
     }
 
     body::before{
@@ -49,26 +50,45 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.22;
+      z-index:-2;
+      background:
+        linear-gradient(90deg,
+          rgba(0,0,0,.96) 0%,
+          rgba(49,16,94,.9) 6%,
+          rgba(0,0,0,0) 14%,
+          rgba(0,0,0,0) 86%,
+          rgba(49,16,94,.9) 94%,
+          rgba(0,0,0,.96) 100%);
+      box-shadow:
+        inset 0 0 80px rgba(122,50,255,.16),
+        inset 0 0 180px rgba(122,50,255,.1);
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.18;
       background-image:
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.17)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.16)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
       background-size:180px 208px;
       background-position:center top;
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.95), rgba(0,0,0,.55));
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.45));
       z-index:-1;
     }
 
     .orb{
       position:fixed;
       border-radius:50%;
-      filter:blur(60px);
+      filter:blur(70px);
       pointer-events:none;
       z-index:-1;
-      opacity:.22;
+      opacity:.16;
     }
-    .orb.one{width:280px;height:280px;left:-60px;top:80px;background:var(--cyan)}
-    .orb.two{width:320px;height:320px;right:-80px;top:180px;background:var(--violet)}
-    .orb.three{width:260px;height:260px;left:35%;bottom:-80px;background:var(--blue)}
+    .orb.one{width:300px;height:300px;left:-80px;top:60px;background:#5ee7ff}
+    .orb.two{width:320px;height:320px;right:-100px;top:140px;background:#7a32ff}
+    .orb.three{width:280px;height:280px;left:34%;bottom:-100px;background:#7ba2ff}
 
     .wrap{width:min(var(--max), calc(100% - 32px));margin-inline:auto}
 
@@ -82,16 +102,14 @@
     .reveal:nth-child(4){animation-delay:.24s}
     .reveal:nth-child(5){animation-delay:.32s}
 
-    @keyframes reveal{
-      to{opacity:1;transform:translateY(0)}
-    }
+    @keyframes reveal{to{opacity:1;transform:translateY(0)}}
 
     .topbar{
       position:sticky;
       top:0;
       z-index:50;
       backdrop-filter:blur(14px);
-      background:linear-gradient(180deg, rgba(7,9,15,.82), rgba(7,9,15,.45));
+      background:linear-gradient(180deg, rgba(5,6,10,.86), rgba(5,6,10,.46));
       border-bottom:1px solid rgba(255,255,255,.05);
     }
 
@@ -111,22 +129,15 @@
     }
 
     .brand-badge{
-      width:42px;
-      height:42px;
-      border-radius:14px;
+      width:42px;height:42px;border-radius:14px;
       background:
-        linear-gradient(135deg, rgba(94,231,255,.2), rgba(123,162,255,.12)),
+        linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.14)),
         rgba(255,255,255,.04);
       border:1px solid var(--line);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.25);
-      display:grid;
-      place-items:center;
-      position:relative;
-      overflow:hidden;
+      display:grid;place-items:center;
     }
-
     .brand-badge svg{width:24px;height:24px}
-    .brand-text{min-width:0}
     .eyebrow{
       display:block;
       color:var(--cyan);
@@ -135,7 +146,6 @@
       text-transform:uppercase;
       margin-bottom:2px;
     }
-
     .title{
       margin:0;
       font-family:"Orbitron", sans-serif;
@@ -167,12 +177,7 @@
       backdrop-filter:blur(10px);
     }
 
-    .dot{
-      width:9px;height:9px;border-radius:50%;
-      background:var(--amber);
-      box-shadow:0 0 0 4px rgba(255,202,107,.1);
-    }
-
+    .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(255,202,107,.1)}
     .dot.online{background:var(--green);box-shadow:0 0 0 4px rgba(99,245,176,.12)}
     .dot.offline{background:var(--red);box-shadow:0 0 0 4px rgba(255,111,145,.12)}
 
@@ -187,8 +192,12 @@
       min-height:44px;
       padding:0 16px;
       font:600 .95rem "Inter", sans-serif;
-      transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease, opacity .18s ease;
       box-shadow:0 8px 24px rgba(0,0,0,.2);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
     }
     .btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
     .btn:active{transform:translateY(0) scale(.985)}
@@ -196,6 +205,11 @@
       background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));
       border-color:rgba(94,231,255,.28);
       box-shadow:0 10px 30px rgba(94,231,255,.12);
+    }
+    .btn-violet{
+      background:linear-gradient(135deg, rgba(122,50,255,.22), rgba(72,17,153,.16));
+      border-color:rgba(122,50,255,.34);
+      box-shadow:0 10px 28px rgba(122,50,255,.18);
     }
     .btn-danger{
       background:linear-gradient(135deg, rgba(255,111,145,.16), rgba(255,202,107,.1));
@@ -213,8 +227,7 @@
       margin:10px 0 24px;
     }
 
-    .hero-panel,
-    .panel{
+    .hero-panel,.panel,.terminal-shell{
       position:relative;
       overflow:hidden;
       background:
@@ -226,13 +239,12 @@
       backdrop-filter:blur(14px);
     }
 
-    .hero-panel::before,
-    .panel::before{
+    .hero-panel::before,.panel::before,.terminal-shell::before{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
-      background:linear-gradient(120deg, rgba(255,255,255,.06), transparent 35%, transparent 65%, rgba(94,231,255,.05));
+      background:linear-gradient(120deg, rgba(255,255,255,.05), transparent 35%, transparent 65%, rgba(94,231,255,.03));
     }
 
     .hero-copy{
@@ -240,7 +252,7 @@
       display:flex;
       flex-direction:column;
       justify-content:space-between;
-      min-height:280px;
+      min-height:300px;
     }
 
     .hero-kicker{
@@ -254,11 +266,11 @@
     .hero h1{
       margin:0 0 14px;
       font-family:"Orbitron", sans-serif;
-      font-size:clamp(2rem, 4vw, 4.25rem);
+      font-size:clamp(2rem, 4vw, 4.2rem);
       line-height:.95;
       letter-spacing:.03em;
       text-transform:uppercase;
-      max-width:10ch;
+      max-width:11ch;
     }
 
     .hero p{
@@ -289,7 +301,6 @@
       border:1px solid rgba(255,255,255,.06);
       background:rgba(255,255,255,.03);
     }
-
     .mini-stat .label{
       color:var(--muted);
       font-size:.82rem;
@@ -297,11 +308,14 @@
       letter-spacing:.14em;
       margin-bottom:8px;
     }
-
     .mini-stat .value{
       font-family:"Orbitron", sans-serif;
       font-size:clamp(1.2rem, 2vw, 2rem);
       letter-spacing:.04em;
+    }
+
+    .section-only-logged-out{
+      margin-top:18px;
     }
 
     .layout{
@@ -310,7 +324,6 @@
       gap:22px;
       align-items:start;
     }
-
     .stack{display:grid;gap:22px}
 
     .section-head{
@@ -334,11 +347,9 @@
     }
 
     .panel-body{padding:24px}
+    .hidden{display:none !important}
 
-    .roster{
-      display:grid;
-      gap:14px;
-    }
+    .roster{display:grid;gap:14px}
 
     .player{
       display:grid;
@@ -357,21 +368,13 @@
       background:rgba(255,255,255,.04);
     }
 
-    .player-main strong{
-      display:block;
-      font-size:1rem;
-      margin-bottom:4px;
-    }
-    .player-main span,
-    .player-meta span{
+    .player-main strong{display:block;font-size:1rem;margin-bottom:4px}
+    .player-main span,.player-meta span{
       color:var(--muted);
       font-size:.92rem;
       word-break:break-word;
     }
-    .player-meta{
-      display:grid;
-      gap:4px;
-    }
+    .player-meta{display:grid;gap:4px}
 
     .dir-badge{
       display:inline-flex;
@@ -396,23 +399,8 @@
       flex-wrap:wrap;
     }
 
-    .icon-btn{
-      min-width:42px;
-      height:42px;
-      border-radius:12px;
-      padding:0 14px;
-    }
-
-    .form-grid{
-      display:grid;
-      gap:14px;
-    }
-
-    .field{
-      display:grid;
-      gap:8px;
-    }
-
+    .form-grid{display:grid;gap:14px}
+    .field{display:grid;gap:8px}
     .field label{
       color:var(--muted);
       font-size:.86rem;
@@ -420,8 +408,7 @@
       letter-spacing:.13em;
     }
 
-    .input,
-    .select{
+    .input,.select{
       width:100%;
       min-height:48px;
       padding:0 14px;
@@ -433,20 +420,14 @@
       font:500 .96rem "Inter", sans-serif;
       transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
-
     .input::placeholder{color:#7f8aa3}
-    .input:focus,
-    .select:focus{
+    .input:focus,.select:focus{
       border-color:rgba(94,231,255,.35);
       box-shadow:0 0 0 4px rgba(94,231,255,.08);
       background:rgba(255,255,255,.05);
     }
 
-    .actions{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-    }
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
 
     .message{
       margin-top:14px;
@@ -459,7 +440,6 @@
       display:flex;
       align-items:center;
     }
-
     .message.success{border-color:rgba(99,245,176,.28);color:#caffeb;background:rgba(99,245,176,.08)}
     .message.error{border-color:rgba(255,111,145,.28);color:#ffd3de;background:rgba(255,111,145,.08)}
     .message.info{border-color:rgba(94,231,255,.24);color:#d8fbff;background:rgba(94,231,255,.07)}
@@ -480,53 +460,194 @@
       gap:10px;
       animation:flashIn .25s ease;
     }
-
     @keyframes flashIn{
       from{opacity:0;transform:translateY(6px)}
       to{opacity:1;transform:translateY(0)}
     }
 
-    .login-grid{
+    .center-panel{
+      max-width:860px;
+      margin:0 auto;
+    }
+
+    .operational-copy{
+      padding:34px;
+    }
+    .operational-copy h2{
+      margin:0 0 16px;
+      font-family:"Orbitron", sans-serif;
+      font-size:clamp(1.6rem, 2.8vw, 2.6rem);
+      line-height:1.02;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .operational-copy p{
+      margin:0 0 14px;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:1rem;
+    }
+    .quote-line{
+      margin-top:18px;
+      color:#d9ccff;
+      font-weight:600;
+      letter-spacing:.05em;
+    }
+
+    .access-grid{
+      margin-top:22px;
       display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    .access-box{
+      padding:18px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.03);
+    }
+    .access-box .k{
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:.8rem;
+      margin-bottom:8px;
+    }
+    .access-box .v{
+      font-family:"Orbitron", sans-serif;
+      font-size:1.2rem;
+      letter-spacing:.04em;
+    }
+    .denied{color:#ffb7ca}
+    .granted{color:#bdfde1}
+
+    .terminal-overlay{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      display:none;
+      place-items:center;
+      padding:20px;
+      background:rgba(2,3,8,.7);
+      backdrop-filter:blur(12px);
+    }
+    .terminal-overlay.show{display:grid}
+
+    .terminal-shell{
+      width:min(760px, 100%);
+      border-radius:22px;
+      border:1px solid rgba(122,50,255,.26);
+      box-shadow:0 24px 90px rgba(0,0,0,.55), 0 0 40px rgba(122,50,255,.16);
+      background:
+        linear-gradient(180deg, rgba(8,10,18,.96), rgba(4,6,12,.98));
+    }
+
+    .terminal-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+    }
+    .term-lights{display:flex;gap:8px}
+    .term-lights span{
+      width:10px;height:10px;border-radius:50%;
+      background:#2f3545;border:1px solid rgba(255,255,255,.08)
+    }
+    .term-lights span:nth-child(1){background:#ff6f91}
+    .term-lights span:nth-child(2){background:#ffca6b}
+    .term-lights span:nth-child(3){background:#63f5b0}
+    .terminal-title{
+      font-family:"Orbitron", sans-serif;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.84rem;
+      color:#d9e8ff;
+    }
+
+    .terminal-body{
+      padding:18px 18px 20px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color:#b9ffd3;
+      background:
+        radial-gradient(circle at top right, rgba(122,50,255,.08), transparent 30%),
+        linear-gradient(180deg, rgba(2,4,8,.98), rgba(3,5,9,.98));
+      min-height:360px;
+    }
+
+    .terminal-log{
+      white-space:pre-wrap;
+      line-height:1.65;
+      min-height:180px;
+      color:#9cffc5;
+      text-shadow:0 0 8px rgba(156,255,197,.08);
+    }
+
+    .terminal-form{
+      display:grid;
+      gap:14px;
+      margin-top:16px;
+    }
+
+    .terminal-row{
+      display:grid;
+      grid-template-columns:120px 1fr;
+      align-items:center;
       gap:14px;
     }
 
-    .split{
-      display:grid;
-      grid-template-columns:1fr 1fr;
+    .terminal-label{
+      color:#d7e1ff;
+    }
+
+    .terminal-input{
+      width:100%;
+      min-height:44px;
+      border:none;
+      border-bottom:1px solid rgba(156,255,197,.28);
+      background:transparent;
+      color:#9cffc5;
+      outline:none;
+      font:500 1rem ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    .terminal-input:focus{
+      border-bottom-color:#9cffc5;
+      box-shadow:0 8px 24px rgba(156,255,197,.05);
+    }
+
+    .terminal-actions{
+      display:flex;
+      justify-content:flex-end;
       gap:12px;
+      margin-top:8px;
     }
 
-    .footer-note{
-      color:var(--muted);
-      font-size:.85rem;
-      line-height:1.5;
-      margin-top:10px;
+    .blink::after{
+      content:"_";
+      animation:blink 1s steps(1,end) infinite;
+      margin-left:2px;
     }
-
-    .hidden{display:none !important}
+    @keyframes blink{
+      50%{opacity:0}
+    }
 
     @media (max-width: 980px){
-      .hero,
-      .layout{
-        grid-template-columns:1fr;
-      }
-      .player{
-        grid-template-columns:1fr;
-        align-items:start;
-      }
+      .hero,.layout{grid-template-columns:1fr}
+      .player{grid-template-columns:1fr;align-items:start}
       .player-actions{justify-content:flex-start}
     }
 
     @media (max-width: 640px){
       .wrap{width:min(var(--max), calc(100% - 20px))}
-      .hero-copy,
-      .hero-side,
-      .panel-body{padding:18px}
+      .hero-copy,.hero-side,.panel-body,.operational-copy{padding:18px}
       .section-head{padding:18px 18px 0}
       .topbar-inner{align-items:flex-start;flex-direction:column}
       .statusbar{justify-content:flex-start}
-      .split{grid-template-columns:1fr}
+      .access-grid{grid-template-columns:1fr}
+      .terminal-row{grid-template-columns:1fr}
+      .terminal-label{margin-bottom:-6px}
       .actions > *{flex:1 1 auto}
     }
   </style>
@@ -546,21 +667,23 @@
             <defs>
               <linearGradient id="g" x1="4.5" y1="2" x2="20" y2="19" gradientUnits="userSpaceOnUse">
                 <stop stop-color="#5ee7ff"/>
-                <stop offset="1" stop-color="#a77bff"/>
+                <stop offset="1" stop-color="#7a32ff"/>
               </linearGradient>
             </defs>
           </svg>
         </div>
         <div class="brand-text">
-          <span class="eyebrow">Control Panel</span>
-          <h1 class="title">Pearl Trigger Network</h1>
+          <span class="eyebrow">Security Grid</span>
+          <h1 class="title">Frosted Fang Control</h1>
         </div>
       </div>
 
       <div class="statusbar">
         <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
-        <div class="pill" id="authPill">Guest</div>
-        <button class="btn btn-ghost" id="logoutBtn">Logout</button>
+        <div class="pill" id="authPill">Unauthenticated</div>
+        <a class="btn btn-primary" id="discordLoginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
+        <button class="btn btn-violet" id="openAdminTerminalBtn" type="button">Admin Login</button>
+        <button class="btn btn-danger hidden" id="logoutBtn" type="button">Log Out</button>
       </div>
     </div>
   </header>
@@ -570,18 +693,21 @@
       <article class="hero-panel">
         <div class="hero-copy">
           <div>
-            <p class="hero-kicker">Operational Control</p>
-            <h1>Pearl Pull Trigger Hub</h1>
+            <p class="hero-kicker">Operational Panel</p>
+            <h1>Frosted Fang Security & Pull System</h1>
             <p>
-              Trigger assigned computers by name and direction, manage roster entries, and monitor access from one place.
-              Computers only care about their own <strong>computer_name</strong> and <strong>direction</strong>.
+              Logging in will grant access to the trigger network and protected roster controls. The in-game systems obey only
+              their own <strong>computer_name</strong> and assigned <strong>direction</strong>—nothing more, nothing less.
+            </p>
+            <p class="quote-line">
+              Below zero. Above all. Tooth for tooth. Fang for fang.
             </p>
           </div>
 
           <div class="hero-meta">
-            <div class="pill">Game-side logic: <strong>poll /trigger</strong></div>
-            <div class="pill">Pulse: <strong>0.5s</strong></div>
-            <div class="pill">Trigger TTL: <strong>1s</strong></div>
+            <div class="pill">Trigger path: <strong>/trigger</strong></div>
+            <div class="pill">Pulse window: <strong>0.5s</strong></div>
+            <div class="pill">Ephemeral trigger: <strong>1s TTL</strong></div>
           </div>
         </div>
       </article>
@@ -590,29 +716,56 @@
         <div class="hero-side">
           <div class="mini-stat">
             <div class="label">Players in roster</div>
-            <div class="value" id="playerCount">0</div>
+            <div class="value" id="playerCount">--</div>
           </div>
           <div class="mini-stat">
             <div class="label">Trigger access</div>
-            <div class="value" id="triggerAccess">Locked</div>
+            <div class="value" id="triggerAccess">Denied</div>
           </div>
           <div class="mini-stat">
             <div class="label">Admin access</div>
-            <div class="value" id="adminAccess">No</div>
+            <div class="value" id="adminAccess">Denied</div>
           </div>
         </div>
       </aside>
     </section>
 
-    <section class="layout">
+    <section id="guestOnlySection" class="section-only-logged-out reveal">
+      <article class="panel center-panel">
+        <div class="operational-copy">
+          <h2>Operational Panel</h2>
+          <p>
+            Frosted Fang Security and Pull System is locked behind verified access. Login will unlock the secured trigger interface
+            and, if authorized, roster management controls.
+          </p>
+          <p>
+            The website may display names, channels, and roster metadata for command clarity, but the field computers care only for
+            their own name and their pulse direction.
+          </p>
+
+          <div class="access-grid">
+            <div class="access-box">
+              <div class="k">Admin Access</div>
+              <div class="v denied" id="guestAdminStatus">DENIED</div>
+            </div>
+            <div class="access-box">
+              <div class="k">Trigger Access</div>
+              <div class="v denied" id="guestTriggerStatus">DENIED</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="authedSection" class="layout hidden">
       <div class="stack">
-        <article class="panel reveal">
+        <article class="panel reveal" id="rosterPanel">
           <div class="section-head">
             <div>
               <h2>Roster</h2>
-              <p>Stored players and trigger directions from the backend list.</p>
+              <p>Authorized roster with player names, computer names, and assigned directions.</p>
             </div>
-            <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+            <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
           </div>
           <div class="panel-body">
             <div id="roster" class="roster"></div>
@@ -622,11 +775,11 @@
       </div>
 
       <div class="stack">
-        <article class="panel reveal">
+        <article class="panel reveal" id="triggerPanel">
           <div class="section-head">
             <div>
               <h2>Trigger</h2>
-              <p>Send only the fields the in-game computer actually needs.</p>
+              <p>Send the exact name and direction required by the in-game computer.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -658,7 +811,7 @@
           </div>
         </article>
 
-        <article class="panel reveal" id="playerAdminPanel">
+        <article class="panel reveal hidden" id="playerAdminPanel">
           <div class="section-head">
             <div>
               <h2>Add player</h2>
@@ -684,23 +837,21 @@
                 <input class="input" id="channel_name" name="channel_name" placeholder="Optional channel" />
               </div>
 
-              <div class="split">
-                <div class="field">
-                  <label for="direction">Direction</label>
-                  <select class="select" id="direction" name="direction">
-                    <option value="left">left</option>
-                    <option value="right">right</option>
-                    <option value="top">top</option>
-                    <option value="bottom">bottom</option>
-                    <option value="front">front</option>
-                    <option value="back">back</option>
-                  </select>
-                </div>
+              <div class="field">
+                <label for="direction">Direction</label>
+                <select class="select" id="direction" name="direction">
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                  <option value="top">top</option>
+                  <option value="bottom">bottom</option>
+                  <option value="front">front</option>
+                  <option value="back">back</option>
+                </select>
+              </div>
 
-                <div class="field">
-                  <label for="signal_strength">Signal strength</label>
-                  <input class="input" type="number" id="signal_strength" name="signal_strength" min="1" max="15" value="15" />
-                </div>
+              <div class="field">
+                <label for="signal_strength">Signal strength</label>
+                <input class="input" type="number" id="signal_strength" name="signal_strength" min="1" max="15" value="15" />
               </div>
 
               <div class="actions">
@@ -712,44 +863,37 @@
             <div id="playerMessage" class="message">Admin panel ready.</div>
           </div>
         </article>
-
-        <article class="panel reveal" id="loginPanel">
-          <div class="section-head">
-            <div>
-              <h2>Login</h2>
-              <p>Discord or fallback local admin access.</p>
-            </div>
-          </div>
-          <div class="panel-body">
-            <div class="login-grid">
-              <div class="actions">
-                <a class="btn btn-primary" id="discordLoginBtn" href="https://backend-website-syxe.onrender.com/auth/discord/login">Login with Discord</a>
-              </div>
-
-              <form id="localLoginForm" class="form-grid">
-                <div class="field">
-                  <label for="localUsername">Username</label>
-                  <input class="input" id="localUsername" name="username" placeholder="Fr05tedF4ng" />
-                </div>
-                <div class="field">
-                  <label for="localPassword">Password</label>
-                  <input class="input" id="localPassword" name="password" type="password" placeholder="Admin" />
-                </div>
-                <div class="actions">
-                  <button class="btn" type="submit">Local admin login</button>
-                </div>
-              </form>
-
-              <div id="loginMessage" class="message">Not logged in.</div>
-              <p class="footer-note">
-                Trigger access depends on Discord roles or local admin fallback. Roster add/remove requires admin access.
-              </p>
-            </div>
-          </div>
-        </article>
       </div>
     </section>
   </main>
+
+  <div class="terminal-overlay" id="terminalOverlay" aria-hidden="true">
+    <div class="terminal-shell">
+      <div class="terminal-top">
+        <div class="term-lights"><span></span><span></span><span></span></div>
+        <div class="terminal-title">Frosted Fang Admin Login</div>
+      </div>
+      <div class="terminal-body">
+        <div class="terminal-log" id="terminalLog">> C:/Frosted/OS/ Initializing...
+> Stand by<span class="blink"></span></div>
+
+        <form id="localLoginForm" class="terminal-form">
+          <div class="terminal-row">
+            <div class="terminal-label">&gt; User:</div>
+            <input class="terminal-input" id="localUsername" name="username" autocomplete="username" />
+          </div>
+          <div class="terminal-row">
+            <div class="terminal-label">&gt; Password:</div>
+            <input class="terminal-input" id="localPassword" name="password" type="password" autocomplete="current-password" />
+          </div>
+          <div class="terminal-actions">
+            <button class="btn btn-ghost" type="button" id="closeTerminalBtn">Cancel</button>
+            <button class="btn btn-violet" type="submit">Authenticate</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
     const API = 'https://backend-website-syxe.onrender.com';
@@ -763,11 +907,22 @@
       backendDot: document.getElementById('backendDot'),
       backendText: document.getElementById('backendText'),
       authPill: document.getElementById('authPill'),
+      discordLoginBtn: document.getElementById('discordLoginBtn'),
+      openAdminTerminalBtn: document.getElementById('openAdminTerminalBtn'),
       logoutBtn: document.getElementById('logoutBtn'),
 
       playerCount: document.getElementById('playerCount'),
       triggerAccess: document.getElementById('triggerAccess'),
       adminAccess: document.getElementById('adminAccess'),
+
+      guestOnlySection: document.getElementById('guestOnlySection'),
+      guestAdminStatus: document.getElementById('guestAdminStatus'),
+      guestTriggerStatus: document.getElementById('guestTriggerStatus'),
+
+      authedSection: document.getElementById('authedSection'),
+      rosterPanel: document.getElementById('rosterPanel'),
+      triggerPanel: document.getElementById('triggerPanel'),
+      playerAdminPanel: document.getElementById('playerAdminPanel'),
 
       roster: document.getElementById('roster'),
       rosterEmpty: document.getElementById('rosterEmpty'),
@@ -776,22 +931,22 @@
       triggerForm: document.getElementById('triggerForm'),
       triggerComputerName: document.getElementById('triggerComputerName'),
       triggerDirection: document.getElementById('triggerDirection'),
-      triggerBtn: document.getElementById('triggerBtn'),
       triggerMessage: document.getElementById('triggerMessage'),
       triggerFlash: document.getElementById('triggerFlash'),
 
-      playerAdminPanel: document.getElementById('playerAdminPanel'),
       playerForm: document.getElementById('playerForm'),
       playerId: document.getElementById('playerId'),
       playerMessage: document.getElementById('playerMessage'),
       clearPlayerBtn: document.getElementById('clearPlayerBtn'),
 
-      loginPanel: document.getElementById('loginPanel'),
+      terminalOverlay: document.getElementById('terminalOverlay'),
+      terminalLog: document.getElementById('terminalLog'),
       localLoginForm: document.getElementById('localLoginForm'),
-      loginMessage: document.getElementById('loginMessage')
+      closeTerminalBtn: document.getElementById('closeTerminalBtn')
     };
 
     function setMessage(el, text, type = '') {
+      if (!el) return;
       el.textContent = text;
       el.className = 'message' + (type ? ' ' + type : '');
     }
@@ -828,28 +983,58 @@
       return data;
     }
 
+    function isAuthorized(user) {
+      return !!(user && (user.canPull || user.isAdmin));
+    }
+
     function updateAuthUI() {
       const user = state.user;
+      const authorized = isAuthorized(user);
+      const admin = !!(user && user.isAdmin);
+
+      els.playerCount.textContent = authorized ? String(state.players.length) : '--';
+      els.triggerAccess.textContent = authorized ? 'Granted' : 'Denied';
+      els.adminAccess.textContent = admin ? 'Granted' : 'Denied';
+      els.guestTriggerStatus.textContent = authorized ? 'GRANTED' : 'DENIED';
+      els.guestAdminStatus.textContent = admin ? 'GRANTED' : 'DENIED';
+
+      els.guestTriggerStatus.className = authorized ? 'v granted' : 'v denied';
+      els.guestAdminStatus.className = admin ? 'v granted' : 'v denied';
 
       if (!user) {
-        els.authPill.textContent = 'Guest';
-        els.triggerAccess.textContent = 'Locked';
-        els.adminAccess.textContent = 'No';
-        els.playerAdminPanel.classList.add('hidden');
-        return;
+        els.authPill.textContent = 'Unauthenticated';
+      } else {
+        const tags = [user.username || 'User'];
+        if (user.authType) tags.push(user.authType);
+        if (user.isAdmin) tags.push('admin');
+        else if (user.canPull) tags.push('trigger');
+        els.authPill.textContent = tags.join(' • ');
       }
 
-      const parts = [user.username || 'User'];
-      if (user.authType) parts.push(`via ${user.authType}`);
-      if (user.isAdmin) parts.push('Admin');
-      else if (user.canPull) parts.push('Trigger');
+      if (authorized) {
+        els.discordLoginBtn.classList.add('hidden');
+        els.openAdminTerminalBtn.classList.add('hidden');
+        els.logoutBtn.classList.remove('hidden');
 
-      els.authPill.textContent = parts.join(' • ');
-      els.triggerAccess.textContent = user.canPull || user.isAdmin ? 'Granted' : 'Locked';
-      els.adminAccess.textContent = user.isAdmin ? 'Yes' : 'No';
+        els.guestOnlySection.classList.add('hidden');
+        els.authedSection.classList.remove('hidden');
 
-      if (user.isAdmin) els.playerAdminPanel.classList.remove('hidden');
-      else els.playerAdminPanel.classList.add('hidden');
+        els.rosterPanel.classList.remove('hidden');
+        els.triggerPanel.classList.remove('hidden');
+      } else {
+        els.discordLoginBtn.classList.remove('hidden');
+        els.openAdminTerminalBtn.classList.remove('hidden');
+        els.logoutBtn.classList.add('hidden');
+
+        els.guestOnlySection.classList.remove('hidden');
+        els.authedSection.classList.add('hidden');
+      }
+
+      if (admin) {
+        els.playerAdminPanel.classList.remove('hidden');
+      } else {
+        els.playerAdminPanel.classList.add('hidden');
+      }
     }
 
     function showTriggerFlash(computerName, direction) {
@@ -885,8 +1070,6 @@
 
     function renderRoster() {
       const players = state.players || [];
-      els.playerCount.textContent = String(players.length);
-
       if (!players.length) {
         els.roster.innerHTML = '';
         els.rosterEmpty.classList.remove('hidden');
@@ -896,8 +1079,8 @@
       els.rosterEmpty.classList.add('hidden');
       els.roster.innerHTML = players.map(player => {
         const adminControls = state.user && state.user.isAdmin ? `
-          <button class="btn icon-btn btn-ghost" data-edit="${player.id}">Edit</button>
-          <button class="btn icon-btn btn-danger" data-delete="${player.id}">Delete</button>
+          <button class="btn btn-ghost" data-edit="${player.id}" type="button">Edit</button>
+          <button class="btn btn-danger" data-delete="${player.id}" type="button">Delete</button>
         ` : '';
 
         return `
@@ -917,7 +1100,7 @@
             </div>
 
             <div class="player-actions">
-              <button class="btn btn-primary" data-trigger="${player.id}">Trigger</button>
+              <button class="btn btn-primary" data-trigger="${player.id}" type="button">Trigger</button>
               ${adminControls}
             </div>
           </article>
@@ -945,20 +1128,25 @@
       try {
         const data = await api('/auth/me', { method: 'GET' });
         state.user = data.user || null;
-        updateAuthUI();
-        setMessage(els.loginMessage, state.user ? `Logged in as ${state.user.username}` : 'Not logged in.', state.user ? 'success' : '');
       } catch (err) {
         state.user = null;
-        updateAuthUI();
-        setMessage(els.loginMessage, 'Not logged in.', '');
       }
+      updateAuthUI();
     }
 
     async function loadPlayers() {
+      if (!isAuthorized(state.user)) {
+        state.players = [];
+        renderRoster();
+        updateAuthUI();
+        return;
+      }
+
       try {
         const data = await api('/status', { method: 'GET' });
         state.players = data.players || [];
         renderRoster();
+        updateAuthUI();
       } catch (err) {
         state.players = [];
         renderRoster();
@@ -976,6 +1164,52 @@
       showTriggerFlash(computer_name, direction);
       return data;
     }
+
+    function openTerminal() {
+      els.terminalOverlay.classList.add('show');
+      els.terminalOverlay.setAttribute('aria-hidden', 'false');
+      els.terminalLog.textContent =
+`> C:/Frosted/OS/ Checking for admin
+>
+>
+> Awaiting credentials...`;
+      setTimeout(() => document.getElementById('localUsername').focus(), 60);
+    }
+
+    function closeTerminal() {
+      els.terminalOverlay.classList.remove('show');
+      els.terminalOverlay.setAttribute('aria-hidden', 'true');
+      els.localLoginForm.reset();
+    }
+
+    function randomToken(length = 42) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let out = '';
+      for (let i = 0; i < length; i++) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return out;
+    }
+
+    async function runTerminalSuccessSequence() {
+      els.terminalLog.textContent =
+`> C:/Frosted/OS/ Checking for admin
+>
+> Credentials accepted
+> Elevating access...
+> ${randomToken(18)}
+> ${randomToken(24)}
+> ${randomToken(14)}`;
+      await new Promise(r => setTimeout(r, 700));
+      closeTerminal();
+    }
+
+    els.openAdminTerminalBtn.addEventListener('click', openTerminal);
+    els.closeTerminalBtn.addEventListener('click', closeTerminal);
+
+    els.terminalOverlay.addEventListener('click', (e) => {
+      if (e.target === els.terminalOverlay) closeTerminal();
+    });
 
     els.refreshBtn.addEventListener('click', async () => {
       setMessage(els.triggerMessage, 'Refreshing roster…', 'info');
@@ -1026,7 +1260,6 @@
         const id = deleteBtn.getAttribute('data-delete');
         const player = state.players.find(p => String(p.id) === String(id));
         if (!player) return;
-
         if (!confirm(`Delete ${player.name}?`)) return;
 
         try {
@@ -1090,10 +1323,16 @@
           method: 'POST',
           body: JSON.stringify({ username, password })
         });
+
+        await runTerminalSuccessSequence();
         await loadAuth();
         await loadPlayers();
       } catch (err) {
-        setMessage(els.loginMessage, err.message, 'error');
+        els.terminalLog.textContent =
+`> C:/Frosted/OS/ Checking for admin
+>
+> Authentication failed
+> Access denied`;
       }
     });
 
@@ -1101,10 +1340,11 @@
       try {
         await api('/auth/logout', { method: 'POST' });
         state.user = null;
+        state.players = [];
+        renderRoster();
         updateAuthUI();
-        setMessage(els.loginMessage, 'Logged out.', 'info');
       } catch (err) {
-        setMessage(els.loginMessage, err.message, 'error');
+        alert(err.message);
       }
     });
 
