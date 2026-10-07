@@ -185,6 +185,28 @@ wss.on('connection', (ws, req) => {
   });
 });
 
+// Trigger route
+app.post('/trigger', ensureAuth, (req, res) => {
+  const { computer_name, command = 'default' } = req.body || {};
+
+  if (!computer_name) {
+    return res.status(400).json({ error: 'computer_name is required' });
+  }
+
+  const ws = computers.get(computer_name);
+
+  if (!ws || ws.readyState !== ws.OPEN) {
+    return res.status(404).json({ error: 'Computer not connected' });
+  }
+
+  ws.send(JSON.stringify({
+    type: 'trigger',
+    command
+  }));
+
+  return res.json({ ok: true });
+});
+
 // Auth routes
 app.get('/auth/discord/login', passport.authenticate('discord'));
 
