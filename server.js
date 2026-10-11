@@ -8,11 +8,10 @@ const { createClient } = require('@supabase/supabase-js');
 const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change_this_secret';
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SESSION_SECRET) {
-  console.error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET');
-  process.exit(1);
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -33,10 +32,10 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // Localhost/dev:
+    // For localhost HTTP testing:
     // secure: false, sameSite: 'lax'
     //
-    // HTTPS/prod:
+    // For HTTPS deployment:
     // secure: true, sameSite: 'none'
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
@@ -109,35 +108,14 @@ function canSeeFolder(user, folderName) {
   return Array.isArray(user.allowedFolders) && user.allowedFolders.includes(folderName);
 }
 
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await getUserByUsername(username);
-    if (!user) return done(null, false, { message: 'Invalid username' });
-    if (String(user.password) !== String(password)) return done(null, false, { message: 'Invalid password' });
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
-
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await getUserById(id);
-    done(null, user || false);
-  } catch (err) {
-    done(err);
-  }
-});
-
 /* =========================
    COMPUTERCRAFT TRIGGERS
    =========================
-   Keep the website -> in-game communication unchanged:
    GET /trigger?computer_name=...
-   returns { trigger: null } or { trigger: { computer_name, direction } }
+   -> { trigger: null } OR { trigger: { computer_name, direction } }
 
-   POST /trigger queues a trigger that should be visible for about 1 to 1.5 seconds.
+   POST /trigger
+   -> queues a trigger for ~1.5s so ComputerCraft polling catches it
 */
 let triggerQueue = [];
 
@@ -204,6 +182,27 @@ app.post('/trigger', ensureAuth, async (req, res) => {
 /* =========================
    AUTH
    ========================= */
+passport.use(new LocalStrategy(async (username, password, done) => {
+  try {
+    const user = await getUserByUsername(username);
+    if (!user) return done(null, false, { message: 'Invalid username' });
+    if (String(user.password) !== String(password)) return done(null, false, { message: 'Invalid password' });
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+}));
+
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await getUserById(id);
+    done(null, user || false);
+  } catch (err) {
+    done(err);
+  }
+});
+
 app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
   res.json({ user: publicUser(req.user) });
 });
@@ -230,7 +229,7 @@ app.get('/health', (req, res) => {
 
 app.get('/status', ensureAuth, async (req, res) => {
   try {
-    const { data, error } = await supabase.from('players').select('*');
+    const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
     if (error) return res.status(500).json({ error: 'Failed to load status' });
 
     const players = (data || []).filter(p => canSeeFolder(req.user, p.folder_name));
@@ -251,10 +250,7 @@ app.get('/players', ensureAuth, async (req, res) => {
     const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
     if (error) return res.status(500).json({ error: 'Failed to load players' });
 
-    const players = req.user.isAdmin || req.user.allFolders
-      ? (data || [])
-      : (data || []).filter(p => canSeeFolder(req.user, p.folder_name));
-
+    const players = (data || []).filter(p => req.user.isAdmin || req.user.allFolders || canSeeFolder(req.user, p.folder_name));
     res.json({ players });
   } catch {
     res.status(500).json({ error: 'Failed to load players' });
@@ -457,6 +453,14 @@ app.delete('/admin/users/:id', ensureAdmin, async (req, res) => {
   } catch {
     res.status(500).json({ error: 'Failed to delete user' });
   }
+});
+
+/* =========================
+   DEBUG
+   ========================= */
+app.get('/debug/users', async (req, res) => {
+  const { data, error } = await supabase.from('users').select('*');
+  res.json({ data, error });
 });
 
 app.listen(PORT, () => {
