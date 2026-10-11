@@ -55,7 +55,7 @@ const defaultUsers = [
   },
   {
     id: 3,
-    username: 'LokIo',
+    username: 'LakIo',
     password: 'RedEye',
     isAdmin: false,
     canPull: true,
