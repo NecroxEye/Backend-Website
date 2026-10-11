@@ -8,10 +8,8 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// If you're on Render behind a proxy
 app.set('trust proxy', 1);
 
-// ---- CORS ----
 app.use(cors({
   origin: true,
   credentials: true
@@ -20,7 +18,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ---- SESSION ----
 app.use(session({
   secret: process.env.SESSION_SECRET || 'change_this_secret',
   resave: false,
@@ -35,12 +32,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ---- LOCAL USERS ----
-// NOTE: In production, store these in a DB and hash passwords.
 const localUsers = {
-  'Fr05tedFang5': {
+  'Fr05tedF4ang5': {
     id: 1,
-    username: 'Fr05tedFang5',
+    username: 'Fr05tedF4ang5',
     password: 'Frosting',
     isAdmin: true,
     canPull: true,
@@ -67,8 +62,6 @@ const localUsers = {
   }
 };
 
-// ---- ROASTER/PLAYER DATA (in-memory example) ----
-// Replace with DB later if you want persistence.
 let players = [
   {
     id: 1,
@@ -99,7 +92,6 @@ let players = [
   }
 ];
 
-// ---- PASSPORT STRATEGY ----
 passport.use(new LocalStrategy((username, password, done) => {
   const user = localUsers[username];
   if (!user) return done(null, false, { message: 'Invalid username' });
@@ -109,11 +101,9 @@ passport.use(new LocalStrategy((username, password, done) => {
 
 passport.serializeUser((user, done) => done(null, user.username));
 passport.deserializeUser((username, done) => {
-  const user = localUsers[username];
-  done(null, user || false);
+  done(null, localUsers[username] || false);
 });
 
-// ---- HELPERS ----
 function ensureAuth(req, res, next) {
   if (req.isAuthenticated && req.isAuthenticated()) return next();
   return res.status(401).json({ error: 'Unauthorized' });
@@ -133,15 +123,18 @@ function getVisiblePlayersForUser(user) {
   return [];
 }
 
-// ---- AUTH ROUTES ----
+app.get('/health', (req, res) => {
+  res.json({ status: 'ON' });
+});
+
 app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
   res.json({
     ok: true,
     user: {
       username: req.user.username,
-      isAdmin: req.user.isAdmin,
-      canPull: req.user.canPull,
-      allFolders: req.user.allFolders,
+      isAdmin: !!req.user.isAdmin,
+      canPull: !!req.user.canPull,
+      allFolders: !!req.user.allFolders,
       allowedFolders: req.user.allowedFolders || []
     }
   });
@@ -170,46 +163,26 @@ app.get('/auth/me', (req, res) => {
   });
 });
 
-// ---- HEALTH ----
-app.get('/health', (req, res) => {
-  res.json({ status: 'ON' });
-});
-
-// ---- STATUS ----
 app.get('/status', ensureAuth, (req, res) => {
-  const visible = getVisiblePlayersForUser(req.user);
-  res.json({ players: visible });
+  res.json({ players: getVisiblePlayersForUser(req.user) });
 });
 
-// ---- TRIGGER ----
 app.post('/trigger', ensureAuth, (req, res) => {
   const { computer_name, direction } = req.body || {};
-
   if (!computer_name || !direction) {
     return res.status(400).json({ error: 'Missing computer_name or direction' });
   }
 
-  // You can connect this to your CC/Tweaked poll system or DB trigger queue later.
   console.log(`[TRIGGER] ${computer_name} -> ${direction} by ${req.user.username}`);
-
-  res.json({
-    ok: true,
-    triggered: {
-      computer_name,
-      direction
-    }
-  });
+  res.json({ ok: true, triggered: { computer_name, direction } });
 });
 
-// ---- PLAYERS CRUD ----
 app.get('/players', ensureAuth, (req, res) => {
-  const visible = getVisiblePlayersForUser(req.user);
-  res.json({ players: visible });
+  res.json({ players: getVisiblePlayersForUser(req.user) });
 });
 
 app.post('/players', ensureAdmin, (req, res) => {
   const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
-
   if (!name || !computer_name || !folder_name) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -232,9 +205,7 @@ app.put('/players/:id', ensureAdmin, (req, res) => {
   const id = Number(req.params.id);
   const idx = players.findIndex(p => Number(p.id) === id);
 
-  if (idx === -1) {
-    return res.status(404).json({ error: 'Player not found' });
-  }
+  if (idx === -1) return res.status(404).json({ error: 'Player not found' });
 
   const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
 
@@ -263,10 +234,8 @@ app.delete('/players/:id', ensureAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- STATIC FRONTEND ----
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---- START ----
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
