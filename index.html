@@ -26,19 +26,16 @@
     }
 
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
     body{
       margin:0;
       color:var(--text);
       font-family:"Inter", sans-serif;
       min-height:100vh;
-      overflow-x:hidden;
       background:
         radial-gradient(circle at 12% 18%, rgba(94,231,255,.05), transparent 26%),
         radial-gradient(circle at 85% 14%, rgba(122,50,255,.10), transparent 28%),
         radial-gradient(circle at 50% 100%, rgba(123,162,255,.06), transparent 35%),
         linear-gradient(180deg, #04050a 0%, #090b13 50%, #0a0d16 100%);
-      position:relative;
     }
 
     body::before{
@@ -46,7 +43,6 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:-2;
       background:
         linear-gradient(90deg,
           rgba(0,0,0,.96) 0%,
@@ -55,9 +51,7 @@
           rgba(0,0,0,0) 86%,
           rgba(49,16,94,.9) 94%,
           rgba(0,0,0,.96) 100%);
-      box-shadow:
-        inset 0 0 80px rgba(122,50,255,.16),
-        inset 0 0 180px rgba(122,50,255,.1);
+      z-index:-1;
     }
 
     .wrap{width:min(var(--max), calc(100% - 32px));margin-inline:auto}
@@ -66,10 +60,10 @@
     .topbar{
       position:sticky;
       top:0;
-      z-index:50;
       backdrop-filter:blur(14px);
       background:linear-gradient(180deg, rgba(5,6,10,.86), rgba(5,6,10,.46));
       border-bottom:1px solid rgba(255,255,255,.05);
+      z-index:20;
     }
 
     .topbar-inner{
@@ -80,12 +74,14 @@
       padding:14px 0;
     }
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand{display:flex;align-items:center;gap:12px}
     .brand-badge{
       width:42px;height:42px;border-radius:14px;
       background:linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.14)), rgba(255,255,255,.04);
-      border:1px solid var(--line);
+      border:1px solid rgba(123,162,255,.18);
       display:grid;place-items:center;
+      font-family:"Orbitron", sans-serif;
+      font-weight:800;
     }
     .eyebrow{
       display:block;
@@ -98,13 +94,11 @@
     .title{
       margin:0;
       font-family:"Orbitron", sans-serif;
-      font-weight:800;
       font-size:1.1rem;
       letter-spacing:.06em;
-      white-space:nowrap;
     }
 
-    .statusbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .statusbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
     .pill{
       display:inline-flex;
       align-items:center;
@@ -166,8 +160,8 @@
       border:1px solid rgba(255,255,255,.06);
       border-radius:24px;
       box-shadow:var(--shadow);
-      backdrop-filter:blur(14px);
       overflow:hidden;
+      backdrop-filter:blur(14px);
     }
 
     .hero-copy{padding:32px;min-height:290px;display:flex;flex-direction:column;justify-content:space-between}
@@ -183,7 +177,6 @@
       font-family:"Orbitron", sans-serif;
       font-size:clamp(2rem, 4vw, 4rem);
       line-height:.95;
-      letter-spacing:.03em;
       text-transform:uppercase;
       max-width:12ch;
     }
@@ -234,7 +227,6 @@
     .panel-body{padding:24px}
 
     .folder-accordion{display:grid;gap:14px}
-
     .folder-card{
       border-radius:20px;
       border:1px solid rgba(255,255,255,.06);
@@ -364,6 +356,27 @@
       min-height:390px;
     }
 
+    .user-list{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .user-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .user-row strong{display:block;margin-bottom:4px}
+    .user-row span{display:block;color:var(--muted);font-size:.9rem}
+    .small-note{color:var(--muted);font-size:.85rem;line-height:1.5}
+
     @media (max-width: 1140px){
       .layout{grid-template-columns:1fr}
     }
@@ -372,166 +385,208 @@
       .hero{grid-template-columns:1fr}
       .player{grid-template-columns:1fr}
       .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
+      .user-row{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 640px){
+      .wrap{width:min(var(--max), calc(100% - 20px))}
+      .hero-copy,.hero-side,.panel-body{padding:18px}
+      .section-head{padding:18px 18px 0}
+      .topbar-inner{align-items:flex-start;flex-direction:column}
+      .statusbar{justify-content:flex-start}
+      .folder-toggle{grid-template-columns:1fr auto}
+      .folder-pill{justify-self:start;margin-top:4px}
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="topbar">
-      <div class="wrap topbar-inner">
-        <div class="brand">
-          <div class="brand-badge">F</div>
-          <div>
-            <span class="eyebrow">Security Grid</span>
-            <h1 class="title">Frosted Fang Control</h1>
-          </div>
-        </div>
-        <div class="statusbar">
-          <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
-          <div class="pill" id="authPill">Unauthenticated</div>
-          <a class="btn btn-primary" href="https://backend-website-syxe.onrender.com/auth/discord/login" id="discordLoginBtn">Login with Discord</a>
-          <button class="btn btn-violet" id="openAdminTerminalBtn" type="button">Terminal Login</button>
-          <button class="btn btn-danger hidden" id="logoutBtn" type="button">Log Out</button>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">F</div>
+        <div>
+          <span class="eyebrow">Security Grid</span>
+          <h1 class="title">Frosted Fang Control</h1>
         </div>
       </div>
-    </header>
+      <div class="statusbar">
+        <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
+        <div class="pill" id="authPill">Unauthenticated</div>
+        <a class="btn btn-primary" href="/auth/discord/login" id="discordLoginBtn">Login with Discord</a>
+        <button class="btn btn-violet" id="openAdminTerminalBtn" type="button">Terminal Login</button>
+        <button class="btn btn-danger hidden" id="logoutBtn" type="button">Log Out</button>
+      </div>
+    </div>
+  </header>
 
-    <main>
-      <section class="hero">
-        <article class="hero-panel">
-          <div class="hero-copy">
-            <div>
-              <p class="hero-kicker">Operational Panel</p>
-              <h1>Frosted Fang Security & Pull System</h1>
-              <p>Login unlocks folders, trigger controls, and admin tools based on your account role.</p>
-            </div>
-            <div class="hero-meta">
-              <div class="pill">Trigger path: <strong>/trigger</strong></div>
-              <div class="pill">Folder-aware UI</div>
-              <div class="pill">Admin login users</div>
-            </div>
+  <main class="wrap">
+    <section class="hero">
+      <article class="hero-panel">
+        <div class="hero-copy">
+          <div>
+            <p class="hero-kicker">Operational Panel</p>
+            <h1>Frosted Fang Security & Pull System</h1>
+            <p>Login unlocks folders, trigger controls, and admin tools based on your account role.</p>
           </div>
-        </article>
+          <div class="hero-meta">
+            <div class="pill">Trigger path: <strong>/trigger</strong></div>
+            <div class="pill">Folder-aware UI</div>
+            <div class="pill">Admin user manager</div>
+          </div>
+        </div>
+      </article>
 
-        <aside class="hero-panel">
-          <div class="hero-side">
-            <div class="mini-stat">
-              <div class="label">Visible players</div>
-              <div class="value" id="playerCount">--</div>
-            </div>
-            <div class="mini-stat">
-              <div class="label">Trigger access</div>
-              <div class="value" id="triggerAccess">Denied</div>
-            </div>
-            <div class="mini-stat">
-              <div class="label">Admin access</div>
-              <div class="value" id="adminAccess">Denied</div>
-            </div>
+      <aside class="hero-panel">
+        <div class="hero-side">
+          <div class="mini-stat">
+            <div class="label">Visible players</div>
+            <div class="value" id="playerCount">--</div>
           </div>
-        </aside>
+          <div class="mini-stat">
+            <div class="label">Trigger access</div>
+            <div class="value" id="triggerAccess">Denied</div>
+          </div>
+          <div class="mini-stat">
+            <div class="label">Admin access</div>
+            <div class="value" id="adminAccess">Denied</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="guestOnlySection">
+      <article class="panel">
+        <div class="panel-body">
+          <h2 style="font-family:Orbitron;margin-top:0">Operational Panel</h2>
+          <p style="color:var(--muted)">Login to unlock your allowed folders and trigger controls.</p>
+        </div>
+      </article>
+    </section>
+
+    <section id="authedSection" class="layout hidden">
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Roster Folders</h2>
+            <p>Click a folder to open or close it.</p>
+          </div>
+          <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div class="folder-accordion" id="folderAccordion"></div>
+          <div id="rosterEmpty" class="message info hidden">No visible folders or players found.</div>
+        </div>
       </section>
 
-      <section id="guestOnlySection">
+      <aside class="stack">
         <article class="panel">
-          <div class="panel-body">
-            <h2 style="font-family:Orbitron;margin-top:0">Operational Panel</h2>
-            <p style="color:var(--muted)">Login to unlock your allowed folders and trigger controls.</p>
-          </div>
-        </article>
-      </section>
-
-      <section id="authedSection" class="layout hidden">
-        <section class="panel">
           <div class="section-head">
             <div>
-              <h2>Roster Folders</h2>
-              <p>Click a folder to open or close it.</p>
+              <h2>Trigger</h2>
+              <p>Send a manual pulse.</p>
             </div>
-            <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
           </div>
           <div class="panel-body">
-            <div id="folderAccordion" class="folder-accordion"></div>
-            <div id="rosterEmpty" class="message info hidden">No visible folders or players found.</div>
+            <form id="triggerForm" class="form-grid">
+              <div class="field">
+                <label for="triggerComputerName">Computer name</label>
+                <input class="input" id="triggerComputerName" required />
+              </div>
+              <div class="field">
+                <label for="triggerDirection">Direction</label>
+                <select class="select" id="triggerDirection">
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                  <option value="top">top</option>
+                  <option value="bottom">bottom</option>
+                  <option value="front">front</option>
+                  <option value="back">back</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="submit">Trigger</button>
+            </form>
+            <div id="triggerMessage" class="message">Ready.</div>
+            <div id="triggerFlash" class="message hidden"></div>
           </div>
-        </section>
+        </article>
 
-        <aside class="stack">
-          <article class="panel">
-            <div class="section-head">
-              <div>
-                <h2>Trigger</h2>
-                <p>Send a manual pulse.</p>
+        <article class="panel hidden" id="playerAdminPanel">
+          <div class="section-head">
+            <div>
+              <h2>Add / Edit Player</h2>
+              <p>Admin only.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="playerForm" class="form-grid">
+              <input type="hidden" id="playerId" />
+              <div class="field"><label>Player name</label><input class="input" id="name" required /></div>
+              <div class="field"><label>Computer name</label><input class="input" id="computer_name" required /></div>
+              <div class="field"><label>Channel name</label><input class="input" id="channel_name" /></div>
+              <div class="field"><label>Folder assignment</label><input class="input" id="folder_name" required /></div>
+              <div class="field">
+                <label>Direction</label>
+                <select class="select" id="direction">
+                  <option value="left">left</option><option value="right">right</option><option value="top">top</option><option value="bottom">bottom</option><option value="front">front</option><option value="back">back</option>
+                </select>
               </div>
-            </div>
-            <div class="panel-body">
-              <form id="triggerForm" class="form-grid">
-                <div class="field">
-                  <label for="triggerComputerName">Computer name</label>
-                  <input class="input" id="triggerComputerName" required />
-                </div>
-                <div class="field">
-                  <label for="triggerDirection">Direction</label>
-                  <select class="select" id="triggerDirection">
-                    <option value="left">left</option>
-                    <option value="right">right</option>
-                    <option value="top">top</option>
-                    <option value="bottom">bottom</option>
-                    <option value="front">front</option>
-                    <option value="back">back</option>
-                  </select>
-                </div>
-                <button class="btn btn-primary" type="submit">Trigger</button>
-              </form>
-              <div id="triggerMessage" class="message">Ready.</div>
-              <div id="triggerFlash" class="message hidden"></div>
-            </div>
-          </article>
+              <div class="field"><label>Signal strength</label><input class="input" type="number" id="signal_strength" min="1" max="15" value="15" /></div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save player</button>
+                <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
+              </div>
+            </form>
+            <div id="playerMessage" class="message">Admin panel ready.</div>
+          </div>
+        </article>
 
-          <article class="panel hidden" id="playerAdminPanel">
-            <div class="section-head">
-              <div>
-                <h2>Add / Edit Player</h2>
-                <p>Admin only.</p>
+        <article class="panel hidden" id="userAdminPanel">
+          <div class="section-head">
+            <div>
+              <h2>Login User Manager</h2>
+              <p>Admin only. Stored server-side.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="userForm" class="form-grid">
+              <input type="hidden" id="userId" />
+              <div class="field"><label>Username</label><input class="input" id="username" required /></div>
+              <div class="field"><label>Password</label><input class="input" id="password" required /></div>
+              <div class="field">
+                <label>Access flags</label>
+                <div class="small-note">
+                  <label><input type="checkbox" id="isAdmin"> Admin</label><br>
+                  <label><input type="checkbox" id="canPull"> Can Pull</label><br>
+                  <label><input type="checkbox" id="allFolders"> All Folders</label>
+                </div>
               </div>
-            </div>
-            <div class="panel-body">
-              <form id="playerForm" class="form-grid">
-                <input type="hidden" id="playerId" />
-                <div class="field"><label>Player name</label><input class="input" id="name" required /></div>
-                <div class="field"><label>Computer name</label><input class="input" id="computer_name" required /></div>
-                <div class="field"><label>Channel name</label><input class="input" id="channel_name" /></div>
-                <div class="field"><label>Folder assignment</label><input class="input" id="folder_name" required /></div>
-                <div class="field"><label>Direction</label>
-                  <select class="select" id="direction">
-                    <option value="left">left</option><option value="right">right</option><option value="top">top</option><option value="bottom">bottom</option><option value="front">front</option><option value="back">back</option>
-                  </select>
-                </div>
-                <div class="field"><label>Signal strength</label><input class="input" type="number" id="signal_strength" min="1" max="15" value="15" /></div>
-                <div class="actions">
-                  <button class="btn btn-primary" type="submit">Save player</button>
-                  <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
-                </div>
-              </form>
-              <div id="playerMessage" class="message">Admin panel ready.</div>
-            </div>
-          </article>
-        </aside>
-      </section>
-    </main>
-  </div>
+              <div class="field"><label>Allowed folders (comma separated)</label><input class="input" id="allowedFolders" placeholder="LakIo, Oil Rig" /></div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save user</button>
+                <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
+              </div>
+            </form>
+
+            <div id="userMessage" class="message">Manage local login users here.</div>
+            <div id="userList" class="user-list"></div>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
 
   <div class="terminal-overlay" id="terminalOverlay">
     <div class="terminal-shell">
       <div class="panel-body terminal-body">
         <div id="terminalLog">> C:/Frosted/OS/ Initializing...</div>
-        <form id="localLoginForm">
+        <form id="loginForm">
           <div class="field">
             <label>User</label>
-            <input class="input" id="localUsername" />
+            <input class="input" id="loginUsername" />
           </div>
           <div class="field">
             <label>Password</label>
-            <input class="input" id="localPassword" type="password" />
+            <input class="input" id="loginPassword" type="password" />
           </div>
           <div class="actions">
             <button class="btn btn-ghost" type="button" id="closeTerminalBtn">Cancel</button>
@@ -543,11 +598,12 @@
   </div>
 
   <script>
-    const API = 'https://backend-website-syxe.onrender.com';
+    const API = '';
 
     const state = {
       user: null,
       players: [],
+      users: [],
       openFolders: new Set(),
       expandAll: false
     };
@@ -565,6 +621,7 @@
       guestOnlySection: document.getElementById('guestOnlySection'),
       authedSection: document.getElementById('authedSection'),
       playerAdminPanel: document.getElementById('playerAdminPanel'),
+      userAdminPanel: document.getElementById('userAdminPanel'),
       folderAccordion: document.getElementById('folderAccordion'),
       rosterEmpty: document.getElementById('rosterEmpty'),
       refreshBtn: document.getElementById('refreshBtn'),
@@ -577,71 +634,85 @@
       playerId: document.getElementById('playerId'),
       playerMessage: document.getElementById('playerMessage'),
       clearPlayerBtn: document.getElementById('clearPlayerBtn'),
+      userForm: document.getElementById('userForm'),
+      userId: document.getElementById('userId'),
+      username: document.getElementById('username'),
+      password: document.getElementById('password'),
+      isAdmin: document.getElementById('isAdmin'),
+      canPull: document.getElementById('canPull'),
+      allFolders: document.getElementById('allFolders'),
+      allowedFolders: document.getElementById('allowedFolders'),
+      clearUserBtn: document.getElementById('clearUserBtn'),
+      userMessage: document.getElementById('userMessage'),
+      userList: document.getElementById('userList'),
       terminalOverlay: document.getElementById('terminalOverlay'),
       terminalLog: document.getElementById('terminalLog'),
-      localLoginForm: document.getElementById('localLoginForm'),
+      loginForm: document.getElementById('loginForm'),
       closeTerminalBtn: document.getElementById('closeTerminalBtn')
     };
 
-    const LOCAL_USERS = {
-      'Fr05tedF4ang5': { password: 'Frosting', admin: true, trigger: true, allFolders: true, folders: [] },
-      'Frost': { password: 'Genius', admin: false, trigger: true, allFolders: true, folders: [] },
-      'LokIo': { password: 'RedEye', admin: false, trigger: true, allFolders: false, folders: ['LakIo'] }
-    };
-
-    function isAuth(user) { return !!(user && (user.isAdmin || user.canPull)); }
-    function normalizeFolder(p) { return String(p.folder_name || p.folder || p.computer_name || 'Unassigned'); }
-    function escapeHtml(str) { return String(str ?? '').replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[s])); }
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, s => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[s]);
+    }
 
     async function api(path, options = {}) {
-      const res = await fetch(API + path, {
+      const res = await fetch(path, {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options
       });
-      const text = await res.text();
+      const txt = await res.text();
       let data = null;
-      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+      try { data = txt ? JSON.parse(txt) : null; } catch { data = txt; }
       if (!res.ok) throw new Error((data && data.error) || `Request failed: ${res.status}`);
       return data;
     }
 
-    function getVisibleFolders() {
-      const folders = [...new Set(state.players.map(normalizeFolder))].sort((a,b)=>a.localeCompare(b));
+    function normalizeFolder(p) {
+      return String(p.folder_name || p.folder || p.computer_name || 'Unassigned').trim() || 'Unassigned';
+    }
+
+    function isAuthed(user) {
+      return !!(user && (user.isAdmin || user.canPull));
+    }
+
+    function canSeeFolder(folder) {
+      const user = state.user;
+      if (!user) return false;
+      if (user.isAdmin || user.allFolders) return true;
+      return Array.isArray(user.allowedFolders) && user.allowedFolders.includes(folder);
+    }
+
+    function visiblePlayers() {
       if (!state.user) return [];
-      if (state.user.isAdmin || state.user.allFolders) return folders;
-      if (Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.length) {
-        return folders.filter(f => state.user.allowedFolders.includes(f));
-      }
-      return [];
+      if (state.user.isAdmin || state.user.allFolders) return state.players;
+      return state.players.filter(p => canSeeFolder(normalizeFolder(p)));
     }
 
-    function getVisiblePlayers() {
-      const folders = getVisibleFolders();
-      return state.players.filter(p => folders.includes(normalizeFolder(p)));
-    }
-
-    function getGroupedPlayers() {
-      const grouped = {};
-      getVisiblePlayers().forEach(p => {
+    function groupedPlayers() {
+      const out = {};
+      for (const p of visiblePlayers()) {
         const f = normalizeFolder(p);
-        if (!grouped[f]) grouped[f] = [];
-        grouped[f].push(p);
-      });
-      return grouped;
+        if (!out[f]) out[f] = [];
+        out[f].push(p);
+      }
+      return out;
     }
 
     function updateAuthUI() {
       const user = state.user;
-      const auth = isAuth(user);
+      const auth = isAuthed(user);
       const admin = !!(user && user.isAdmin);
 
-      els.playerCount.textContent = auth ? String(getVisiblePlayers().length) : '--';
+      els.playerCount.textContent = auth ? String(visiblePlayers().length) : '--';
       els.triggerAccess.textContent = auth ? 'Granted' : 'Denied';
       els.adminAccess.textContent = admin ? 'Granted' : 'Denied';
 
-      if (!user) els.authPill.textContent = 'Unauthenticated';
-      else els.authPill.textContent = user.username + (admin ? ' • admin' : user.allFolders ? ' • all folders' : '');
+      els.authPill.textContent = !user
+        ? 'Unauthenticated'
+        : `${user.username}${admin ? ' • admin' : user.allFolders ? ' • all folders' : ''}`;
 
       els.discordLoginBtn.classList.toggle('hidden', auth);
       els.openAdminTerminalBtn.classList.toggle('hidden', auth);
@@ -649,53 +720,11 @@
       els.guestOnlySection.classList.toggle('hidden', auth);
       els.authedSection.classList.toggle('hidden', !auth);
       els.playerAdminPanel.classList.toggle('hidden', !admin);
-    }
-
-    function renderFolders() {
-      const grouped = getGroupedPlayers();
-      const folders = Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
-
-      if (!folders.length) {
-        els.folderAccordion.innerHTML = '';
-        els.rosterEmpty.classList.remove('hidden');
-        return;
-      }
-      els.rosterEmpty.classList.add('hidden');
-
-      if (state.expandAll) state.openFolders = new Set(folders);
-      else state.openFolders = new Set([...state.openFolders].filter(f => folders.includes(f)));
-
-      if (state.openFolders.size === 0 && folders[0]) state.openFolders.add(folders[0]);
-
-      els.folderAccordion.innerHTML = folders.map(folder => {
-        const open = state.openFolders.has(folder);
-        const players = grouped[folder];
-        return `
-          <section class="folder-card ${open ? 'open' : ''}">
-            <button class="folder-toggle" type="button" data-folder="${escapeHtml(folder)}" aria-expanded="${open ? 'true' : 'false'}">
-              <div class="folder-title-wrap">
-                <h3 class="folder-title">${escapeHtml(folder)}</h3>
-                <div class="folder-sub">${players[0]?.computer_name || folder}</div>
-              </div>
-              <div class="folder-pill">${players.length} player${players.length === 1 ? '' : 's'}</div>
-              <div class="folder-chevron">⌄</div>
-            </button>
-            <div class="folder-content">
-              <div class="folder-content-inner">
-                <div class="folder-content-pad">
-                  <div class="player-list">
-                    ${players.map(playerMarkup).join('')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-      }).join('');
+      els.userAdminPanel.classList.toggle('hidden', !admin);
     }
 
     function playerMarkup(p) {
-      const adminButtons = state.user && state.user.isAdmin ? `
+      const adminBtns = state.user && state.user.isAdmin ? `
         <button class="btn btn-ghost" data-edit="${p.id}" type="button">Edit</button>
         <button class="btn btn-danger" data-delete="${p.id}" type="button">Delete</button>
       ` : '';
@@ -712,71 +741,89 @@
           </div>
           <div><span class="dir-badge">${escapeHtml(p.direction || 'left')}</span></div>
           <div class="player-actions">
-            <button class="btn btn-primary" data-trigger="${p.id}" type="button">Trigger</button>
-            ${adminButtons}
+            ${state.user && state.user.canPull ? `<button class="btn btn-primary" data-trigger="${p.id}" type="button">Trigger</button>` : ''}
+            ${adminBtns}
           </div>
         </article>
       `;
     }
 
-    function showTriggerFlash(computer_name, direction) {
-      els.triggerFlash.textContent = `[Frosted Fang] Direction: ${direction} Pulled`;
-      els.triggerFlash.classList.remove('hidden');
-      setTimeout(() => els.triggerFlash.classList.add('hidden'), 1200);
-    }
+    function renderFolders() {
+      const groups = groupedPlayers();
+      const folders = Object.keys(groups).sort((a, b) => a.localeCompare(b));
 
-    async function loadHealth() {
-      try {
-        const data = await api('/health');
-        els.backendDot.className = data.status === 'ON' ? 'dot online' : 'dot offline';
-        els.backendText.textContent = data.status === 'ON' ? 'Backend online' : 'Backend issue';
-      } catch {
-        els.backendDot.className = 'dot offline';
-        els.backendText.textContent = 'Backend offline';
-      }
-    }
-
-    async function loadAuth() {
-      try {
-        const data = await api('/auth/me');
-        state.user = data.user || null;
-      } catch {
-        state.user = null;
-      }
-      updateAuthUI();
-    }
-
-    async function loadPlayers() {
-      if (!isAuth(state.user)) {
-        state.players = [];
-        renderFolders();
-        updateAuthUI();
+      if (!folders.length) {
+        els.folderAccordion.innerHTML = '';
+        els.rosterEmpty.classList.remove('hidden');
         return;
       }
-      const data = await api('/status');
-      state.players = data.players || [];
-      renderFolders();
-      updateAuthUI();
+
+      els.rosterEmpty.classList.add('hidden');
+
+      if (state.expandAll) state.openFolders = new Set(folders);
+      else state.openFolders = new Set([...state.openFolders].filter(f => folders.includes(f)));
+      if (state.openFolders.size === 0 && folders[0]) state.openFolders.add(folders[0]);
+
+      els.folderAccordion.innerHTML = folders.map(folder => {
+        const open = state.openFolders.has(folder);
+        const list = groups[folder];
+        return `
+          <section class="folder-card ${open ? 'open' : ''}">
+            <button class="folder-toggle" type="button" data-folder="${escapeHtml(folder)}">
+              <div class="folder-title-wrap">
+                <h3 class="folder-title">${escapeHtml(folder)}</h3>
+                <div class="folder-sub">${escapeHtml(list[0]?.computer_name || folder)}</div>
+              </div>
+              <div class="folder-pill">${list.length} player${list.length === 1 ? '' : 's'}</div>
+              <div class="folder-chevron">⌄</div>
+            </button>
+            <div class="folder-content">
+              <div class="folder-content-inner">
+                <div class="folder-content-pad">
+                  <div class="player-list">${list.map(playerMarkup).join('')}</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }).join('');
     }
 
-    async function sendTrigger(computer_name, direction) {
-      await api('/trigger', {
-        method: 'POST',
-        body: JSON.stringify({ computer_name, direction })
-      });
-      showTriggerFlash(computer_name, direction);
-      document.getElementById('triggerMessage').textContent = `Triggered ${computer_name} (${direction})`;
+    function renderUsers() {
+      if (!state.user || !state.user.isAdmin) {
+        els.userList.innerHTML = '';
+        return;
+      }
+
+      els.userList.innerHTML = state.users.map(u => `
+        <article class="user-row">
+          <div>
+            <strong>${escapeHtml(u.username)}</strong>
+            <span>
+              ${u.isAdmin ? 'Admin' : 'User'} •
+              ${u.canPull ? 'Can Pull' : 'No Pull'} •
+              ${u.allFolders ? 'All Folders' : (u.allowedFolders || []).join(', ') || 'No folders'}
+            </span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost" data-user-edit="${u.id}" type="button">Edit</button>
+            <button class="btn btn-danger" data-user-delete="${u.id}" type="button">Delete</button>
+          </div>
+        </article>
+      `).join('') || '<div class="message info">No users loaded.</div>';
     }
 
-    function openTerminal() {
-      els.terminalOverlay.classList.add('show');
-      els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Awaiting credentials...';
-      setTimeout(() => document.getElementById('localUsername').focus(), 50);
+    function clearPlayerForm() {
+      els.playerForm.reset();
+      els.playerId.value = '';
+      document.getElementById('signal_strength').value = 15;
+      document.getElementById('direction').value = 'left';
     }
 
-    function closeTerminal() {
-      els.terminalOverlay.classList.remove('show');
-      els.localLoginForm.reset();
+    function clearUserForm() {
+      els.userForm.reset();
+      els.userId.value = '';
+      els.allowedFolders.value = '';
     }
 
     function randomToken(len = 24) {
@@ -784,6 +831,17 @@
       let out = '';
       for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
       return out;
+    }
+
+    function openTerminal() {
+      els.terminalOverlay.classList.add('show');
+      els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Awaiting credentials...';
+      setTimeout(() => document.getElementById('loginUsername').focus(), 50);
+    }
+
+    function closeTerminal() {
+      els.terminalOverlay.classList.remove('show');
+      els.loginForm.reset();
     }
 
     async function terminalSuccess(username) {
@@ -799,20 +857,75 @@
       els.terminalLog.textContent = '';
       for (const line of lines) {
         els.terminalLog.textContent += (els.terminalLog.textContent ? '\n' : '') + line;
-        await new Promise(r => setTimeout(r, 90));
+        await new Promise(r => setTimeout(r, 85));
       }
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 350));
       closeTerminal();
     }
 
-    els.folderAccordion.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-folder]');
+    async function loadHealth() {
+      try {
+        const data = await api('/health');
+        els.backendDot.className = data.status === 'ON' ? 'dot online' : 'dot offline';
+        els.backendText.textContent = data.status === 'ON' ? 'Backend online' : 'Backend issue';
+      } catch {
+        els.backendDot.className = 'dot offline';
+        els.backendText.textContent = 'Backend offline';
+      }
+    }
+
+    async function loadAuth() {
+      const data = await api('/auth/me');
+      state.user = data.user || null;
+      updateAuthUI();
+    }
+
+    async function loadPlayers() {
+      if (!isAuthed(state.user)) {
+        state.players = [];
+        renderFolders();
+        renderUsers();
+        updateAuthUI();
+        return;
+      }
+      const data = await api('/players');
+      state.players = data.players || [];
+      renderFolders();
+      renderUsers();
+      updateAuthUI();
+    }
+
+    async function loadUsers() {
+      if (!state.user || !state.user.isAdmin) return;
+      const data = await api('/admin/users');
+      state.users = data.users || [];
+      renderUsers();
+    }
+
+    async function sendTrigger(computer_name, direction) {
+      await api('/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ computer_name, direction })
+      });
+      els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})`;
+      els.triggerFlash.classList.remove('hidden');
+      els.triggerFlash.textContent = `Queued for ${computer_name}`;
+      setTimeout(() => els.triggerFlash.classList.add('hidden'), 1200);
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      await loadPlayers();
+      if (state.user && state.user.isAdmin) await loadUsers();
+    });
+
+    els.folderAccordion.addEventListener('click', async (e) => {
+      const toggle = e.target.closest('[data-folder]');
       const triggerBtn = e.target.closest('[data-trigger]');
       const editBtn = e.target.closest('[data-edit]');
       const deleteBtn = e.target.closest('[data-delete]');
 
-      if (btn) {
-        const folder = btn.getAttribute('data-folder');
+      if (toggle) {
+        const folder = toggle.getAttribute('data-folder');
         if (state.openFolders.has(folder)) state.openFolders.delete(folder);
         else state.openFolders.add(folder);
         state.expandAll = false;
@@ -820,56 +933,37 @@
       }
 
       if (triggerBtn) {
-        const player = getVisiblePlayers().find(p => String(p.id) === String(triggerBtn.getAttribute('data-trigger')));
-        if (!player) return;
-        document.getElementById('triggerComputerName').value = player.computer_name;
-        document.getElementById('triggerDirection').value = player.direction || 'left';
-        sendTrigger(player.computer_name, player.direction || 'left').catch(err => {
-          document.getElementById('triggerMessage').textContent = err.message;
-        });
+        const p = visiblePlayers().find(x => String(x.id) === String(triggerBtn.getAttribute('data-trigger')));
+        if (!p) return;
+        document.getElementById('triggerComputerName').value = p.computer_name;
+        document.getElementById('triggerDirection').value = p.direction || 'left';
+        try { await sendTrigger(p.computer_name, p.direction || 'left'); } catch (err) { els.triggerMessage.textContent = err.message; }
       }
 
       if (editBtn && state.user && state.user.isAdmin) {
-        const player = getVisiblePlayers().find(p => String(p.id) === String(editBtn.getAttribute('data-edit')));
-        if (!player) return;
-        document.getElementById('playerId').value = player.id;
-        document.getElementById('name').value = player.name;
-        document.getElementById('computer_name').value = player.computer_name;
-        document.getElementById('channel_name').value = player.channel_name || '';
-        document.getElementById('folder_name').value = normalizeFolder(player);
-        document.getElementById('direction').value = player.direction || 'left';
-        document.getElementById('signal_strength').value = player.signal_strength ?? 15;
+        const p = visiblePlayers().find(x => String(x.id) === String(editBtn.getAttribute('data-edit')));
+        if (!p) return;
+        els.playerId.value = p.id;
+        document.getElementById('name').value = p.name;
+        document.getElementById('computer_name').value = p.computer_name;
+        document.getElementById('channel_name').value = p.channel_name || '';
+        document.getElementById('folder_name').value = normalizeFolder(p);
+        document.getElementById('direction').value = p.direction || 'left';
+        document.getElementById('signal_strength').value = p.signal_strength ?? 15;
       }
 
       if (deleteBtn && state.user && state.user.isAdmin) {
         const id = deleteBtn.getAttribute('data-delete');
-        fetch(API + '/players/' + id, {
-          method: 'DELETE',
-          credentials: 'include'
-        })
-        .then(r => r.json())
-        .then(() => loadPlayers())
-        .catch(err => document.getElementById('playerMessage').textContent = err.message || 'Delete failed');
+        const res = await fetch('/players/' + id, { method: 'DELETE', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) return els.playerMessage.textContent = data.error || 'Delete failed';
+        els.playerMessage.textContent = 'Player deleted.';
+        await loadPlayers();
       }
     });
 
-    document.getElementById('refreshBtn').addEventListener('click', loadPlayers);
-
-    document.getElementById('triggerForm').addEventListener('submit', async (e) => {
+    els.playerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      try {
-        await sendTrigger(
-          document.getElementById('triggerComputerName').value.trim(),
-          document.getElementById('triggerDirection').value
-        );
-      } catch (err) {
-        document.getElementById('triggerMessage').textContent = err.message;
-      }
-    });
-
-    document.getElementById('playerForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
       const payload = {
         name: document.getElementById('name').value.trim(),
         computer_name: document.getElementById('computer_name').value.trim(),
@@ -880,87 +974,144 @@
       };
 
       try {
-        const id = document.getElementById('playerId').value.trim();
-        const url = id ? API + '/players/' + id : API + '/players';
+        const id = els.playerId.value.trim();
+        const url = id ? '/players/' + id : '/players';
         const method = id ? 'PUT' : 'POST';
-
         const res = await fetch(url, {
           method,
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Save failed');
-
-        document.getElementById('playerMessage').textContent = id ? 'Player updated.' : 'Player added.';
-        document.getElementById('playerForm').reset();
-        document.getElementById('signal_strength').value = 15;
-        document.getElementById('direction').value = 'left';
-        document.getElementById('playerId').value = '';
-        loadPlayers();
+        els.playerMessage.textContent = id ? 'Player updated.' : 'Player added.';
+        clearPlayerForm();
+        await loadPlayers();
       } catch (err) {
-        document.getElementById('playerMessage').textContent = err.message;
+        els.playerMessage.textContent = err.message;
       }
     });
 
-    document.getElementById('clearPlayerBtn').addEventListener('click', () => {
-      document.getElementById('playerForm').reset();
-      document.getElementById('signal_strength').value = 15;
-      document.getElementById('direction').value = 'left';
-      document.getElementById('playerId').value = '';
+    els.clearPlayerBtn.addEventListener('click', clearPlayerForm);
+
+    els.userForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.user || !state.user.isAdmin) return;
+
+      const payload = {
+        username: els.username.value.trim(),
+        password: els.password.value,
+        isAdmin: els.isAdmin.checked,
+        canPull: els.canPull.checked,
+        allFolders: els.allFolders.checked,
+        allowedFolders: els.allowedFolders.value.split(',').map(s => s.trim()).filter(Boolean)
+      };
+
+      try {
+        const id = els.userId.value.trim();
+        const url = id ? '/admin/users/' + id : '/admin/users';
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        els.userMessage.textContent = id ? 'User updated.' : 'User added.';
+        clearUserForm();
+        await loadUsers();
+      } catch (err) {
+        els.userMessage.textContent = err.message;
+      }
+    });
+
+    els.clearUserBtn.addEventListener('click', clearUserForm);
+
+    els.userList.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('[data-user-edit]');
+      const deleteBtn = e.target.closest('[data-user-delete]');
+
+      if (editBtn) {
+        const user = state.users.find(u => String(u.id) === String(editBtn.getAttribute('data-user-edit')));
+        if (!user) return;
+        els.userId.value = user.id;
+        els.username.value = user.username;
+        els.password.value = '';
+        els.isAdmin.checked = !!user.isAdmin;
+        els.canPull.checked = !!user.canPull;
+        els.allFolders.checked = !!user.allFolders;
+        els.allowedFolders.value = (user.allowedFolders || []).join(', ');
+        els.userMessage.textContent = `Editing ${user.username}`;
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-user-delete');
+        if (!confirm('Delete this user?')) return;
+        const res = await fetch('/admin/users/' + id, { method: 'DELETE', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) return els.userMessage.textContent = data.error || 'Delete failed';
+        els.userMessage.textContent = 'User deleted.';
+        await loadUsers();
+      }
+    });
+
+    document.getElementById('triggerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await sendTrigger(
+          document.getElementById('triggerComputerName').value.trim(),
+          document.getElementById('triggerDirection').value
+        );
+      } catch (err) {
+        els.triggerMessage.textContent = err.message;
+      }
     });
 
     document.getElementById('openAdminTerminalBtn').addEventListener('click', openTerminal);
     document.getElementById('closeTerminalBtn').addEventListener('click', closeTerminal);
-    document.getElementById('terminalOverlay').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeTerminal();
+    els.terminalOverlay.addEventListener('click', (e) => {
+      if (e.target === els.terminalOverlay) closeTerminal();
     });
 
-    document.getElementById('localLoginForm').addEventListener('submit', async (e) => {
+    els.loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('localUsername').value.trim();
-      const password = document.getElementById('localPassword').value;
-      const cfg = LOCAL_USERS[username];
-
-      if (!cfg || cfg.password !== password) {
-        els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
-        return;
-      }
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
 
       try {
-        await api('/auth/local/login', {
+        const res = await api('/auth/local/login', {
           method: 'POST',
           body: JSON.stringify({ username, password })
         });
-      } catch {}
-
-      state.user = {
-        username,
-        isAdmin: !!cfg.admin,
-        canPull: !!cfg.trigger,
-        allFolders: !!cfg.allFolders,
-        allowedFolders: cfg.folders || []
-      };
-
-      await terminalSuccess(username);
-      updateAuthUI();
-      loadPlayers();
+        state.user = res.user || null;
+        await terminalSuccess(username);
+        updateAuthUI();
+        await loadPlayers();
+        if (state.user && state.user.isAdmin) await loadUsers();
+      } catch (err) {
+        els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
+      }
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
+    els.logoutBtn.addEventListener('click', async () => {
       try { await api('/auth/logout', { method: 'POST' }); } catch {}
       state.user = null;
       state.players = [];
+      state.users = [];
+      state.openFolders = new Set();
       updateAuthUI();
       renderFolders();
+      renderUsers();
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
       await loadHealth();
       await loadAuth();
       await loadPlayers();
+      if (state.user && state.user.isAdmin) await loadUsers();
     });
   </script>
 </body>
