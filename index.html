@@ -328,7 +328,7 @@
 
     .layout{
       display:grid;
-      grid-template-columns:minmax(0, 1fr) 380px;
+      grid-template-columns:minmax(0, 1fr) 390px;
       gap:22px;
       align-items:start;
     }
@@ -386,9 +386,8 @@
       border:1px solid rgba(255,255,255,.06);
       background:rgba(255,255,255,.025);
       overflow:hidden;
-      transition:border-color .2s ease, transform .2s ease, background .2s ease;
+      transition:border-color .2s ease, background .2s ease;
     }
-    .folder-card:hover{border-color:rgba(123,162,255,.2)}
     .folder-card.open{
       border-color:rgba(94,231,255,.24);
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
@@ -466,13 +465,8 @@
       grid-template-rows:0fr;
       transition:grid-template-rows .28s ease;
     }
-    .folder-card.open .folder-content{
-      grid-template-rows:1fr;
-    }
-    .folder-content-inner{
-      min-height:0;
-      overflow:hidden;
-    }
+    .folder-card.open .folder-content{grid-template-rows:1fr}
+    .folder-content-inner{min-height:0;overflow:hidden}
     .folder-content-pad{
       padding:0 18px 18px;
       border-top:1px solid rgba(255,255,255,.05);
@@ -500,10 +494,7 @@
       border-color:var(--line-strong);
       background:rgba(255,255,255,.04);
     }
-    .player-main,
-    .player-meta{
-      min-width:0;
-    }
+    .player-main,.player-meta{min-width:0}
     .player-main strong{
       display:block;
       font-size:1rem;
@@ -512,8 +503,7 @@
       text-overflow:ellipsis;
       white-space:nowrap;
     }
-    .player-main span,
-    .player-meta span{
+    .player-main span,.player-meta span{
       display:block;
       color:var(--muted);
       font-size:.9rem;
@@ -620,6 +610,35 @@
       to{opacity:1;transform:translateY(0)}
     }
 
+    .admin-users{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .admin-user{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .admin-user strong{
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .admin-user span{
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+      overflow-wrap:anywhere;
+    }
+
     .terminal-overlay{
       position:fixed;
       inset:0;
@@ -718,10 +737,8 @@
         align-items:start;
       }
       .player-actions{justify-content:flex-start}
-      .folder-toggle{
-        grid-template-columns:minmax(0,1fr) auto;
-      }
-      .folder-chevron{grid-column:auto}
+      .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
+      .admin-user{grid-template-columns:1fr}
     }
     @media (max-width: 640px){
       .wrap{width:min(var(--max), calc(100% - 20px))}
@@ -732,14 +749,8 @@
       .access-grid{grid-template-columns:1fr}
       .terminal-row{grid-template-columns:1fr}
       .actions > *{flex:1 1 auto}
-      .folder-toggle{
-        grid-template-columns:1fr auto;
-        align-items:start;
-      }
-      .folder-pill{
-        justify-self:start;
-        margin-top:4px;
-      }
+      .folder-toggle{grid-template-columns:1fr auto}
+      .folder-pill{justify-self:start;margin-top:4px}
     }
   </style>
 </head>
@@ -797,8 +808,8 @@
 
           <div class="hero-meta">
             <div class="pill">Trigger path: <strong>/trigger</strong></div>
-            <div class="pill">Folder dropdowns replaced with foldable groups</div>
-            <div class="pill">Cleaner roster layout</div>
+            <div class="pill">Folder access control</div>
+            <div class="pill">Admin user manager UI</div>
           </div>
         </div>
       </article>
@@ -830,7 +841,10 @@
             and, when authorized, full roster management.
           </p>
           <p>
-            Folders represent field computers such as <strong>Oil Rig</strong>, <strong>EMENeth</strong>, <strong>LakIo</strong>, and more.
+            Example local access profiles:
+            <strong>Fr05tedF4ang5</strong> gets full control,
+            <strong>Frost</strong> gets all folders with no player editing,
+            and <strong>LokIo</strong> sees only the LokIo folder.
           </p>
 
           <div class="access-grid">
@@ -964,6 +978,53 @@
             <div id="playerMessage" class="message">Admin panel ready.</div>
           </div>
         </article>
+
+        <article class="panel hidden" id="localUsersPanel">
+          <div class="section-head">
+            <div>
+              <h2>Login User Manager</h2>
+              <p>Frontend management for local login profiles. Requires matching backend support to fully persist.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="localUserForm" class="form-grid">
+              <input type="hidden" id="localUserEditName" />
+
+              <div class="field">
+                <label for="localManageUsername">Username</label>
+                <input class="input" id="localManageUsername" placeholder="LokIo" required />
+              </div>
+
+              <div class="field">
+                <label for="localManagePassword">Password</label>
+                <input class="input" id="localManagePassword" placeholder="RedEye" required />
+              </div>
+
+              <div class="field">
+                <label for="localManageAccess">Access level</label>
+                <select class="select" id="localManageAccess">
+                  <option value="admin">Admin</option>
+                  <option value="all-folders">All folders trigger</option>
+                  <option value="single-folder">Single folder trigger</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="localManageFolder">Allowed folder</label>
+                <input class="input" id="localManageFolder" placeholder="LokIo" />
+                <div class="hint">Used only for single-folder users.</div>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save login user</button>
+                <button class="btn btn-ghost" type="button" id="clearLocalUserBtn">Clear</button>
+              </div>
+            </form>
+
+            <div id="localUserMessage" class="message">Manage local website login users here.</div>
+            <div id="adminUsersList" class="admin-users"></div>
+          </div>
+        </article>
       </aside>
     </section>
   </main>
@@ -998,19 +1059,54 @@
 
   <script>
     const API = 'https://backend-website-syxe.onrender.com';
+    const LOCAL_USERS_STORAGE_KEY = 'frostedfang_local_users_v2';
 
-    const LOCAL_ACCESS_MAP = {
-      'Fr05tedF4ng': { allFolders: true, admin: true, trigger: true },
-      'Frost': { allFolders: true, admin: false, trigger: true },
-      'Fangs': { allFolders: false, admin: false, trigger: true, folders: ['LakIo'] }
+    const DEFAULT_LOCAL_USERS = {
+      'Fr05tedF4ang5': {
+        password: 'Frosting',
+        admin: true,
+        trigger: true,
+        allFolders: true,
+        folders: []
+      },
+      'Frost': {
+        password: 'Genius',
+        admin: false,
+        trigger: true,
+        allFolders: true,
+        folders: []
+      },
+      'LokIo': {
+        password: 'RedEye',
+        admin: false,
+        trigger: true,
+        allFolders: false,
+        folders: ['LokIo']
+      }
     };
 
     const state = {
       user: null,
       players: [],
       openFolders: new Set(),
-      expandAll: false
+      expandAll: false,
+      localUsers: loadLocalUsers()
     };
+
+    function loadLocalUsers() {
+      try {
+        const raw = localStorage.getItem(LOCAL_USERS_STORAGE_KEY);
+        if (!raw) return structuredClone(DEFAULT_LOCAL_USERS);
+        const parsed = JSON.parse(raw);
+        return { ...structuredClone(DEFAULT_LOCAL_USERS), ...parsed };
+      } catch {
+        return structuredClone(DEFAULT_LOCAL_USERS);
+      }
+    }
+
+    function saveLocalUsers() {
+      localStorage.setItem(LOCAL_USERS_STORAGE_KEY, JSON.stringify(state.localUsers));
+    }
 
     const els = {
       backendDot: document.getElementById('backendDot'),
@@ -1030,6 +1126,7 @@
 
       authedSection: document.getElementById('authedSection'),
       playerAdminPanel: document.getElementById('playerAdminPanel'),
+      localUsersPanel: document.getElementById('localUsersPanel'),
 
       folderAccordion: document.getElementById('folderAccordion'),
       rosterEmpty: document.getElementById('rosterEmpty'),
@@ -1047,6 +1144,16 @@
       playerId: document.getElementById('playerId'),
       playerMessage: document.getElementById('playerMessage'),
       clearPlayerBtn: document.getElementById('clearPlayerBtn'),
+
+      localUserForm: document.getElementById('localUserForm'),
+      localUserEditName: document.getElementById('localUserEditName'),
+      localManageUsername: document.getElementById('localManageUsername'),
+      localManagePassword: document.getElementById('localManagePassword'),
+      localManageAccess: document.getElementById('localManageAccess'),
+      localManageFolder: document.getElementById('localManageFolder'),
+      clearLocalUserBtn: document.getElementById('clearLocalUserBtn'),
+      localUserMessage: document.getElementById('localUserMessage'),
+      adminUsersList: document.getElementById('adminUsersList'),
 
       terminalOverlay: document.getElementById('terminalOverlay'),
       terminalLog: document.getElementById('terminalLog'),
@@ -1123,10 +1230,6 @@
       return (state.players || []).filter(p => folders.includes(normalizeFolder(p)));
     }
 
-    function getPlayersByFolder(folder) {
-      return getVisiblePlayers().filter(p => normalizeFolder(p) === folder);
-    }
-
     function groupPlayers(players) {
       const grouped = {};
       players.forEach(player => {
@@ -1180,8 +1283,13 @@
         els.authedSection.classList.add('hidden');
       }
 
-      if (admin) els.playerAdminPanel.classList.remove('hidden');
-      else els.playerAdminPanel.classList.add('hidden');
+      if (admin) {
+        els.playerAdminPanel.classList.remove('hidden');
+        els.localUsersPanel.classList.remove('hidden');
+      } else {
+        els.playerAdminPanel.classList.add('hidden');
+        els.localUsersPanel.classList.add('hidden');
+      }
     }
 
     function playerMarkup(player) {
@@ -1230,9 +1338,7 @@
         state.openFolders = new Set(folderNames);
       } else {
         state.openFolders = new Set([...state.openFolders].filter(name => folderNames.includes(name)));
-        if (state.openFolders.size === 0 && folderNames[0]) {
-          state.openFolders.add(folderNames[0]);
-        }
+        if (state.openFolders.size === 0 && folderNames[0]) state.openFolders.add(folderNames[0]);
       }
 
       els.expandAllBtn.classList.toggle('active', state.expandAll);
@@ -1244,7 +1350,7 @@
         const sampleComputer = players[0]?.computer_name || folder;
 
         return `
-          <section class="folder-card${open ? ' open' : ''}" data-folder-card="${escapeHtml(folder)}">
+          <section class="folder-card${open ? ' open' : ''}">
             <button class="folder-toggle" type="button" data-folder-toggle="${escapeHtml(folder)}" aria-expanded="${open ? 'true' : 'false'}">
               <div class="folder-title-wrap">
                 <h3 class="folder-title">${escapeHtml(folder)}</h3>
@@ -1270,6 +1376,39 @@
           </section>
         `;
       }).join('');
+    }
+
+    function renderLocalUsers() {
+      if (!state.user || !state.user.isAdmin) {
+        els.adminUsersList.innerHTML = '';
+        return;
+      }
+
+      const rows = Object.entries(state.localUsers)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([username, cfg]) => {
+          const access = cfg.admin
+            ? 'Admin • all folders'
+            : cfg.allFolders
+              ? 'Trigger • all folders'
+              : `Trigger • ${Array.isArray(cfg.folders) ? cfg.folders.join(', ') : 'No folder'}`;
+
+          return `
+            <article class="admin-user">
+              <div>
+                <strong>${escapeHtml(username)}</strong>
+                <span>Password: ${escapeHtml(cfg.password)}</span><br>
+                <span>${escapeHtml(access)}</span>
+              </div>
+              <div class="actions">
+                <button class="btn btn-ghost" type="button" data-login-edit="${escapeHtml(username)}">Edit</button>
+                <button class="btn btn-danger" type="button" data-login-delete="${escapeHtml(username)}">Delete</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+      els.adminUsersList.innerHTML = rows || '<div class="message info">No local users configured.</div>';
     }
 
     function showTriggerFlash(computerName, direction) {
@@ -1304,6 +1443,13 @@
       document.getElementById('direction').value = 'left';
     }
 
+    function clearLocalUserForm() {
+      els.localUserForm.reset();
+      els.localUserEditName.value = '';
+      els.localManageAccess.value = 'admin';
+      els.localManageFolder.value = '';
+    }
+
     async function loadHealth() {
       try {
         const data = await api('/health', { method: 'GET' });
@@ -1334,6 +1480,7 @@
       if (!isAuthorized(state.user)) {
         state.players = [];
         renderFolders();
+        renderLocalUsers();
         updateAuthUI();
         return;
       }
@@ -1346,6 +1493,7 @@
         }));
 
         renderFolders();
+        renderLocalUsers();
         updateAuthUI();
       } catch (err) {
         state.players = [];
@@ -1397,6 +1545,7 @@
         `> vault\\${randomToken(18)}`,
         `> ${randomToken(30)}`,
         `> ${randomToken(26)}`,
+        `> ${randomToken(24)}`,
         '> Access profile loaded',
         '> Session elevated'
       ];
@@ -1406,27 +1555,18 @@
         els.terminalLog.textContent += (els.terminalLog.textContent ? '\n' : '') + line;
         await new Promise(r => setTimeout(r, 80 + Math.random() * 70));
       }
-      await new Promise(r => setTimeout(r, 450));
+      await new Promise(r => setTimeout(r, 500));
       closeTerminal();
     }
 
-    function applyLocalAccessModel(username, fallbackData) {
-      const cfg = LOCAL_ACCESS_MAP[username] || {};
-      const baseUser = fallbackData?.user || {
+    function buildLocalSessionUser(username, cfg) {
+      return {
         username,
         authType: 'local',
-        canPull: !!cfg.trigger,
-        isAdmin: !!cfg.admin
-      };
-
-      state.user = {
-        ...baseUser,
-        username: username,
-        authType: 'local',
-        canPull: cfg.trigger ?? baseUser.canPull ?? false,
-        isAdmin: cfg.admin ?? baseUser.isAdmin ?? false,
+        canPull: !!cfg.trigger || !!cfg.admin,
+        isAdmin: !!cfg.admin,
         allFolders: !!cfg.allFolders || !!cfg.admin,
-        allowedFolders: cfg.allFolders || cfg.admin ? [] : (cfg.folders || [])
+        allowedFolders: cfg.admin || cfg.allFolders ? [] : (cfg.folders || [])
       };
     }
 
@@ -1549,6 +1689,88 @@
       setMessage(els.playerMessage, 'Form cleared.', 'info');
     });
 
+    els.localUserForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      if (!state.user || !state.user.isAdmin) {
+        setMessage(els.localUserMessage, 'Admin access required.', 'error');
+        return;
+      }
+
+      const originalName = els.localUserEditName.value.trim();
+      const username = els.localManageUsername.value.trim();
+      const password = els.localManagePassword.value.trim();
+      const access = els.localManageAccess.value;
+      const folder = els.localManageFolder.value.trim();
+
+      if (!username || !password) {
+        setMessage(els.localUserMessage, 'Username and password are required.', 'error');
+        return;
+      }
+
+      const cfg = {
+        password,
+        admin: access === 'admin',
+        trigger: true,
+        allFolders: access === 'admin' || access === 'all-folders',
+        folders: access === 'single-folder' ? (folder ? [folder] : []) : []
+      };
+
+      if (access === 'single-folder' && !folder) {
+        setMessage(els.localUserMessage, 'Single-folder users need a folder name.', 'error');
+        return;
+      }
+
+      if (originalName && originalName !== username) {
+        delete state.localUsers[originalName];
+      }
+
+      state.localUsers[username] = cfg;
+      saveLocalUsers();
+      clearLocalUserForm();
+      renderLocalUsers();
+      setMessage(els.localUserMessage, `Login user ${username} saved locally in browser storage.`, 'success');
+    });
+
+    els.clearLocalUserBtn.addEventListener('click', () => {
+      clearLocalUserForm();
+      setMessage(els.localUserMessage, 'Login user form cleared.', 'info');
+    });
+
+    els.adminUsersList.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('[data-login-edit]');
+      const deleteBtn = e.target.closest('[data-login-delete]');
+
+      if (editBtn) {
+        const username = editBtn.getAttribute('data-login-edit');
+        const cfg = state.localUsers[username];
+        if (!cfg) return;
+
+        els.localUserEditName.value = username;
+        els.localManageUsername.value = username;
+        els.localManagePassword.value = cfg.password || '';
+        if (cfg.admin) els.localManageAccess.value = 'admin';
+        else if (cfg.allFolders) els.localManageAccess.value = 'all-folders';
+        else els.localManageAccess.value = 'single-folder';
+        els.localManageFolder.value = Array.isArray(cfg.folders) ? (cfg.folders[0] || '') : '';
+        setMessage(els.localUserMessage, `Editing login user ${username}`, 'info');
+      }
+
+      if (deleteBtn) {
+        const username = deleteBtn.getAttribute('data-login-delete');
+        if (username === 'Fr05tedF4ang5') {
+          setMessage(els.localUserMessage, 'Primary admin account cannot be removed from the frontend preset.', 'error');
+          return;
+        }
+        if (!confirm(`Delete login user ${username}?`)) return;
+
+        delete state.localUsers[username];
+        saveLocalUsers();
+        renderLocalUsers();
+        setMessage(els.localUserMessage, `Login user ${username} removed.`, 'success');
+      }
+    });
+
     els.openAdminTerminalBtn.addEventListener('click', openTerminal);
     els.closeTerminalBtn.addEventListener('click', closeTerminal);
     els.terminalOverlay.addEventListener('click', (e) => {
@@ -1560,14 +1782,26 @@
 
       const username = document.getElementById('localUsername').value.trim();
       const password = document.getElementById('localPassword').value;
+      const cfg = state.localUsers[username];
+
+      if (!cfg || cfg.password !== password) {
+        els.terminalLog.textContent =
+`> C:/Frosted/OS/ Checking for access
+>
+> Authentication failed
+> Access denied`;
+        return;
+      }
 
       try {
-        const data = await api('/auth/local/login', {
-          method: 'POST',
-          body: JSON.stringify({ username, password })
-        });
+        try {
+          await api('/auth/local/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+          });
+        } catch {}
 
-        applyLocalAccessModel(username, data);
+        state.user = buildLocalSessionUser(username, cfg);
         await runTerminalSuccessSequence(username);
         updateAuthUI();
         await loadPlayers();
@@ -1587,6 +1821,7 @@
       state.openFolders = new Set();
       state.expandAll = false;
       renderFolders();
+      renderLocalUsers();
       updateAuthUI();
     });
 
@@ -1594,6 +1829,7 @@
       await loadHealth();
       await loadAuth();
       await loadPlayers();
+      renderLocalUsers();
     });
   </script>
 </body>
