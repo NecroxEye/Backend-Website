@@ -544,7 +544,10 @@
     }
     .terminal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
 
-    @media (max-width: 1120px){ .layout{grid-template-columns:1fr} }
+    @media (max-width: 1120px){
+      .layout{grid-template-columns:1fr}
+    }
+
     @media (max-width: 920px){
       .hero{grid-template-columns:1fr}
       .player{grid-template-columns:1fr}
@@ -552,6 +555,7 @@
       .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
       .user-row{grid-template-columns:1fr}
     }
+
     @media (max-width: 640px){
       .wrap{width:min(var(--max), calc(100% - 20px))}
       .topbar-inner{flex-direction:column;align-items:flex-start}
@@ -591,13 +595,13 @@
           <div>
             <p class="hero-kicker">Operational Panel</p>
             <h1>Frosted Fang Security & Pull System</h1>
-            <p>Folder-based visibility, controlled pearl pulling, and full admin tools for player and user management.</p>
+            <p>Folder-based visibility, role-based pearl trigger control, admin user management, and player editing without changing the in-game computer communication format.</p>
           </div>
 
           <div class="hero-meta">
+            <div class="pill">Supabase users</div>
             <div class="pill">Folder-aware roster</div>
-            <div class="pill">ComputerCraft compatible trigger flow</div>
-            <div class="pill">Supabase-backed users</div>
+            <div class="pill">ComputerCraft-safe trigger queue</div>
           </div>
         </div>
       </article>
@@ -625,7 +629,7 @@
         <div class="panel-head">
           <div>
             <h2>Roster Folders</h2>
-            <p>Click a folder to open it.</p>
+            <p>Open a folder to view its pearls and controls.</p>
           </div>
           <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -639,8 +643,8 @@
         <article class="panel">
           <div class="panel-head">
             <div>
-              <h2>Trigger</h2>
-              <p>Send a pearl pull manually.</p>
+              <h2>Manual Trigger</h2>
+              <p>Send a pearl pull directly.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -648,6 +652,11 @@
               <div class="field">
                 <label for="triggerComputerName">Computer name</label>
                 <input class="input" id="triggerComputerName" placeholder="LakIo" required />
+              </div>
+
+              <div class="field">
+                <label for="triggerFolderName">Folder name</label>
+                <input class="input" id="triggerFolderName" placeholder="LakIo" required />
               </div>
 
               <div class="field">
@@ -681,22 +690,27 @@
           <div class="panel-body">
             <form id="playerForm" class="form-grid">
               <input type="hidden" id="playerId" />
+
               <div class="field">
                 <label for="name">Player name</label>
                 <input class="input" id="name" required />
               </div>
+
               <div class="field">
                 <label for="computer_name">Computer name</label>
                 <input class="input" id="computer_name" required />
               </div>
+
               <div class="field">
                 <label for="channel_name">Channel name</label>
                 <input class="input" id="channel_name" />
               </div>
+
               <div class="field">
                 <label for="folder_name">Folder</label>
                 <input class="input" id="folder_name" required />
               </div>
+
               <div class="field">
                 <label for="direction">Direction</label>
                 <select class="select" id="direction">
@@ -708,15 +722,18 @@
                   <option value="back">back</option>
                 </select>
               </div>
+
               <div class="field">
                 <label for="signal_strength">Signal strength</label>
                 <input class="input" type="number" id="signal_strength" min="1" max="15" value="15" />
               </div>
+
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save player</button>
                 <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
               </div>
             </form>
+
             <div id="playerMessage" class="message">Admin panel ready.</div>
           </div>
         </article>
@@ -724,21 +741,24 @@
         <article class="panel hidden" id="userAdminPanel">
           <div class="panel-head">
             <div>
-              <h2>Login User Manager</h2>
-              <p>Admin only.</p>
+              <h2>User Manager</h2>
+              <p>Admin only. Edit accounts in public.users.</p>
             </div>
           </div>
           <div class="panel-body">
             <form id="userForm" class="form-grid">
               <input type="hidden" id="userId" />
+
               <div class="field">
                 <label for="username">Username</label>
                 <input class="input" id="username" required />
               </div>
+
               <div class="field">
                 <label for="password">Password</label>
-                <input class="input" id="password" required />
+                <input class="input" id="password" placeholder="Leave blank only when not changing during edit" />
               </div>
+
               <div class="field">
                 <label>Permissions</label>
                 <div style="display:grid;gap:8px;color:var(--muted);font-size:.92rem;">
@@ -747,16 +767,19 @@
                   <label><input type="checkbox" id="allFolders" /> All Folders</label>
                 </div>
               </div>
+
               <div class="field">
                 <label for="allowedFolders">Allowed folders (comma separated)</label>
-                <input class="input" id="allowedFolders" placeholder="LakIo, Oil Rig" />
+                <input class="input" id="allowedFolders" placeholder="LakIo, Base, Vault" />
               </div>
+
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save user</button>
                 <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
               </div>
             </form>
-            <div id="userMessage" class="message">Manage local login users here.</div>
+
+            <div id="userMessage" class="message">Manage users from Supabase.</div>
             <div id="userList" class="user-list"></div>
           </div>
         </article>
@@ -818,6 +841,7 @@
       refreshBtn: document.getElementById('refreshBtn'),
       triggerForm: document.getElementById('triggerForm'),
       triggerComputerName: document.getElementById('triggerComputerName'),
+      triggerFolderName: document.getElementById('triggerFolderName'),
       triggerDirection: document.getElementById('triggerDirection'),
       triggerMessage: document.getElementById('triggerMessage'),
       playerAdminPanel: document.getElementById('playerAdminPanel'),
@@ -862,15 +886,29 @@
         },
         ...options
       });
+
       const text = await res.text();
       let data = null;
-      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-      if (!res.ok) throw new Error((data && data.error) || `Request failed: ${res.status}`);
+
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = text;
+      }
+
+      if (!res.ok) {
+        throw new Error((data && data.error) || `Request failed: ${res.status}`);
+      }
+
       return data;
     }
 
     function normalizeFolder(player) {
-      return String(player.folder_name || 'Unassigned').trim() || 'Unassigned';
+      return String(player.folder_name || player.computer_name || 'Unassigned').trim() || 'Unassigned';
+    }
+
+    function normalizeComputer(player) {
+      return String(player.computer_name || '').trim();
     }
 
     function isAuthed(user) {
@@ -911,7 +949,12 @@
       if (!user) {
         els.authPill.textContent = 'Unauthenticated';
       } else {
-        const scope = user.isAdmin ? 'admin' : user.allFolders ? 'all folders' : ((user.allowedFolders || []).join(', ') || 'limited');
+        const scope = user.isAdmin
+          ? 'admin'
+          : user.allFolders
+            ? 'all folders'
+            : ((user.allowedFolders || []).join(', ') || 'limited');
+
         els.authPill.textContent = `${user.username} • ${scope}`;
       }
 
@@ -932,7 +975,7 @@
         <article class="player">
           <div class="player-main">
             <strong>${escapeHtml(player.name)}</strong>
-            <span>Computer: ${escapeHtml(player.computer_name || normalizeFolder(player))}</span>
+            <span>Computer: ${escapeHtml(normalizeComputer(player) || normalizeFolder(player))}</span>
           </div>
 
           <div class="player-meta">
@@ -1104,7 +1147,7 @@
       }
 
       const data = await api('/players');
-      state.players = data.players || [];
+      state.players = Array.isArray(data.players) ? data.players : [];
       renderFolders();
       updateAuthUI();
     }
@@ -1112,15 +1155,16 @@
     async function loadUsers() {
       if (!state.user || !state.user.isAdmin) return;
       const data = await api('/admin/users');
-      state.users = data.users || [];
+      state.users = Array.isArray(data.users) ? data.users : [];
       renderUsers();
     }
 
-    async function sendTrigger(computer_name, direction) {
+    async function sendTrigger(computer_name, direction, folder_name) {
       await api('/trigger', {
         method: 'POST',
-        body: JSON.stringify({ computer_name, direction, folder_name: computer_name })
+        body: JSON.stringify({ computer_name, direction, folder_name })
       });
+
       els.triggerMessage.className = 'message success';
       els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})`;
     }
@@ -1147,11 +1191,17 @@
       if (triggerBtn) {
         const player = visiblePlayers().find(p => String(p.id) === String(triggerBtn.getAttribute('data-trigger')));
         if (!player) return;
-        const computer = player.computer_name || normalizeFolder(player);
+
+        const computer = normalizeComputer(player) || normalizeFolder(player);
+        const folder = normalizeFolder(player);
+        const direction = player.direction || 'left';
+
         els.triggerComputerName.value = computer;
-        els.triggerDirection.value = player.direction || 'left';
+        els.triggerFolderName.value = folder;
+        els.triggerDirection.value = direction;
+
         try {
-          await sendTrigger(computer, player.direction || 'left');
+          await sendTrigger(computer, direction, folder);
         } catch (err) {
           els.triggerMessage.className = 'message error';
           els.triggerMessage.textContent = err.message;
@@ -1167,9 +1217,10 @@
         document.getElementById('name').value = player.name || '';
         document.getElementById('computer_name').value = player.computer_name || '';
         document.getElementById('channel_name').value = player.channel_name || '';
-        document.getElementById('folder_name').value = normalizeFolder(player);
+        document.getElementById('folder_name').value = player.folder_name || '';
         document.getElementById('direction').value = player.direction || 'left';
         document.getElementById('signal_strength').value = Number(player.signal_strength ?? 15);
+
         els.playerMessage.className = 'message info';
         els.playerMessage.textContent = `Editing ${player.name}`;
         return;
@@ -1179,17 +1230,15 @@
         const id = deleteBtn.getAttribute('data-delete');
         if (!confirm('Delete this player?')) return;
 
-        const res = await fetch('/players/' + id, { method: 'DELETE', credentials: 'include' });
-        const data = await res.json();
-        if (!res.ok) {
+        try {
+          await api('/players/' + id, { method: 'DELETE' });
+          els.playerMessage.className = 'message success';
+          els.playerMessage.textContent = 'Player deleted.';
+          await loadPlayers();
+        } catch (err) {
           els.playerMessage.className = 'message error';
-          els.playerMessage.textContent = data.error || 'Delete failed';
-          return;
+          els.playerMessage.textContent = err.message;
         }
-
-        els.playerMessage.className = 'message success';
-        els.playerMessage.textContent = 'Player deleted.';
-        await loadPlayers();
       }
     });
 
@@ -1198,7 +1247,8 @@
       try {
         await sendTrigger(
           els.triggerComputerName.value.trim(),
-          els.triggerDirection.value
+          els.triggerDirection.value,
+          els.triggerFolderName.value.trim()
         );
       } catch (err) {
         els.triggerMessage.className = 'message error';
@@ -1220,21 +1270,16 @@
 
       try {
         const id = els.playerId.value.trim();
-        const url = id ? '/players/' + id : '/players';
         const method = id ? 'PUT' : 'POST';
+        const path = id ? `/players/${id}` : '/players';
 
-        const res = await fetch(url, {
+        const data = await api(path, {
           method,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Save failed');
-
         els.playerMessage.className = 'message success';
-        els.playerMessage.textContent = id ? 'Player updated.' : 'Player added.';
+        els.playerMessage.textContent = data.player ? 'Player saved.' : 'Player updated.';
         clearPlayerForm();
         await loadPlayers();
       } catch (err) {
@@ -1259,21 +1304,19 @@
 
       try {
         const id = els.userId.value.trim();
-        const url = id ? '/admin/users/' + id : '/admin/users';
         const method = id ? 'PUT' : 'POST';
+        const path = id ? `/admin/users/${id}` : '/admin/users';
 
-        const res = await fetch(url, {
+        const finalPayload = { ...payload };
+        if (id && !finalPayload.password) delete finalPayload.password;
+
+        await api(path, {
           method,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(finalPayload)
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Save failed');
-
         els.userMessage.className = 'message success';
-        els.userMessage.textContent = id ? 'User updated.' : 'User added.';
+        els.userMessage.textContent = id ? 'User updated.' : 'User created.';
         clearUserForm();
         await loadUsers();
       } catch (err) {
@@ -1299,6 +1342,7 @@
         els.canPull.checked = !!user.canPull;
         els.allFolders.checked = !!user.allFolders;
         els.allowedFolders.value = (user.allowedFolders || []).join(', ');
+
         els.userMessage.className = 'message info';
         els.userMessage.textContent = `Editing ${user.username}`;
         return;
@@ -1308,22 +1352,21 @@
         const id = deleteBtn.getAttribute('data-user-delete');
         if (!confirm('Delete this user?')) return;
 
-        const res = await fetch('/admin/users/' + id, { method: 'DELETE', credentials: 'include' });
-        const data = await res.json();
-        if (!res.ok) {
+        try {
+          await api('/admin/users/' + id, { method: 'DELETE' });
+          els.userMessage.className = 'message success';
+          els.userMessage.textContent = 'User deleted.';
+          await loadUsers();
+        } catch (err) {
           els.userMessage.className = 'message error';
-          els.userMessage.textContent = data.error || 'Delete failed';
-          return;
+          els.userMessage.textContent = err.message;
         }
-
-        els.userMessage.className = 'message success';
-        els.userMessage.textContent = 'User deleted.';
-        await loadUsers();
       }
     });
 
     els.openTerminalBtn.addEventListener('click', openTerminal);
     els.closeTerminalBtn.addEventListener('click', closeTerminal);
+
     els.terminalOverlay.addEventListener('click', (e) => {
       if (e.target === els.terminalOverlay) closeTerminal();
     });
@@ -1346,8 +1389,13 @@
         await loadPlayers();
         if (state.user && state.user.isAdmin) await loadUsers();
 
-        if (state.user && !state.user.isAdmin && Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.length === 1) {
-          els.triggerComputerName.value = state.user.allowedFolders[0];
+        if (state.user && !state.user.isAdmin) {
+          if (state.user.allFolders) {
+            els.triggerFolderName.value = '';
+          } else if (Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.length === 1) {
+            els.triggerFolderName.value = state.user.allowedFolders[0];
+            els.triggerComputerName.value = state.user.allowedFolders[0];
+          }
         }
       } catch {
         els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
@@ -1363,6 +1411,8 @@
       updateAuthUI();
       renderFolders();
       renderUsers();
+      els.triggerMessage.className = 'message';
+      els.triggerMessage.textContent = 'Ready.';
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
