@@ -1,7 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -12,6 +10,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'change_this_secret';
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -32,25 +31,19 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // For localhost HTTP testing:
-    // secure: false, sameSite: 'lax'
-    //
-    // For HTTPS deployment:
-    // secure: true, sameSite: 'none'
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-function normalizeUser(row) {
+/* =========================
+   HELPERS
+   ========================= */
+function publicUser(row) {
   if (!row) return null;
   return {
     id: row.id,
     username: row.username,
-    password: row.password,
     isAdmin: !!row.is_admin,
     canPull: !!row.can_pull,
     allFolders: !!row.all_folders,
@@ -58,47 +51,13 @@ function normalizeUser(row) {
   };
 }
 
-function publicUser(user) {
-  if (!user) return null;
-  return {
-    id: user.id,
-    username: user.username,
-    isAdmin: !!user.isAdmin,
-    canPull: !!user.canPull,
-    allFolders: !!user.allFolders,
-    allowedFolders: Array.isArray(user.allowedFolders) ? user.allowedFolders : []
-  };
-}
-
-async function getUserByUsername(username) {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('username', username)
-    .maybeSingle();
-
-  if (error) throw error;
-  return normalizeUser(data);
-}
-
-async function getUserById(id) {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
-
-  if (error) throw error;
-  return normalizeUser(data);
-}
-
 function ensureAuth(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated()) return next();
+  if (req.session && req.session.user) return next();
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
 function ensureAdmin(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user && req.user.isAdmin) return next();
+  if (req.session && req.session.user && req.session.user.isAdmin) return next();
   return res.status(403).json({ error: 'Admin only' });
 }
 
@@ -108,14 +67,90 @@ function canSeeFolder(user, folderName) {
   return Array.isArray(user.allowedFolders) && user.allowedFolders.includes(folderName);
 }
 
+function normalizeFolderName(player) {
+  return String(player.folder_name || player.computer_name || 'Unassigned').trim() || 'Unassigned';
+}
+
+/* =========================
+   SESSION-BASED LOGIN
+   ========================= */
+app.post('/auth/local/login', async (req, res) => {
+  try {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing username or password' });
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .maybeSingle();
+
+    if (error) {
+      return res.status(500).json({ error: error.message || 'Login lookup failed' });
+    }
+
+    if (!data) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = publicUser(data);
+
+    req.session.user = user;
+    req.session.save((sessionErr) => {
+      if (sessionErr) {
+        return res.status(500).json({ error: 'Session save failed' });
+      }
+      return res.json({ user });
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Login failed' });
+  }
+});
+
+app.get('/auth/me', (req, res) => {
+  res.json({ user: req.session.user || null });
+});
+
+app.post('/auth/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.json({ ok: true });
+  });
+});
+
+/* =========================
+   HEALTH / STATUS
+   ========================= */
+app.get('/health', (req, res) => {
+  res.json({ status: 'ON' });
+});
+
+app.get('/status', ensureAuth, async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
+    if (error) return res.status(500).json({ error: 'Failed to load status' });
+
+    const players = (data || []).filter(p => canSeeFolder(req.session.user, normalizeFolderName(p)));
+
+    res.json({
+      user: req.session.user,
+      players
+    });
+  } catch {
+    res.status(500).json({ error: 'Failed to load status' });
+  }
+});
+
 /* =========================
    COMPUTERCRAFT TRIGGERS
    =========================
+   Keep unchanged:
    GET /trigger?computer_name=...
    -> { trigger: null } OR { trigger: { computer_name, direction } }
-
-   POST /trigger
-   -> queues a trigger for ~1.5s so ComputerCraft polling catches it
 */
 let triggerQueue = [];
 
@@ -143,7 +178,7 @@ app.get('/trigger', async (req, res) => {
         direction: trigger.direction
       }
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Trigger lookup failed' });
   }
 });
@@ -151,94 +186,32 @@ app.get('/trigger', async (req, res) => {
 app.post('/trigger', ensureAuth, async (req, res) => {
   try {
     const { computer_name, direction, folder_name } = req.body || {};
+
     if (!computer_name || !direction) {
       return res.status(400).json({ error: 'Missing computer_name or direction' });
     }
 
-    if (!req.user.canPull && !req.user.isAdmin) {
+    const user = req.session.user;
+    if (!user.isAdmin && !user.canPull) {
       return res.status(403).json({ error: 'Pull permission denied' });
     }
 
-    const targetFolder = String(folder_name || computer_name).trim();
-    if (!req.user.isAdmin && !canSeeFolder(req.user, targetFolder)) {
+    const folder = String(folder_name || computer_name).trim();
+    if (!user.isAdmin && !canSeeFolder(user, folder)) {
       return res.status(403).json({ error: 'No access to that folder' });
     }
 
     const now = Date.now();
-    const trigger = {
+    triggerQueue.push({
       computer_name: String(computer_name).trim(),
       direction: String(direction).trim(),
       createdAt: now,
       expiresAt: now + 1500
-    };
+    });
 
-    triggerQueue.push(trigger);
     return res.json({ ok: true });
-  } catch (err) {
-    return res.status(500).json({ error: 'Failed to queue trigger' });
-  }
-});
-
-/* =========================
-   AUTH
-   ========================= */
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await getUserByUsername(username);
-    if (!user) return done(null, false, { message: 'Invalid username' });
-    if (String(user.password) !== String(password)) return done(null, false, { message: 'Invalid password' });
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
-
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await getUserById(id);
-    done(null, user || false);
-  } catch (err) {
-    done(err);
-  }
-});
-
-app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
-  res.json({ user: publicUser(req.user) });
-});
-
-app.get('/auth/me', (req, res) => {
-  res.json({ user: req.user ? publicUser(req.user) : null });
-});
-
-app.post('/auth/logout', (req, res) => {
-  req.logout(() => {
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.json({ ok: true });
-    });
-  });
-});
-
-/* =========================
-   HEALTH / STATUS
-   ========================= */
-app.get('/health', (req, res) => {
-  res.json({ status: 'ON' });
-});
-
-app.get('/status', ensureAuth, async (req, res) => {
-  try {
-    const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
-    if (error) return res.status(500).json({ error: 'Failed to load status' });
-
-    const players = (data || []).filter(p => canSeeFolder(req.user, p.folder_name));
-    res.json({
-      user: publicUser(req.user),
-      players
-    });
   } catch {
-    res.status(500).json({ error: 'Failed to load status' });
+    return res.status(500).json({ error: 'Failed to queue trigger' });
   }
 });
 
@@ -250,7 +223,9 @@ app.get('/players', ensureAuth, async (req, res) => {
     const { data, error } = await supabase.from('players').select('*').order('id', { ascending: true });
     if (error) return res.status(500).json({ error: 'Failed to load players' });
 
-    const players = (data || []).filter(p => req.user.isAdmin || req.user.allFolders || canSeeFolder(req.user, p.folder_name));
+    const user = req.session.user;
+    const players = (data || []).filter(p => user.isAdmin || user.allFolders || canSeeFolder(user, normalizeFolderName(p)));
+
     res.json({ players });
   } catch {
     res.status(500).json({ error: 'Failed to load players' });
@@ -442,7 +417,7 @@ app.delete('/admin/users/:id', ensureAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    if (req.user && Number(req.user.id) === id) {
+    if (req.session.user && Number(req.session.user.id) === id) {
       return res.status(400).json({ error: 'You cannot delete your own active account' });
     }
 
