@@ -11,7 +11,6 @@
     :root{
       --bg:#05060a;
       --panel:rgba(10,13,22,.88);
-      --panel-2:rgba(15,18,30,.9);
       --line:rgba(123,162,255,.16);
       --line-strong:rgba(123,162,255,.34);
       --text:#edf3ff;
@@ -20,9 +19,9 @@
       --violet:#7a32ff;
       --green:#63f5b0;
       --red:#ff6f91;
+      --amber:#ffca6b;
       --shadow:0 18px 60px rgba(0,0,0,.42);
       --radius:24px;
-      --radius-sm:16px;
       --max:1280px;
     }
 
@@ -64,7 +63,7 @@
       inset:0;
       pointer-events:none;
       z-index:-1;
-      opacity:.11;
+      opacity:.1;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.14)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
       background-size:180px 208px;
       background-position:center top;
@@ -140,7 +139,7 @@
       white-space:nowrap;
     }
 
-    .dot{width:9px;height:9px;border-radius:50%;background:#ffca6b}
+    .dot{width:9px;height:9px;border-radius:50%;background:var(--amber)}
     .dot.online{background:var(--green)}
     .dot.offline{background:var(--red)}
 
@@ -251,7 +250,6 @@
       font-size:clamp(1.2rem,2vw,2rem);
     }
 
-    .guest-panel .panel-body,
     .panel-body{padding:22px}
     .panel-head{
       display:flex;
@@ -390,7 +388,6 @@
       color:var(--muted);
       font-size:.9rem;
       line-height:1.45;
-      white-space:normal;
       word-break:break-word;
       overflow-wrap:anywhere;
     }
@@ -607,15 +604,13 @@
           <div>
             <p class="hero-kicker">Operational Panel</p>
             <h1>Frosted Fang Security & Pull System</h1>
-            <p>
-              Login unlocks computer folders, folder-limited roster visibility, and trigger access. Admin can manage players and login users.
-            </p>
+            <p>Folder-based visibility, controlled pearl pulling, and full admin tools for player and user management.</p>
           </div>
 
           <div class="hero-meta">
             <div class="pill">Folder-aware roster</div>
-            <div class="pill">LakIo-limited user supported</div>
             <div class="pill">ComputerCraft compatible trigger flow</div>
+            <div class="pill">Server-stored local users</div>
           </div>
         </div>
       </article>
@@ -638,26 +633,12 @@
       </aside>
     </section>
 
-    <section id="guestSection" class="guest-panel">
-      <article class="panel">
-        <div class="panel-body">
-          <h2 style="margin:0 0 8px;font-family:Orbitron,sans-serif;text-transform:uppercase;letter-spacing:.08em;">Access Locked</h2>
-          <p style="margin:0;color:var(--muted);line-height:1.7;">
-            Use terminal login to access folders. Example role behavior:
-            <strong>Fr05tedF4ang5</strong> = full admin,
-            <strong>Frost</strong> = all folders + pull only,
-            <strong>LakIo</strong> = LakIo folder only + pull.
-          </p>
-        </div>
-      </article>
-    </section>
-
     <section id="appSection" class="layout hidden">
       <section class="panel">
         <div class="panel-head">
           <div>
             <h2>Roster Folders</h2>
-            <p>Click a folder to slide it open.</p>
+            <p>Click a folder to open it.</p>
           </div>
           <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -765,7 +746,7 @@
           <div class="panel-head">
             <div>
               <h2>Login User Manager</h2>
-              <p>Admin only. Server-stored users.</p>
+              <p>Admin only.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -858,7 +839,6 @@
       playerCount: document.getElementById('playerCount'),
       triggerAccess: document.getElementById('triggerAccess'),
       adminAccess: document.getElementById('adminAccess'),
-      guestSection: document.getElementById('guestSection'),
       appSection: document.getElementById('appSection'),
       folderAccordion: document.getElementById('folderAccordion'),
       rosterEmpty: document.getElementById('rosterEmpty'),
@@ -958,13 +938,12 @@
       if (!user) {
         els.authPill.textContent = 'Unauthenticated';
       } else {
-        const scope = user.isAdmin ? 'admin' : user.allFolders ? 'all folders' : (user.allowedFolders || []).join(', ');
+        const scope = user.isAdmin ? 'admin' : user.allFolders ? 'all folders' : ((user.allowedFolders || []).join(', ') || 'limited');
         els.authPill.textContent = `${user.username} • ${scope}`;
       }
 
       els.openTerminalBtn.classList.toggle('hidden', authed);
       els.logoutBtn.classList.toggle('hidden', !authed);
-      els.guestSection.classList.toggle('hidden', authed);
       els.appSection.classList.toggle('hidden', !authed);
       els.playerAdminPanel.classList.toggle('hidden', !isAdmin);
       els.userAdminPanel.classList.toggle('hidden', !isAdmin);
@@ -1167,7 +1146,7 @@
     async function sendTrigger(computer_name, direction) {
       await api('/trigger', {
         method: 'POST',
-        body: JSON.stringify({ computer_name, direction })
+        body: JSON.stringify({ computer_name, direction, folder_name: computer_name })
       });
       els.triggerMessage.className = 'message success';
       els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})`;
@@ -1195,10 +1174,11 @@
       if (triggerBtn) {
         const player = visiblePlayers().find(p => String(p.id) === String(triggerBtn.getAttribute('data-trigger')));
         if (!player) return;
-        els.triggerComputerName.value = player.computer_name || normalizeFolder(player);
+        const computer = player.computer_name || normalizeFolder(player);
+        els.triggerComputerName.value = computer;
         els.triggerDirection.value = player.direction || 'left';
         try {
-          await sendTrigger(player.computer_name || normalizeFolder(player), player.direction || 'left');
+          await sendTrigger(computer, player.direction || 'left');
         } catch (err) {
           els.triggerMessage.className = 'message error';
           els.triggerMessage.textContent = err.message;
