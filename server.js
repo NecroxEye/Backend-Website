@@ -3,80 +3,19 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change_this_secret';
 
-const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-function loadJSON(file, fallback) {
-  const filePath = path.join(DATA_DIR, file);
-  try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(fallback, null, 2));
-      return structuredClone(fallback);
-    }
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return structuredClone(fallback);
-  }
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
 }
 
-function saveJSON(file, data) {
-  const filePath = path.join(DATA_DIR, file);
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
-const defaultUsers = [
-  {
-    id: 1,
-    username: 'Fr05tedF4ng5',
-    password: 'Frosting',
-    isAdmin: true,
-    canPull: true,
-    allFolders: true,
-    allowedFolders: []
-  },
-  {
-    id: 2,
-    username: 'Frosted',
-    password: 'Genius',
-    isAdmin: false,
-    canPull: true,
-    allFolders: true,
-    allowedFolders: []
-  },
-  {
-    id: 3,
-    username: 'LakIo',
-    password: 'RedEye',
-    isAdmin: false,
-    canPull: true,
-    allFolders: false,
-    allowedFolders: ['LakIo']
-  }
-];
-
-const defaultPlayers = [
-  {
-    id: 1,
-    name: 'Example Player',
-    computer_name: 'LakIo',
-    folder_name: 'LakIo',
-    channel_name: '',
-    direction: 'back',
-    signal_strength: 15
-  }
-];
-
-const defaultTriggers = [];
-
-let users = loadJSON('users.json', defaultUsers);
-let players = loadJSON('players.json', defaultPlayers);
-let triggers = loadJSON('triggers.json', defaultTriggers);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const app = express();
 
 app.set('trust proxy', 1);
 
@@ -88,13 +27,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_this_secret',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // For local http testing, set secure: false and sameSite: 'lax'
-    // For HTTPS deployments, keep secure: true and sameSite: 'none'
+    // For localhost HTTP testing:
+    // secure: false, sameSite: 'lax'
+    //
+    // For HTTPS deployment:
+    // secure: true, sameSite: 'none'
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
@@ -103,17 +45,80 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new LocalStrategy((username, password, done) => {
-  const user = users.find(u => u.username === username);
-  if (!user) return done(null, false, { message: 'Invalid username' });
-  if (user.password !== password) return done(null, false, { message: 'Invalid password' });
-  return done(null, user);
+function safeUser(user) {
+  if (!user) return null;
+  const { password, ...rest } = user;
+  return {
+    username: rest.username,
+    isAdmin: !!rest.is_admin ?? !!rest.isAdmin,
+    canPull: !!rest.can_pull ?? !!rest.canPull,
+    allFolders: !!rest.all_folders ?? !!rest.allFolders,
+    allowedFolders: rest.allowed_folders ?? rest.allowedFolders ?? []
+  };
+}
+
+async function fetchUserByUsername(username) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('username', username)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+async function fetchUserById(id) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+function userCanSeeFolder(user, folder) {
+  if (!user) return false;
+  if (user.is_admin || user.isAdmin) return true;
+  if (user.all_folders || user.allFolders) return true;
+  const allowed = user.allowed_folders ?? user.allowedFolders ?? [];
+  return Array.isArray(allowed) && allowed.includes(folder);
+}
+
+function normalizeUserRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    username: row.username,
+    password: row.password,
+    isAdmin: !!(row.is_admin ?? row.isAdmin),
+    canPull: !!(row.can_pull ?? row.canPull),
+    allFolders: !!(row.all_folders ?? row.allFolders),
+    allowedFolders: row.allowed_folders ?? row.allowedFolders ?? []
+  };
+}
+
+passport.use(new LocalStrategy(async (username, password, done) => {
+  try {
+    const user = normalizeUserRow(await fetchUserByUsername(username));
+    if (!user) return done(null, false, { message: 'Invalid username' });
+    if (String(user.password) !== String(password)) return done(null, false, { message: 'Invalid password' });
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
 }));
 
 passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser((id, done) => {
-  const user = users.find(u => Number(u.id) === Number(id));
-  done(null, user || false);
+passport.deserializeUser(async (id, done) => {
+  try {
+    const row = normalizeUserRow(await fetchUserById(id));
+    done(null, row || false);
+  } catch (err) {
+    done(err);
+  }
 });
 
 function ensureAuth(req, res, next) {
@@ -126,58 +131,97 @@ function ensureAdmin(req, res, next) {
   return res.status(403).json({ error: 'Admin Only' });
 }
 
-function canSeeFolder(user, folder) {
-  if (!user) return false;
-  if (user.isAdmin || user.allFolders) return true;
-  return Array.isArray(user.allowedFolders) && user.allowedFolders.includes(folder);
-}
-
-function visiblePlayersFor(user) {
-  if (!user) return [];
-  if (user.isAdmin || user.allFolders) return players;
-  return players.filter(p => canSeeFolder(user, p.folder_name));
-}
+let triggerQueue = [];
 
 function cleanExpiredTriggers() {
   const now = Date.now();
-  triggers = triggers.filter(t => !t.expiresAt || t.expiresAt > now);
+  triggerQueue = triggerQueue.filter(t => !t.expiresAt || t.expiresAt > now);
 }
 
-function persistAll() {
-  saveJSON('users.json', users);
-  saveJSON('players.json', players);
-  saveJSON('triggers.json', triggers);
+async function loadTriggersFromDb() {
+  const { data, error } = await supabase
+    .from('triggers')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+
+  triggerQueue = (data || []).map(t => ({
+    id: t.id,
+    computer_name: t.computer_name,
+    direction: t.direction,
+    createdAt: t.created_at ? new Date(t.created_at).getTime() : Date.now(),
+    expiresAt: t.expires_at ? new Date(t.expires_at).getTime() : null
+  }));
+
+  cleanExpiredTriggers();
 }
 
+async function persistTrigger(trigger) {
+  const payload = {
+    computer_name: trigger.computer_name,
+    direction: trigger.direction,
+    created_at: new Date(trigger.createdAt).toISOString(),
+    expires_at: new Date(trigger.expiresAt).toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from('triggers')
+    .insert([payload])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function deleteTriggerById(id) {
+  const { error } = await supabase.from('triggers').delete().eq('id', id);
+  if (error) throw error;
+}
+
+async function getVisiblePlayersForUser(user) {
+  const { data, error } = await supabase.from('players').select('*');
+  if (error) throw error;
+
+  const allPlayers = data || [];
+  if (!user) return [];
+
+  if (user.isAdmin || user.is_admin || user.allFolders || user.all_folders) {
+    return allPlayers;
+  }
+
+  const allowed = user.allowedFolders || user.allowed_folders || [];
+  return allPlayers.filter(p => allowed.includes(p.folder_name));
+}
+
+async function getPlayerById(id) {
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
+/* HEALTH */
 app.get('/health', (req, res) => {
   res.json({ status: 'ON' });
 });
 
+/* AUTH */
 app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
   res.json({
     ok: true,
-    user: {
-      username: req.user.username,
-      isAdmin: !!req.user.isAdmin,
-      canPull: !!req.user.canPull,
-      allFolders: !!req.user.allFolders,
-      allowedFolders: req.user.allowedFolders || []
-    }
+    user: safeUser(req.user)
   });
 });
 
 app.get('/auth/me', (req, res) => {
   if (!req.user) return res.json({ user: null });
-
-  res.json({
-    user: {
-      username: req.user.username,
-      isAdmin: !!req.user.isAdmin,
-      canPull: !!req.user.canPull,
-      allFolders: !!req.user.allFolders,
-      allowedFolders: req.user.allowedFolders || []
-    }
-  });
+  res.json({ user: safeUser(req.user) });
 });
 
 app.post('/auth/logout', (req, res) => {
@@ -189,194 +233,285 @@ app.post('/auth/logout', (req, res) => {
   });
 });
 
-/*
-  ComputerCraft compatibility:
-  - CC Lua does GET /trigger?computer_name=LakIo
-  - Server returns { trigger: null } or { trigger: { computer_name, direction } }
-  - POST /trigger queues a trigger for the website
-*/
-app.get('/trigger', (req, res) => {
-  const computerName = String(req.query.computer_name || '').trim();
-  if (!computerName) return res.status(400).json({ error: 'Missing computer_name' });
+/* STATUS */
+app.get('/status', ensureAuth, async (req, res) => {
+  try {
+    const players = await getVisiblePlayersForUser(req.user);
+    res.json({
+      username: req.user.username,
+      isAdmin: !!req.user.isAdmin,
+      canPull: !!req.user.canPull,
+      allFolders: !!req.user.allFolders,
+      allowedFolders: req.user.allowedFolders || [],
+      players
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load status' });
+  }
+});
 
-  cleanExpiredTriggers();
+/* COMPUTERCRAFT TRIGGER QUEUE */
+app.get('/trigger', async (req, res) => {
+  try {
+    const computerName = String(req.query.computer_name || '').trim();
+    if (!computerName) return res.status(400).json({ error: 'Missing computer_name' });
 
-  const idx = triggers.findIndex(t => String(t.computer_name) === computerName);
-  if (idx === -1) return res.json({ trigger: null });
+    await loadTriggersFromDb();
+    cleanExpiredTriggers();
 
-  const trigger = triggers.splice(idx, 1)[0];
-  saveJSON('triggers.json', triggers);
+    const index = triggerQueue.findIndex(t => String(t.computer_name) === computerName);
+    if (index === -1) return res.json({ trigger: null });
 
-  return res.json({
-    trigger: {
-      computer_name: trigger.computer_name,
-      direction: trigger.direction
+    const trigger = triggerQueue.splice(index, 1)[0];
+    if (trigger.id) {
+      await deleteTriggerById(trigger.id);
     }
-  });
-});
 
-app.post('/trigger', ensureAuth, (req, res) => {
-  const { computer_name, direction } = req.body || {};
-  if (!computer_name || !direction) {
-    return res.status(400).json({ error: 'Missing computer_name or direction' });
+    return res.json({
+      trigger: {
+        computer_name: trigger.computer_name,
+        direction: trigger.direction
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Trigger lookup failed' });
   }
+});
 
-  if (!req.user.canPull && !req.user.isAdmin) {
-    return res.status(403).json({ error: 'Pull permission denied' });
+app.post('/trigger', ensureAuth, async (req, res) => {
+  try {
+    const { computer_name, direction } = req.body || {};
+    if (!computer_name || !direction) {
+      return res.status(400).json({ error: 'Missing computer_name or direction' });
+    }
+
+    if (!req.user.isAdmin && !req.user.canPull) {
+      return res.status(403).json({ error: 'Pull permission denied' });
+    }
+
+    const targetFolder = String(req.body.folder_name || computer_name).trim();
+    if (!req.user.isAdmin && !userCanSeeFolder(req.user, targetFolder)) {
+      return res.status(403).json({ error: 'No permission for this folder' });
+    }
+
+    const now = Date.now();
+    const trigger = {
+      computer_name: String(computer_name).trim(),
+      direction: String(direction).trim(),
+      createdAt: now,
+      expiresAt: now + 1500
+    };
+
+    const dbRow = await persistTrigger(trigger);
+    triggerQueue.push({
+      id: dbRow.id,
+      computer_name: dbRow.computer_name,
+      direction: dbRow.direction,
+      createdAt: trigger.createdAt,
+      expiresAt: trigger.expiresAt
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to queue trigger' });
   }
+});
 
-  const targetFolder = String(req.body.folder_name || computer_name).trim();
-  if (!req.user.isAdmin && !canSeeFolder(req.user, targetFolder)) {
-    return res.status(403).json({ error: 'No permission for this folder' });
+/* PLAYERS */
+app.get('/players', ensureAuth, async (req, res) => {
+  try {
+    const players = await getVisiblePlayersForUser(req.user);
+    res.json({ players });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load players' });
   }
-
-  const ttl = 1500; // trigger lives long enough for 1s CC polling
-  triggers.push({
-    computer_name: String(computer_name).trim(),
-    direction: String(direction).trim(),
-    createdAt: Date.now(),
-    expiresAt: Date.now() + ttl
-  });
-
-  saveJSON('triggers.json', triggers);
-  res.json({ ok: true });
 });
 
-app.get('/status', ensureAuth, (req, res) => {
-  res.json({ players: visiblePlayersFor(req.user) });
-});
+app.post('/players', ensureAdmin, async (req, res) => {
+  try {
+    const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
+    if (!name || !computer_name || !folder_name) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-app.get('/players', ensureAuth, (req, res) => {
-  res.json({ players: visiblePlayersFor(req.user) });
-});
+    const payload = {
+      name: String(name),
+      computer_name: String(computer_name),
+      folder_name: String(folder_name),
+      channel_name: String(channel_name || ''),
+      direction: String(direction || 'left'),
+      signal_strength: Number(signal_strength || 15)
+    };
 
-app.post('/players', ensureAdmin, (req, res) => {
-  const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
-  if (!name || !computer_name || !folder_name) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    const { data, error } = await supabase.from('players').insert([payload]).select().single();
+    if (error) return res.status(500).json({ error: 'Failed to create player' });
+
+    res.json({ ok: true, player: data });
+  } catch {
+    res.status(500).json({ error: 'Failed to create player' });
   }
-
-  const newPlayer = {
-    id: Date.now(),
-    name: String(name),
-    computer_name: String(computer_name),
-    folder_name: String(folder_name),
-    channel_name: String(channel_name || ''),
-    direction: String(direction || 'left'),
-    signal_strength: Number(signal_strength || 15)
-  };
-
-  players.push(newPlayer);
-  saveJSON('players.json', players);
-  res.json({ ok: true, player: newPlayer });
 });
 
-app.put('/players/:id', ensureAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  const idx = players.findIndex(p => Number(p.id) === id);
-  if (idx === -1) return res.status(404).json({ error: 'Player not found' });
+app.put('/players/:id', ensureAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const existing = await getPlayerById(id);
+    if (!existing) return res.status(404).json({ error: 'Player not found' });
 
-  const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
+    const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
+    const payload = {
+      name: name !== undefined ? String(name) : existing.name,
+      computer_name: computer_name !== undefined ? String(computer_name) : existing.computer_name,
+      folder_name: folder_name !== undefined ? String(folder_name) : existing.folder_name,
+      channel_name: channel_name !== undefined ? String(channel_name) : existing.channel_name,
+      direction: direction !== undefined ? String(direction) : existing.direction,
+      signal_strength: signal_strength !== undefined ? Number(signal_strength) : existing.signal_strength
+    };
 
-  players[idx] = {
-    ...players[idx],
-    name: name !== undefined ? String(name) : players[idx].name,
-    computer_name: computer_name !== undefined ? String(computer_name) : players[idx].computer_name,
-    folder_name: folder_name !== undefined ? String(folder_name) : players[idx].folder_name,
-    channel_name: channel_name !== undefined ? String(channel_name) : players[idx].channel_name,
-    direction: direction !== undefined ? String(direction) : players[idx].direction,
-    signal_strength: signal_strength !== undefined ? Number(signal_strength) : players[idx].signal_strength
-  };
+    const { data, error } = await supabase
+      .from('players')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
 
-  saveJSON('players.json', players);
-  res.json({ ok: true, player: players[idx] });
-});
-
-app.delete('/players/:id', ensureAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  const before = players.length;
-  players = players.filter(p => Number(p.id) !== id);
-  if (players.length === before) return res.status(404).json({ error: 'Player not found' });
-
-  saveJSON('players.json', players);
-  res.json({ ok: true });
-});
-
-app.get('/admin/users', ensureAdmin, (req, res) => {
-  res.json({
-    users: users.map(({ password, ...u }) => u)
-  });
-});
-
-app.post('/admin/users', ensureAdmin, (req, res) => {
-  const { username, password, isAdmin, canPull, allFolders, allowedFolders } = req.body || {};
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Missing username or password' });
+    if (error) return res.status(500).json({ error: 'Failed to update player' });
+    res.json({ ok: true, player: data });
+  } catch {
+    res.status(500).json({ error: 'Failed to update player' });
   }
-  if (users.some(u => u.username === username)) {
-    return res.status(409).json({ error: 'Username already exists' });
-  }
-
-  const newUser = {
-    id: Date.now(),
-    username: String(username),
-    password: String(password),
-    isAdmin: !!isAdmin,
-    canPull: canPull !== undefined ? !!canPull : true,
-    allFolders: !!allFolders,
-    allowedFolders: Array.isArray(allowedFolders) ? allowedFolders.map(String) : []
-  };
-
-  users.push(newUser);
-  saveJSON('users.json', users);
-
-  const { password: _, ...safeUser } = newUser;
-  res.json({ ok: true, user: safeUser });
 });
 
-app.put('/admin/users/:id', ensureAdmin, (req, res) => {
-  const id = Number(req.params.id);
-  const idx = users.findIndex(u => Number(u.id) === id);
-  if (idx === -1) return res.status(404).json({ error: 'User not found' });
-
-  const { username, password, isAdmin, canPull, allFolders, allowedFolders } = req.body || {};
-
-  if (username && users.some(u => u.username === username && Number(u.id) !== id)) {
-    return res.status(409).json({ error: 'Username already exists' });
+app.delete('/players/:id', ensureAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { error } = await supabase.from('players').delete().eq('id', id);
+    if (error) return res.status(500).json({ error: 'Failed to delete player' });
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: 'Failed to delete player' });
   }
-
-  users[idx] = {
-    ...users[idx],
-    username: username !== undefined ? String(username) : users[idx].username,
-    password: password !== undefined && password !== '' ? String(password) : users[idx].password,
-    isAdmin: isAdmin !== undefined ? !!isAdmin : users[idx].isAdmin,
-    canPull: canPull !== undefined ? !!canPull : users[idx].canPull,
-    allFolders: allFolders !== undefined ? !!allFolders : users[idx].allFolders,
-    allowedFolders: Array.isArray(allowedFolders) ? allowedFolders.map(String) : users[idx].allowedFolders
-  };
-
-  saveJSON('users.json', users);
-
-  const { password: _, ...safeUser } = users[idx];
-  res.json({ ok: true, user: safeUser });
 });
 
-app.delete('/admin/users/:id', ensureAdmin, (req, res) => {
-  const id = Number(req.params.id);
+/* ADMIN USERS */
+app.get('/admin/users', ensureAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, username, is_admin, can_pull, all_folders, allowed_folders')
+      .order('id', { ascending: true });
 
-  if (users.some(u => Number(u.id) === id && u.username === req.user.username)) {
-    return res.status(400).json({ error: 'You cannot delete your own active account' });
+    if (error) return res.status(500).json({ error: 'Failed to load users' });
+
+    res.json({
+      users: (data || []).map(u => ({
+        id: u.id,
+        username: u.username,
+        isAdmin: !!u.is_admin,
+        canPull: !!u.can_pull,
+        allFolders: !!u.all_folders,
+        allowedFolders: u.allowed_folders || []
+      }))
+    });
+  } catch {
+    res.status(500).json({ error: 'Failed to load users' });
   }
-
-  const before = users.length;
-  users = users.filter(u => Number(u.id) !== id);
-  if (users.length === before) return res.status(404).json({ error: 'User not found' });
-
-  saveJSON('users.json', users);
-  res.json({ ok: true });
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.post('/admin/users', ensureAdmin, async (req, res) => {
+  try {
+    const { username, password, isAdmin, canPull, allFolders, allowedFolders } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing username or password' });
+    }
+
+    const payload = {
+      username: String(username),
+      password: String(password),
+      is_admin: !!isAdmin,
+      can_pull: canPull !== undefined ? !!canPull : true,
+      all_folders: !!allFolders,
+      allowed_folders: Array.isArray(allowedFolders) ? allowedFolders.map(String) : []
+    };
+
+    const { data, error } = await supabase
+      .from('users')
+      .insert([payload])
+      .select('id, username, is_admin, can_pull, all_folders, allowed_folders')
+      .single();
+
+    if (error) return res.status(500).json({ error: 'Failed to create user' });
+
+    res.json({
+      ok: true,
+      user: {
+        id: data.id,
+        username: data.username,
+        isAdmin: !!data.is_admin,
+        canPull: !!data.can_pull,
+        allFolders: !!data.all_folders,
+        allowedFolders: data.allowed_folders || []
+      }
+    });
+  } catch {
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+});
+
+app.put('/admin/users/:id', ensureAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { username, password, isAdmin, canPull, allFolders, allowedFolders } = req.body || {};
+
+    const payload = {};
+    if (username !== undefined) payload.username = String(username);
+    if (password !== undefined && password !== '') payload.password = String(password);
+    if (isAdmin !== undefined) payload.is_admin = !!isAdmin;
+    if (canPull !== undefined) payload.can_pull = !!canPull;
+    if (allFolders !== undefined) payload.all_folders = !!allFolders;
+    if (allowedFolders !== undefined) payload.allowed_folders = Array.isArray(allowedFolders) ? allowedFolders.map(String) : [];
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(payload)
+      .eq('id', id)
+      .select('id, username, is_admin, can_pull, all_folders, allowed_folders')
+      .single();
+
+    if (error) return res.status(500).json({ error: 'Failed to update user' });
+
+    res.json({
+      ok: true,
+      user: {
+        id: data.id,
+        username: data.username,
+        isAdmin: !!data.is_admin,
+        canPull: !!data.can_pull,
+        allFolders: !!data.all_folders,
+        allowedFolders: data.allowed_folders || []
+      }
+    });
+  } catch {
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+app.delete('/admin/users/:id', ensureAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (req.user && Number(req.user.id) === id) {
+      return res.status(400).json({ error: 'You cannot delete your own active account' });
+    }
+
+    const { error } = await supabase.from('users').delete().eq('id', id);
+    if (error) return res.status(500).json({ error: 'Failed to delete user' });
+
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
