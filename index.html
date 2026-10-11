@@ -436,7 +436,6 @@
       outline:none;
       font:500 .96rem "Inter",sans-serif;
     }
-    .input::placeholder{color:#7f8aa3}
 
     .actions{display:flex;gap:12px;flex-wrap:wrap}
     .message{
@@ -525,10 +524,7 @@
       margin-bottom:16px;
       font-size:1rem;
     }
-    .terminal-form{
-      display:grid;
-      gap:14px;
-    }
+    .terminal-form{display:grid;gap:14px}
     .terminal-label{
       color:#bdf7d7;
       font-size:.95rem;
@@ -546,17 +542,9 @@
       outline:none;
       font:500 1rem "Inter",sans-serif;
     }
-    .terminal-actions{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:4px;
-    }
+    .terminal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
 
-    @media (max-width: 1120px){
-      .layout{grid-template-columns:1fr}
-    }
-
+    @media (max-width: 1120px){ .layout{grid-template-columns:1fr} }
     @media (max-width: 920px){
       .hero{grid-template-columns:1fr}
       .player{grid-template-columns:1fr}
@@ -564,7 +552,6 @@
       .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
       .user-row{grid-template-columns:1fr}
     }
-
     @media (max-width: 640px){
       .wrap{width:min(var(--max), calc(100% - 20px))}
       .topbar-inner{flex-direction:column;align-items:flex-start}
@@ -610,7 +597,7 @@
           <div class="hero-meta">
             <div class="pill">Folder-aware roster</div>
             <div class="pill">ComputerCraft compatible trigger flow</div>
-            <div class="pill">Server-stored local users</div>
+            <div class="pill">Supabase-backed users</div>
           </div>
         </div>
       </article>
@@ -694,27 +681,22 @@
           <div class="panel-body">
             <form id="playerForm" class="form-grid">
               <input type="hidden" id="playerId" />
-
               <div class="field">
                 <label for="name">Player name</label>
                 <input class="input" id="name" required />
               </div>
-
               <div class="field">
                 <label for="computer_name">Computer name</label>
                 <input class="input" id="computer_name" required />
               </div>
-
               <div class="field">
                 <label for="channel_name">Channel name</label>
                 <input class="input" id="channel_name" />
               </div>
-
               <div class="field">
                 <label for="folder_name">Folder</label>
                 <input class="input" id="folder_name" required />
               </div>
-
               <div class="field">
                 <label for="direction">Direction</label>
                 <select class="select" id="direction">
@@ -726,18 +708,15 @@
                   <option value="back">back</option>
                 </select>
               </div>
-
               <div class="field">
                 <label for="signal_strength">Signal strength</label>
                 <input class="input" type="number" id="signal_strength" min="1" max="15" value="15" />
               </div>
-
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save player</button>
                 <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
               </div>
             </form>
-
             <div id="playerMessage" class="message">Admin panel ready.</div>
           </div>
         </article>
@@ -752,17 +731,14 @@
           <div class="panel-body">
             <form id="userForm" class="form-grid">
               <input type="hidden" id="userId" />
-
               <div class="field">
                 <label for="username">Username</label>
                 <input class="input" id="username" required />
               </div>
-
               <div class="field">
                 <label for="password">Password</label>
                 <input class="input" id="password" required />
               </div>
-
               <div class="field">
                 <label>Permissions</label>
                 <div style="display:grid;gap:8px;color:var(--muted);font-size:.92rem;">
@@ -771,18 +747,15 @@
                   <label><input type="checkbox" id="allFolders" /> All Folders</label>
                 </div>
               </div>
-
               <div class="field">
                 <label for="allowedFolders">Allowed folders (comma separated)</label>
                 <input class="input" id="allowedFolders" placeholder="LakIo, Oil Rig" />
               </div>
-
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save user</button>
                 <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
               </div>
             </form>
-
             <div id="userMessage" class="message">Manage local login users here.</div>
             <div id="userList" class="user-list"></div>
           </div>
@@ -897,7 +870,7 @@
     }
 
     function normalizeFolder(player) {
-      return String(player.folder_name || player.folder || player.computer_name || 'Unassigned').trim() || 'Unassigned';
+      return String(player.folder_name || 'Unassigned').trim() || 'Unassigned';
     }
 
     function isAuthed(user) {
@@ -1376,7 +1349,7 @@
         if (state.user && !state.user.isAdmin && Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.length === 1) {
           els.triggerComputerName.value = state.user.allowedFolders[0];
         }
-      } catch (err) {
+      } catch {
         els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
       }
     });
