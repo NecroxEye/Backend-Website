@@ -2,42 +2,38 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.set('trust proxy', 1);
-
 const DATA_DIR = path.join(__dirname, 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const PLAYERS_FILE = path.join(DATA_DIR, 'players.json');
-const STATE_FILE = path.join(DATA_DIR, 'state.json');
-
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-function readJSON(file, fallback) {
+function loadJSON(file, fallback) {
+  const filePath = path.join(DATA_DIR, file);
   try {
-    if (!fs.existsSync(file)) {
-      fs.writeFileSync(file, JSON.stringify(fallback, null, 2));
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(fallback, null, 2));
       return structuredClone(fallback);
     }
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch {
     return structuredClone(fallback);
   }
 }
 
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+function saveJSON(file, data) {
+  const filePath = path.join(DATA_DIR, file);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
 const defaultUsers = [
   {
     id: 1,
-    username: 'Fr05tedF4ang5',
+    username: 'Fr05tedF4ng5',
     password: 'Frosting',
     isAdmin: true,
     canPull: true,
@@ -46,7 +42,7 @@ const defaultUsers = [
   },
   {
     id: 2,
-    username: 'Frost',
+    username: 'Frosted',
     password: 'Genius',
     isAdmin: false,
     canPull: true,
@@ -67,48 +63,22 @@ const defaultUsers = [
 const defaultPlayers = [
   {
     id: 1,
-    name: 'Necrox',
-    computer_name: 'Oil Rig',
-    folder_name: 'Oil Rig',
-    channel_name: 'main',
-    direction: 'left',
-    signal_strength: 15
-  },
-  {
-    id: 2,
-    name: 'Alice',
-    computer_name: 'EMENeth',
-    folder_name: 'EMENeth',
-    channel_name: 'alpha',
-    direction: 'right',
-    signal_strength: 15
-  },
-  {
-    id: 3,
-    name: 'Fangs',
+    name: 'Example Player',
     computer_name: 'LakIo',
     folder_name: 'LakIo',
-    channel_name: 'beta',
+    channel_name: '',
     direction: 'back',
     signal_strength: 15
   }
 ];
 
-let users = readJSON(USERS_FILE, defaultUsers);
-let players = readJSON(PLAYERS_FILE, defaultPlayers);
-let triggerQueue = readJSON(STATE_FILE, []);
+const defaultTriggers = [];
 
-function persistUsers() {
-  writeJSON(USERS_FILE, users);
-}
+let users = loadJSON('users.json', defaultUsers);
+let players = loadJSON('players.json', defaultPlayers);
+let triggers = loadJSON('triggers.json', defaultTriggers);
 
-function persistPlayers() {
-  writeJSON(PLAYERS_FILE, players);
-}
-
-function persistTriggers() {
-  writeJSON(STATE_FILE, triggerQueue);
-}
+app.set('trust proxy', 1);
 
 app.use(cors({
   origin: true,
@@ -123,6 +93,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
+    // For local http testing, set secure: false and sameSite: 'lax'
+    // For HTTPS deployments, keep secure: true and sameSite: 'none'
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
@@ -140,7 +112,7 @@ passport.use(new LocalStrategy((username, password, done) => {
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
-  const user = users.find(u => u.id === id);
+  const user = users.find(u => Number(u.id) === Number(id));
   done(null, user || false);
 });
 
@@ -154,31 +126,33 @@ function ensureAdmin(req, res, next) {
   return res.status(403).json({ error: 'Admin Only' });
 }
 
-function canViewFolder(user, folder) {
+function canSeeFolder(user, folder) {
   if (!user) return false;
   if (user.isAdmin || user.allFolders) return true;
   return Array.isArray(user.allowedFolders) && user.allowedFolders.includes(folder);
 }
 
-function visiblePlayers(user) {
+function visiblePlayersFor(user) {
   if (!user) return [];
   if (user.isAdmin || user.allFolders) return players;
-  return players.filter(p => canViewFolder(user, p.folder_name));
+  return players.filter(p => canSeeFolder(user, p.folder_name));
 }
 
-function findTriggerForComputer(computerName) {
-  const index = triggerQueue.findIndex(t => t.computer_name === computerName);
-  if (index === -1) return null;
-  const trigger = triggerQueue.splice(index, 1)[0];
-  persistTriggers();
-  return trigger;
+function cleanExpiredTriggers() {
+  const now = Date.now();
+  triggers = triggers.filter(t => !t.expiresAt || t.expiresAt > now);
+}
+
+function persistAll() {
+  saveJSON('users.json', users);
+  saveJSON('players.json', players);
+  saveJSON('triggers.json', triggers);
 }
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ON' });
 });
 
-/* AUTH */
 app.post('/auth/local/login', passport.authenticate('local'), (req, res) => {
   res.json({
     ok: true,
@@ -215,24 +189,23 @@ app.post('/auth/logout', (req, res) => {
   });
 });
 
-/* DISCORD PLACEHOLDERS */
-app.get('/auth/discord/login', (req, res) => {
-  res.status(501).send('Discord login not configured yet.');
-});
-
-app.get('/auth/discord/callback', (req, res) => {
-  res.status(501).send('Discord callback not configured yet.');
-});
-
-/* TRIGGER API FOR CC LUA */
+/*
+  ComputerCraft compatibility:
+  - CC Lua does GET /trigger?computer_name=LakIo
+  - Server returns { trigger: null } or { trigger: { computer_name, direction } }
+  - POST /trigger queues a trigger for the website
+*/
 app.get('/trigger', (req, res) => {
   const computerName = String(req.query.computer_name || '').trim();
-  if (!computerName) {
-    return res.status(400).json({ error: 'Missing computer_name' });
-  }
+  if (!computerName) return res.status(400).json({ error: 'Missing computer_name' });
 
-  const trigger = findTriggerForComputer(computerName);
-  if (!trigger) return res.json({ trigger: null });
+  cleanExpiredTriggers();
+
+  const idx = triggers.findIndex(t => String(t.computer_name) === computerName);
+  if (idx === -1) return res.json({ trigger: null });
+
+  const trigger = triggers.splice(idx, 1)[0];
+  saveJSON('triggers.json', triggers);
 
   return res.json({
     trigger: {
@@ -248,33 +221,33 @@ app.post('/trigger', ensureAuth, (req, res) => {
     return res.status(400).json({ error: 'Missing computer_name or direction' });
   }
 
-  if (!canViewFolder(req.user, String(req.body.folder_name || req.body.folder || computer_name))) {
-    if (!req.user.isAdmin) {
-      return res.status(403).json({ error: 'No permission for this folder' });
-    }
-  }
-
   if (!req.user.canPull && !req.user.isAdmin) {
     return res.status(403).json({ error: 'Pull permission denied' });
   }
 
-  triggerQueue.push({
-    computer_name: String(computer_name),
-    direction: String(direction),
-    createdAt: Date.now()
-  });
-  persistTriggers();
+  const targetFolder = String(req.body.folder_name || computer_name).trim();
+  if (!req.user.isAdmin && !canSeeFolder(req.user, targetFolder)) {
+    return res.status(403).json({ error: 'No permission for this folder' });
+  }
 
+  const ttl = 1500; // trigger lives long enough for 1s CC polling
+  triggers.push({
+    computer_name: String(computer_name).trim(),
+    direction: String(direction).trim(),
+    createdAt: Date.now(),
+    expiresAt: Date.now() + ttl
+  });
+
+  saveJSON('triggers.json', triggers);
   res.json({ ok: true });
 });
 
-/* STATUS / PLAYERS */
 app.get('/status', ensureAuth, (req, res) => {
-  res.json({ players: visiblePlayers(req.user) });
+  res.json({ players: visiblePlayersFor(req.user) });
 });
 
 app.get('/players', ensureAuth, (req, res) => {
-  res.json({ players: visiblePlayers(req.user) });
+  res.json({ players: visiblePlayersFor(req.user) });
 });
 
 app.post('/players', ensureAdmin, (req, res) => {
@@ -294,7 +267,7 @@ app.post('/players', ensureAdmin, (req, res) => {
   };
 
   players.push(newPlayer);
-  persistPlayers();
+  saveJSON('players.json', players);
   res.json({ ok: true, player: newPlayer });
 });
 
@@ -304,17 +277,18 @@ app.put('/players/:id', ensureAdmin, (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Player not found' });
 
   const { name, computer_name, folder_name, channel_name, direction, signal_strength } = req.body || {};
+
   players[idx] = {
     ...players[idx],
-    name: name ?? players[idx].name,
-    computer_name: computer_name ?? players[idx].computer_name,
-    folder_name: folder_name ?? players[idx].folder_name,
-    channel_name: channel_name ?? players[idx].channel_name,
-    direction: direction ?? players[idx].direction,
+    name: name !== undefined ? String(name) : players[idx].name,
+    computer_name: computer_name !== undefined ? String(computer_name) : players[idx].computer_name,
+    folder_name: folder_name !== undefined ? String(folder_name) : players[idx].folder_name,
+    channel_name: channel_name !== undefined ? String(channel_name) : players[idx].channel_name,
+    direction: direction !== undefined ? String(direction) : players[idx].direction,
     signal_strength: signal_strength !== undefined ? Number(signal_strength) : players[idx].signal_strength
   };
 
-  persistPlayers();
+  saveJSON('players.json', players);
   res.json({ ok: true, player: players[idx] });
 });
 
@@ -322,18 +296,16 @@ app.delete('/players/:id', ensureAdmin, (req, res) => {
   const id = Number(req.params.id);
   const before = players.length;
   players = players.filter(p => Number(p.id) !== id);
+  if (players.length === before) return res.status(404).json({ error: 'Player not found' });
 
-  if (players.length === before) {
-    return res.status(404).json({ error: 'Player not found' });
-  }
-
-  persistPlayers();
+  saveJSON('players.json', players);
   res.json({ ok: true });
 });
 
-/* USER MANAGEMENT */
 app.get('/admin/users', ensureAdmin, (req, res) => {
-  res.json({ users: users.map(({ password, ...u }) => u) });
+  res.json({
+    users: users.map(({ password, ...u }) => u)
+  });
 });
 
 app.post('/admin/users', ensureAdmin, (req, res) => {
@@ -341,7 +313,6 @@ app.post('/admin/users', ensureAdmin, (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Missing username or password' });
   }
-
   if (users.some(u => u.username === username)) {
     return res.status(409).json({ error: 'Username already exists' });
   }
@@ -357,7 +328,7 @@ app.post('/admin/users', ensureAdmin, (req, res) => {
   };
 
   users.push(newUser);
-  persistUsers();
+  saveJSON('users.json', users);
 
   const { password: _, ...safeUser } = newUser;
   res.json({ ok: true, user: safeUser });
@@ -376,7 +347,7 @@ app.put('/admin/users/:id', ensureAdmin, (req, res) => {
 
   users[idx] = {
     ...users[idx],
-    username: username ?? users[idx].username,
+    username: username !== undefined ? String(username) : users[idx].username,
     password: password !== undefined && password !== '' ? String(password) : users[idx].password,
     isAdmin: isAdmin !== undefined ? !!isAdmin : users[idx].isAdmin,
     canPull: canPull !== undefined ? !!canPull : users[idx].canPull,
@@ -384,7 +355,7 @@ app.put('/admin/users/:id', ensureAdmin, (req, res) => {
     allowedFolders: Array.isArray(allowedFolders) ? allowedFolders.map(String) : users[idx].allowedFolders
   };
 
-  persistUsers();
+  saveJSON('users.json', users);
 
   const { password: _, ...safeUser } = users[idx];
   res.json({ ok: true, user: safeUser });
@@ -399,16 +370,12 @@ app.delete('/admin/users/:id', ensureAdmin, (req, res) => {
 
   const before = users.length;
   users = users.filter(u => Number(u.id) !== id);
+  if (users.length === before) return res.status(404).json({ error: 'User not found' });
 
-  if (users.length === before) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  persistUsers();
+  saveJSON('users.json', users);
   res.json({ ok: true });
 });
 
-/* STATIC */
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {
