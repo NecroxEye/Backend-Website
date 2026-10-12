@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frosted Fang Control</title>
+  <title>Frosted Fang Auth Debug Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#05060a;
-      --panel:rgba(10,13,22,.88);
-      --line:rgba(123,162,255,.16);
-      --line-strong:rgba(123,162,255,.34);
-      --text:#edf3ff;
-      --muted:#97a4bf;
-      --cyan:#5ee7ff;
-      --violet:#7a32ff;
-      --green:#63f5b0;
-      --red:#ff6f91;
-      --amber:#ffca6b;
-      --shadow:0 18px 60px rgba(0,0,0,.42);
-      --radius:24px;
-      --max:1280px;
+      --bg:#06070b;
+      --panel:rgba(11,14,24,.9);
+      --soft:rgba(255,255,255,.04);
+      --line:rgba(110,150,255,.18);
+      --line-strong:rgba(110,150,255,.34);
+      --text:#edf2ff;
+      --muted:#98a6c2;
+      --cyan:#63e8ff;
+      --violet:#7b38ff;
+      --green:#69f3b9;
+      --red:#ff7693;
+      --amber:#ffc96d;
+      --radius:22px;
+      --shadow:0 24px 80px rgba(0,0,0,.45);
+      --max:1180px;
     }
 
     *{box-sizing:border-box}
@@ -32,12 +33,9 @@
       color:var(--text);
       min-height:100vh;
       background:
-        radial-gradient(circle at 10% 20%, rgba(94,231,255,.05), transparent 24%),
-        radial-gradient(circle at 90% 15%, rgba(122,50,255,.11), transparent 26%),
-        radial-gradient(circle at 50% 100%, rgba(123,162,255,.05), transparent 34%),
-        linear-gradient(180deg,#04050a 0%,#090b13 52%,#0a0d16 100%);
-      overflow-x:hidden;
-      position:relative;
+        radial-gradient(circle at 12% 18%, rgba(99,232,255,.06), transparent 24%),
+        radial-gradient(circle at 86% 10%, rgba(123,56,255,.12), transparent 25%),
+        linear-gradient(180deg,#05060a 0%,#0a0c13 52%,#0b0f18 100%);
     }
 
     body::before{
@@ -45,39 +43,20 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:-2;
-      background:
-        linear-gradient(90deg,
-          rgba(0,0,0,.96) 0%,
-          rgba(49,16,94,.88) 7%,
-          rgba(0,0,0,0) 16%,
-          rgba(0,0,0,0) 84%,
-          rgba(49,16,94,.88) 93%,
-          rgba(0,0,0,.96) 100%);
-      box-shadow:inset 0 0 90px rgba(122,50,255,.14);
-    }
-
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:-1;
-      opacity:.1;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.14)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
+      opacity:.08;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(110,150,255,0.18)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
       background-size:180px 208px;
-      background-position:center top;
     }
 
-    .wrap{width:min(var(--max), calc(100% - 28px));margin-inline:auto}
+    .wrap{width:min(var(--max), calc(100% - 24px));margin-inline:auto}
     .hidden{display:none!important}
 
     .topbar{
       position:sticky;
       top:0;
-      z-index:50;
+      z-index:10;
       backdrop-filter:blur(14px);
-      background:linear-gradient(180deg, rgba(6,8,14,.9), rgba(6,8,14,.55));
+      background:linear-gradient(180deg, rgba(7,9,16,.94), rgba(7,9,16,.7));
       border-bottom:1px solid rgba(255,255,255,.05);
     }
 
@@ -85,145 +64,94 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:14px;
       padding:14px 0;
+      flex-wrap:wrap;
     }
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
     .brand-badge{
-      width:42px;height:42px;border-radius:14px;
+      width:44px;height:44px;border-radius:14px;
       display:grid;place-items:center;
-      background:
-        linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.16)),
-        rgba(255,255,255,.04);
-      border:1px solid var(--line);
       font-family:"Orbitron",sans-serif;
       font-weight:800;
       letter-spacing:.08em;
+      border:1px solid var(--line);
+      background:linear-gradient(135deg, rgba(99,232,255,.14), rgba(123,56,255,.18));
     }
+
     .eyebrow{
       display:block;
       color:var(--cyan);
       font-size:.72rem;
-      letter-spacing:.22em;
       text-transform:uppercase;
+      letter-spacing:.2em;
       margin-bottom:2px;
     }
+
     .title{
       margin:0;
       font-family:"Orbitron",sans-serif;
-      font-size:1.05rem;
+      font-size:1rem;
       letter-spacing:.06em;
-      white-space:nowrap;
+      text-transform:uppercase;
     }
 
-    .statusbar{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      min-height:40px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-size:.92rem;
-      white-space:nowrap;
-    }
-
-    .dot{width:9px;height:9px;border-radius:50%;background:var(--amber)}
-    .dot.online{background:var(--green)}
-    .dot.offline{background:var(--red)}
-
-    .btn{
-      appearance:none;
-      border:none;
-      outline:none;
-      cursor:pointer;
-      color:var(--text);
-      min-height:44px;
-      padding:0 16px;
-      border-radius:14px;
-      font:600 .94rem "Inter",sans-serif;
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border:1px solid rgba(255,255,255,.08);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      transition:transform .16s ease, border-color .16s ease, background .16s ease;
-    }
-    .btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
-    .btn:active{transform:scale(.985)}
-    .btn-primary{
-      background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));
-      border-color:rgba(94,231,255,.26);
-    }
-    .btn-violet{
-      background:linear-gradient(135deg, rgba(122,50,255,.24), rgba(74,22,140,.18));
-      border-color:rgba(122,50,255,.34);
-    }
-    .btn-danger{
-      background:linear-gradient(135deg, rgba(255,111,145,.18), rgba(200,70,100,.1));
-      border-color:rgba(255,111,145,.3);
-    }
-    .btn-ghost{background:rgba(255,255,255,.04)}
-
-    main{padding:26px 0 54px}
+    main{padding:24px 0 48px}
 
     .hero{
       display:grid;
-      grid-template-columns:1.1fr .9fr;
+      grid-template-columns:1.08fr .92fr;
       gap:20px;
-      margin-bottom:22px;
+      margin-bottom:20px;
     }
 
     .panel{
       background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),
+        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.018)),
         var(--panel);
       border:1px solid rgba(255,255,255,.06);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
-      backdrop-filter:blur(14px);
+      backdrop-filter:blur(12px);
     }
 
-    .hero-copy{padding:30px;min-height:280px;display:flex;flex-direction:column;justify-content:space-between}
+    .hero-copy{
+      padding:28px;
+      min-height:250px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
     .hero-kicker{
       color:var(--cyan);
       text-transform:uppercase;
-      letter-spacing:.24em;
+      letter-spacing:.23em;
       font-size:.72rem;
-      margin:0 0 10px;
+      margin:0 0 12px;
     }
+
     .hero h1{
-      margin:0 0 14px;
+      margin:0 0 12px;
       font-family:"Orbitron",sans-serif;
-      font-size:clamp(2rem, 4vw, 4rem);
-      line-height:.94;
+      font-size:clamp(2rem, 4vw, 3.8rem);
+      line-height:.95;
       text-transform:uppercase;
       max-width:12ch;
     }
+
     .hero p{
       margin:0;
       color:var(--muted);
       line-height:1.65;
       max-width:60ch;
-    }
-    .hero-meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:22px;
     }
 
     .hero-side{
@@ -232,25 +160,35 @@
       gap:14px;
       align-content:start;
     }
+
     .mini-stat{
       padding:18px;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.06);
       background:rgba(255,255,255,.03);
     }
+
     .mini-stat .label{
       color:var(--muted);
       font-size:.78rem;
+      letter-spacing:.12em;
       text-transform:uppercase;
-      letter-spacing:.14em;
       margin-bottom:8px;
     }
+
     .mini-stat .value{
       font-family:"Orbitron",sans-serif;
-      font-size:clamp(1.2rem,2vw,2rem);
+      font-size:1.2rem;
+      word-break:break-word;
     }
 
-    .panel-body{padding:22px}
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
     .panel-head{
       display:flex;
       justify-content:space-between;
@@ -258,174 +196,33 @@
       gap:12px;
       padding:22px 22px 0;
     }
+
     .panel-head h2{
       margin:0;
       font-family:"Orbitron",sans-serif;
-      font-size:1.18rem;
+      font-size:1.05rem;
       text-transform:uppercase;
       letter-spacing:.08em;
     }
+
     .panel-head p{
       margin:6px 0 0;
       color:var(--muted);
-      font-size:.94rem;
+      font-size:.92rem;
     }
 
-    .layout{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 390px;
-      gap:20px;
-      align-items:start;
-    }
-    .stack{display:grid;gap:20px}
-
-    .folder-accordion{display:grid;gap:14px}
-    .folder-card{
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.024);
-      overflow:hidden;
-    }
-    .folder-card.open{
-      border-color:rgba(94,231,255,.22);
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
-    }
-
-    .folder-toggle{
-      width:100%;
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto;
-      gap:14px;
-      align-items:center;
-      text-align:left;
-      background:transparent;
-      border:none;
-      color:var(--text);
-      padding:18px;
-      cursor:pointer;
-    }
-
-    .folder-title-wrap{min-width:0}
-    .folder-title{
-      margin:0;
-      font-family:"Orbitron",sans-serif;
-      font-size:1rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .folder-sub{
-      margin-top:5px;
-      color:var(--muted);
-      font-size:.9rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .folder-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:88px;
-      min-height:36px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-weight:700;
-      font-size:.88rem;
-    }
-
-    .folder-chevron{
-      width:38px;height:38px;border-radius:12px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-      transition:transform .2s ease;
-      flex-shrink:0;
-    }
-    .folder-card.open .folder-chevron{transform:rotate(180deg)}
-
-    .folder-content{
-      display:grid;
-      grid-template-rows:0fr;
-      transition:grid-template-rows .28s ease;
-    }
-    .folder-card.open .folder-content{grid-template-rows:1fr}
-    .folder-content-inner{min-height:0;overflow:hidden}
-    .folder-content-pad{
-      padding:0 18px 18px;
-      border-top:1px solid rgba(255,255,255,.05);
-    }
-
-    .player-list{display:grid;gap:12px;margin-top:14px}
-    .player{
-      display:grid;
-      grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr) auto auto;
-      gap:12px;
-      align-items:center;
-      padding:14px 16px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.06);
-    }
-
-    .player-main,.player-meta{min-width:0}
-    .player-main strong{
-      display:block;
-      margin-bottom:4px;
-      font-size:1rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .player-main span,.player-meta span{
-      display:block;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.45;
-      word-break:break-word;
-      overflow-wrap:anywhere;
-    }
-    .player-meta{display:grid;gap:4px}
-
-    .dir-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:38px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(94,231,255,.18);
-      background:rgba(94,231,255,.08);
-      color:var(--cyan);
-      font-weight:700;
-      font-size:.78rem;
-      text-transform:uppercase;
-      white-space:nowrap;
-    }
-
-    .player-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .panel-body{padding:22px}
 
     .form-grid{display:grid;gap:14px}
     .field{display:grid;gap:8px}
     .field label{
       color:var(--muted);
-      font-size:.84rem;
+      font-size:.82rem;
       text-transform:uppercase;
       letter-spacing:.12em;
     }
 
-    .input,.select{
+    .input,.select,.textarea{
       width:100%;
       min-height:48px;
       padding:0 14px;
@@ -437,10 +234,53 @@
       font:500 .96rem "Inter",sans-serif;
     }
 
-    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .textarea{
+      min-height:180px;
+      padding:14px;
+      resize:vertical;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.92rem;
+      line-height:1.5;
+    }
+
+    .btn-row,.actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      min-height:44px;
+      padding:0 16px;
+      border-radius:14px;
+      color:var(--text);
+      font:600 .93rem "Inter",sans-serif;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      transition:transform .16s ease, border-color .16s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
+    .btn:active{transform:scale(.985)}
+    .btn-primary{
+      background:linear-gradient(135deg, rgba(99,232,255,.16), rgba(110,150,255,.16));
+      border-color:rgba(99,232,255,.26);
+    }
+    .btn-violet{
+      background:linear-gradient(135deg, rgba(123,56,255,.24), rgba(72,26,155,.2));
+      border-color:rgba(123,56,255,.34);
+    }
+    .btn-danger{
+      background:linear-gradient(135deg, rgba(255,118,147,.18), rgba(193,69,95,.1));
+      border-color:rgba(255,118,147,.28);
+    }
+
     .message{
+      min-height:54px;
       margin-top:14px;
-      min-height:52px;
       padding:14px 16px;
       display:flex;
       align-items:center;
@@ -448,123 +288,62 @@
       border:1px solid rgba(255,255,255,.07);
       background:rgba(255,255,255,.03);
       color:var(--muted);
+      white-space:pre-wrap;
+      word-break:break-word;
     }
-    .message.success{border-color:rgba(99,245,176,.26);background:rgba(99,245,176,.08);color:#ccffeb}
-    .message.error{border-color:rgba(255,111,145,.28);background:rgba(255,111,145,.08);color:#ffd9e3}
-    .message.info{border-color:rgba(94,231,255,.24);background:rgba(94,231,255,.08);color:#d9fbff}
+    .message.success{border-color:rgba(105,243,185,.26);background:rgba(105,243,185,.08);color:#d8fff0}
+    .message.error{border-color:rgba(255,118,147,.28);background:rgba(255,118,147,.08);color:#ffe1e8}
+    .message.info{border-color:rgba(99,232,255,.24);background:rgba(99,232,255,.08);color:#dcfbff}
 
-    .user-list{display:grid;gap:12px;margin-top:14px}
-    .user-row{
+    .codebox{
+      padding:16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.03);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.9rem;
+      line-height:1.55;
+      color:#dce8ff;
+      white-space:pre-wrap;
+      word-break:break-word;
+      min-height:220px;
+    }
+
+    .list{
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:12px;
-      align-items:center;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .item{
       padding:14px 16px;
       border-radius:16px;
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.06);
     }
-    .user-row strong{display:block;margin-bottom:4px}
-    .user-row span{display:block;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
 
-    .terminal-overlay{
-      position:fixed;
-      inset:0;
-      z-index:100;
-      display:none;
-      place-items:center;
-      padding:20px;
-      background:rgba(2,3,8,.74);
-      backdrop-filter:blur(12px);
-    }
-    .terminal-overlay.show{display:grid}
-
-    .terminal-shell{
-      width:min(760px, 100%);
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(122,50,255,.26);
-      box-shadow:0 28px 100px rgba(0,0,0,.58);
-      background:linear-gradient(180deg, rgba(8,10,18,.98), rgba(4,6,12,.98));
-    }
-    .terminal-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.016));
-    }
-    .term-lights{display:flex;gap:8px}
-    .term-lights span{
-      width:10px;height:10px;border-radius:50%;
-      border:1px solid rgba(255,255,255,.08);
-    }
-    .term-lights span:nth-child(1){background:#ff6f91}
-    .term-lights span:nth-child(2){background:#ffca6b}
-    .term-lights span:nth-child(3){background:#63f5b0}
-    .terminal-title{
-      font-family:"Orbitron",sans-serif;
-      font-size:.84rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#dce7ff;
-    }
-    .terminal-body{
-      padding:18px;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      color:#9cffc5;
-    }
-    .terminal-log{
-      min-height:130px;
-      white-space:pre-wrap;
-      line-height:1.5;
-      color:#9cffc5;
-      margin-bottom:16px;
-      font-size:1rem;
-    }
-    .terminal-form{display:grid;gap:14px}
-    .terminal-label{
-      color:#bdf7d7;
-      font-size:.95rem;
-      margin-bottom:6px;
+    .item strong{
       display:block;
-    }
-    .terminal-input{
-      width:100%;
-      min-height:52px;
-      border-radius:16px;
-      padding:0 16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.04);
-      color:#ebfff4;
-      outline:none;
-      font:500 1rem "Inter",sans-serif;
-    }
-    .terminal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
-
-    @media (max-width: 1120px){
-      .layout{grid-template-columns:1fr}
+      margin-bottom:4px;
     }
 
-    @media (max-width: 920px){
-      .hero{grid-template-columns:1fr}
-      .player{grid-template-columns:1fr}
-      .player-actions{justify-content:flex-start}
-      .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
-      .user-row{grid-template-columns:1fr}
+    .item span{
+      display:block;
+      color:var(--muted);
+      font-size:.92rem;
+      overflow-wrap:anywhere;
+    }
+
+    @media (max-width: 980px){
+      .hero,.grid{grid-template-columns:1fr}
     }
 
     @media (max-width: 640px){
-      .wrap{width:min(var(--max), calc(100% - 20px))}
-      .topbar-inner{flex-direction:column;align-items:flex-start}
-      .statusbar{justify-content:flex-start}
-      .hero-copy,.hero-side,.panel-body,.terminal-body{padding:18px}
+      .wrap{width:min(var(--max), calc(100% - 18px))}
+      .hero-copy,.hero-side,.panel-body{padding:18px}
       .panel-head{padding:18px 18px 0}
-      .folder-toggle{grid-template-columns:1fr auto}
-      .folder-pill{justify-self:start}
-      .terminal-actions > *{flex:1 1 auto}
+      .topbar-inner{align-items:flex-start}
+      .btn-row > *, .actions > *{flex:1 1 auto}
     }
   </style>
 </head>
@@ -574,16 +353,9 @@
       <div class="brand">
         <div class="brand-badge">F</div>
         <div>
-          <span class="eyebrow">Security Grid</span>
-          <h1 class="title">Frosted Fang Control</h1>
+          <span class="eyebrow">Debug Console</span>
+          <h1 class="title">Frosted Fang Auth Debug Panel</h1>
         </div>
-      </div>
-
-      <div class="statusbar">
-        <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
-        <div class="pill" id="authPill">Unauthenticated</div>
-        <button class="btn btn-violet" id="openTerminalBtn" type="button">Terminal Login</button>
-        <button class="btn btn-danger hidden" id="logoutBtn" type="button">Log Out</button>
       </div>
     </div>
   </header>
@@ -593,15 +365,9 @@
       <article class="panel">
         <div class="hero-copy">
           <div>
-            <p class="hero-kicker">Operational Panel</p>
-            <h1>Frosted Fang Security & Pull System</h1>
-            <p>Folder-based visibility, role-based pearl trigger control, admin user management, and player editing without changing the in-game computer communication format.</p>
-          </div>
-
-          <div class="hero-meta">
-            <div class="pill">Supabase users</div>
-            <div class="pill">Folder-aware roster</div>
-            <div class="pill">ComputerCraft-safe trigger queue</div>
+            <p class="hero-kicker">Live troubleshooting</p>
+            <h1>See exactly where login breaks</h1>
+            <p>This page is only for debugging. It tests the login request, checks session storage, reads the debug routes, and shows raw responses so you can see whether the failure is from Supabase lookup, session cookie saving, or frontend request flow.</p>
           </div>
         </div>
       </article>
@@ -609,813 +375,278 @@
       <aside class="panel">
         <div class="hero-side">
           <div class="mini-stat">
-            <div class="label">Visible players</div>
-            <div class="value" id="playerCount">--</div>
+            <div class="label">Backend health</div>
+            <div class="value" id="healthValue">Checking…</div>
           </div>
           <div class="mini-stat">
-            <div class="label">Trigger access</div>
-            <div class="value" id="triggerAccess">Denied</div>
+            <div class="label">Auth me</div>
+            <div class="value" id="authMeValue">Unknown</div>
           </div>
           <div class="mini-stat">
-            <div class="label">Admin access</div>
-            <div class="value" id="adminAccess">Denied</div>
+            <div class="label">Cookie status</div>
+            <div class="value" id="cookieValue">Unknown</div>
           </div>
         </div>
       </aside>
     </section>
 
-    <section id="appSection" class="layout hidden">
-      <section class="panel">
+    <section class="grid">
+      <article class="panel">
         <div class="panel-head">
           <div>
-            <h2>Roster Folders</h2>
-            <p>Open a folder to view its pearls and controls.</p>
+            <h2>Manual Login Test</h2>
+            <p>Sends the same request your real site should send.</p>
           </div>
-          <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
         <div class="panel-body">
-          <div id="folderAccordion" class="folder-accordion"></div>
-          <div id="rosterEmpty" class="message info hidden">No visible folders or players found.</div>
+          <form id="loginForm" class="form-grid">
+            <div class="field">
+              <label for="username">Username</label>
+              <input class="input" id="username" value="Fr05tedF4ng5" />
+            </div>
+
+            <div class="field">
+              <label for="password">Password</label>
+              <input class="input" id="password" value="Frosting" />
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-violet" type="submit">Test Login</button>
+              <button class="btn" type="button" id="checkSessionBtn">Check Session</button>
+              <button class="btn" type="button" id="checkAuthMeBtn">Check /auth/me</button>
+              <button class="btn btn-danger" type="button" id="logoutBtn">Logout</button>
+            </div>
+          </form>
+
+          <div id="loginMessage" class="message info">Ready to test.</div>
         </div>
-      </section>
+      </article>
 
-      <aside class="stack">
-        <article class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Manual Trigger</h2>
-              <p>Send a pearl pull directly.</p>
-            </div>
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Quick Debug Endpoints</h2>
+            <p>Direct tests for the routes you added in server.js.</p>
           </div>
-          <div class="panel-body">
-            <form id="triggerForm" class="form-grid">
-              <div class="field">
-                <label for="triggerComputerName">Computer name</label>
-                <input class="input" id="triggerComputerName" placeholder="LakIo" required />
-              </div>
-
-              <div class="field">
-                <label for="triggerFolderName">Folder name</label>
-                <input class="input" id="triggerFolderName" placeholder="LakIo" required />
-              </div>
-
-              <div class="field">
-                <label for="triggerDirection">Direction</label>
-                <select class="select" id="triggerDirection">
-                  <option value="left">left</option>
-                  <option value="right">right</option>
-                  <option value="top">top</option>
-                  <option value="bottom">bottom</option>
-                  <option value="front">front</option>
-                  <option value="back">back</option>
-                </select>
-              </div>
-
-              <div class="actions">
-                <button class="btn btn-primary" type="submit">Trigger</button>
-              </div>
-            </form>
-
-            <div id="triggerMessage" class="message">Ready.</div>
+        </div>
+        <div class="panel-body">
+          <div class="actions">
+            <button class="btn btn-primary" type="button" id="loadHealthBtn">GET /health</button>
+            <button class="btn btn-primary" type="button" id="loadUsersBtn">GET /debug/users</button>
+            <button class="btn btn-primary" type="button" id="debugLoginBtn">POST /debug/login</button>
+            <button class="btn btn-primary" type="button" id="debugSessionBtn">GET /debug/session</button>
           </div>
-        </article>
 
-        <article class="panel hidden" id="playerAdminPanel">
-          <div class="panel-head">
-            <div>
-              <h2>Add / Edit Player</h2>
-              <p>Admin only.</p>
-            </div>
+          <div id="debugMessage" class="message">Click a debug route to inspect output.</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Raw Response Output</h2>
+            <p>This is the most important box.</p>
           </div>
-          <div class="panel-body">
-            <form id="playerForm" class="form-grid">
-              <input type="hidden" id="playerId" />
+        </div>
+        <div class="panel-body">
+          <pre id="output" class="codebox">Waiting for output...</pre>
+        </div>
+      </article>
 
-              <div class="field">
-                <label for="name">Player name</label>
-                <input class="input" id="name" required />
-              </div>
-
-              <div class="field">
-                <label for="computer_name">Computer name</label>
-                <input class="input" id="computer_name" required />
-              </div>
-
-              <div class="field">
-                <label for="channel_name">Channel name</label>
-                <input class="input" id="channel_name" />
-              </div>
-
-              <div class="field">
-                <label for="folder_name">Folder</label>
-                <input class="input" id="folder_name" required />
-              </div>
-
-              <div class="field">
-                <label for="direction">Direction</label>
-                <select class="select" id="direction">
-                  <option value="left">left</option>
-                  <option value="right">right</option>
-                  <option value="top">top</option>
-                  <option value="bottom">bottom</option>
-                  <option value="front">front</option>
-                  <option value="back">back</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="signal_strength">Signal strength</label>
-                <input class="input" type="number" id="signal_strength" min="1" max="15" value="15" />
-              </div>
-
-              <div class="actions">
-                <button class="btn btn-primary" type="submit">Save player</button>
-                <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
-              </div>
-            </form>
-
-            <div id="playerMessage" class="message">Admin panel ready.</div>
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Loaded Users</h2>
+            <p>From /debug/users</p>
           </div>
-        </article>
-
-        <article class="panel hidden" id="userAdminPanel">
-          <div class="panel-head">
-            <div>
-              <h2>User Manager</h2>
-              <p>Admin only. Edit accounts in public.users.</p>
-            </div>
-          </div>
-          <div class="panel-body">
-            <form id="userForm" class="form-grid">
-              <input type="hidden" id="userId" />
-
-              <div class="field">
-                <label for="username">Username</label>
-                <input class="input" id="username" required />
-              </div>
-
-              <div class="field">
-                <label for="password">Password</label>
-                <input class="input" id="password" placeholder="Leave blank only when not changing during edit" />
-              </div>
-
-              <div class="field">
-                <label>Permissions</label>
-                <div style="display:grid;gap:8px;color:var(--muted);font-size:.92rem;">
-                  <label><input type="checkbox" id="isAdmin" /> Admin</label>
-                  <label><input type="checkbox" id="canPull" checked /> Can Pull</label>
-                  <label><input type="checkbox" id="allFolders" /> All Folders</label>
-                </div>
-              </div>
-
-              <div class="field">
-                <label for="allowedFolders">Allowed folders (comma separated)</label>
-                <input class="input" id="allowedFolders" placeholder="LakIo, Base, Vault" />
-              </div>
-
-              <div class="actions">
-                <button class="btn btn-primary" type="submit">Save user</button>
-                <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
-              </div>
-            </form>
-
-            <div id="userMessage" class="message">Manage users from Supabase.</div>
-            <div id="userList" class="user-list"></div>
-          </div>
-        </article>
-      </aside>
+        </div>
+        <div class="panel-body">
+          <div id="usersList" class="list"></div>
+        </div>
+      </article>
     </section>
   </main>
 
-  <div class="terminal-overlay" id="terminalOverlay">
-    <div class="terminal-shell">
-      <div class="terminal-top">
-        <div class="term-lights"><span></span><span></span><span></span></div>
-        <div class="terminal-title">Frosted Fang Terminal Access</div>
-      </div>
-      <div class="terminal-body">
-        <div id="terminalLog" class="terminal-log">&gt; C:/Frosted/OS/ Checking for access
-&gt;
-&gt; Awaiting credentials...</div>
-
-        <form id="loginForm" class="terminal-form">
-          <div>
-            <label class="terminal-label" for="loginUsername">User</label>
-            <input class="terminal-input" id="loginUsername" autocomplete="username" />
-          </div>
-
-          <div>
-            <label class="terminal-label" for="loginPassword">Password</label>
-            <input class="terminal-input" id="loginPassword" type="password" autocomplete="current-password" />
-          </div>
-
-          <div class="terminal-actions">
-            <button class="btn btn-ghost" type="button" id="closeTerminalBtn">Cancel</button>
-            <button class="btn btn-violet" type="submit">Authenticate</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
   <script>
-    const state = {
-      user: null,
-      players: [],
-      users: [],
-      openFolders: new Set()
-    };
-
     const els = {
-      backendDot: document.getElementById('backendDot'),
-      backendText: document.getElementById('backendText'),
-      authPill: document.getElementById('authPill'),
-      openTerminalBtn: document.getElementById('openTerminalBtn'),
-      logoutBtn: document.getElementById('logoutBtn'),
-      playerCount: document.getElementById('playerCount'),
-      triggerAccess: document.getElementById('triggerAccess'),
-      adminAccess: document.getElementById('adminAccess'),
-      appSection: document.getElementById('appSection'),
-      folderAccordion: document.getElementById('folderAccordion'),
-      rosterEmpty: document.getElementById('rosterEmpty'),
-      refreshBtn: document.getElementById('refreshBtn'),
-      triggerForm: document.getElementById('triggerForm'),
-      triggerComputerName: document.getElementById('triggerComputerName'),
-      triggerFolderName: document.getElementById('triggerFolderName'),
-      triggerDirection: document.getElementById('triggerDirection'),
-      triggerMessage: document.getElementById('triggerMessage'),
-      playerAdminPanel: document.getElementById('playerAdminPanel'),
-      userAdminPanel: document.getElementById('userAdminPanel'),
-      playerForm: document.getElementById('playerForm'),
-      playerId: document.getElementById('playerId'),
-      playerMessage: document.getElementById('playerMessage'),
-      clearPlayerBtn: document.getElementById('clearPlayerBtn'),
-      userForm: document.getElementById('userForm'),
-      userId: document.getElementById('userId'),
       username: document.getElementById('username'),
       password: document.getElementById('password'),
-      isAdmin: document.getElementById('isAdmin'),
-      canPull: document.getElementById('canPull'),
-      allFolders: document.getElementById('allFolders'),
-      allowedFolders: document.getElementById('allowedFolders'),
-      clearUserBtn: document.getElementById('clearUserBtn'),
-      userMessage: document.getElementById('userMessage'),
-      userList: document.getElementById('userList'),
-      terminalOverlay: document.getElementById('terminalOverlay'),
-      terminalLog: document.getElementById('terminalLog'),
       loginForm: document.getElementById('loginForm'),
-      closeTerminalBtn: document.getElementById('closeTerminalBtn')
+      loginMessage: document.getElementById('loginMessage'),
+      debugMessage: document.getElementById('debugMessage'),
+      output: document.getElementById('output'),
+      usersList: document.getElementById('usersList'),
+      healthValue: document.getElementById('healthValue'),
+      authMeValue: document.getElementById('authMeValue'),
+      cookieValue: document.getElementById('cookieValue'),
+      checkSessionBtn: document.getElementById('checkSessionBtn'),
+      checkAuthMeBtn: document.getElementById('checkAuthMeBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      loadHealthBtn: document.getElementById('loadHealthBtn'),
+      loadUsersBtn: document.getElementById('loadUsersBtn'),
+      debugLoginBtn: document.getElementById('debugLoginBtn'),
+      debugSessionBtn: document.getElementById('debugSessionBtn')
     };
 
-    function escapeHtml(str) {
-      return String(str ?? '').replace(/[&<>"']/g, s => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[s]);
+    function setOutput(title, data) {
+      els.output.textContent = `${title}\n\n${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}`;
     }
 
-    async function api(path, options = {}) {
-      const res = await fetch(path, {
+    async function request(path, options = {}) {
+      const response = await fetch(path, {
+        method: options.method || 'GET',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           ...(options.headers || {})
         },
-        ...options
+        body: options.body ? JSON.stringify(options.body) : undefined
       });
 
-      const text = await res.text();
-      let data = null;
+      const text = await response.text();
+      let json;
       try {
-        data = text ? JSON.parse(text) : null;
+        json = text ? JSON.parse(text) : null;
       } catch {
-        data = text;
+        json = text;
       }
 
-      if (!res.ok) throw new Error((data && data.error) || `Request failed: ${res.status}`);
-      return data;
+      return {
+        ok: response.ok,
+        status: response.status,
+        data: json
+      };
     }
 
-    function normalizeFolder(player) {
-      return String(player.folder_name || player.computer_name || 'Unassigned').trim() || 'Unassigned';
-    }
-
-    function normalizeComputer(player) {
-      return String(player.computer_name || '').trim();
-    }
-
-    function isAuthed(user) {
-      return !!(user && (user.isAdmin || user.canPull));
-    }
-
-    function canSeeFolder(folder) {
-      if (!state.user) return false;
-      if (state.user.isAdmin || state.user.allFolders) return true;
-      return Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.includes(folder);
-    }
-
-    function visiblePlayers() {
-      if (!state.user) return [];
-      if (state.user.isAdmin || state.user.allFolders) return state.players;
-      return state.players.filter(p => canSeeFolder(normalizeFolder(p)));
-    }
-
-    function groupedPlayers() {
-      const out = {};
-      for (const p of visiblePlayers()) {
-        const folder = normalizeFolder(p);
-        if (!out[folder]) out[folder] = [];
-        out[folder].push(p);
-      }
-      return out;
-    }
-
-    function updateAuthUI() {
-      const user = state.user;
-      const authed = isAuthed(user);
-      const isAdmin = !!(user && user.isAdmin);
-
-      els.playerCount.textContent = authed ? String(visiblePlayers().length) : '--';
-      els.triggerAccess.textContent = authed ? 'Granted' : 'Denied';
-      els.adminAccess.textContent = isAdmin ? 'Granted' : 'Denied';
-
-      if (!user) {
-        els.authPill.textContent = 'Unauthenticated';
-      } else {
-        const scope = user.isAdmin
-          ? 'admin'
-          : user.allFolders
-            ? 'all folders'
-            : ((user.allowedFolders || []).join(', ') || 'limited');
-
-        els.authPill.textContent = `${user.username} • ${scope}`;
-      }
-
-      els.openTerminalBtn.classList.toggle('hidden', authed);
-      els.logoutBtn.classList.toggle('hidden', !authed);
-      els.appSection.classList.toggle('hidden', !authed);
-      els.playerAdminPanel.classList.toggle('hidden', !isAdmin);
-      els.userAdminPanel.classList.toggle('hidden', !isAdmin);
-    }
-
-    function playerMarkup(player) {
-      const adminControls = state.user && state.user.isAdmin ? `
-        <button class="btn btn-ghost" type="button" data-edit="${player.id}">Edit</button>
-        <button class="btn btn-danger" type="button" data-delete="${player.id}">Delete</button>
-      ` : '';
-
-      return `
-        <article class="player">
-          <div class="player-main">
-            <strong>${escapeHtml(player.name)}</strong>
-            <span>Computer: ${escapeHtml(normalizeComputer(player) || normalizeFolder(player))}</span>
-          </div>
-
-          <div class="player-meta">
-            <span>Folder: ${escapeHtml(normalizeFolder(player))}</span>
-            <span>Channel: ${escapeHtml(player.channel_name || '-')}</span>
-          </div>
-
-          <div>
-            <span class="dir-badge">${escapeHtml(player.direction || 'left')}</span>
-          </div>
-
-          <div class="player-actions">
-            ${state.user && state.user.canPull ? `<button class="btn btn-primary" type="button" data-trigger="${player.id}">Trigger</button>` : ''}
-            ${adminControls}
-          </div>
-        </article>
-      `;
-    }
-
-    function renderFolders() {
-      const groups = groupedPlayers();
-      const folders = Object.keys(groups).sort((a, b) => a.localeCompare(b));
-
-      if (!folders.length) {
-        els.folderAccordion.innerHTML = '';
-        els.rosterEmpty.classList.remove('hidden');
+    function renderUsers(data) {
+      const users = Array.isArray(data?.data) ? data.data : [];
+      if (!users.length) {
+        els.usersList.innerHTML = '<div class="item"><strong>No users</strong><span>No rows returned.</span></div>';
         return;
       }
 
-      els.rosterEmpty.classList.add('hidden');
-
-      state.openFolders = new Set([...state.openFolders].filter(f => folders.includes(f)));
-      if (state.openFolders.size === 0 && folders[0]) state.openFolders.add(folders[0]);
-
-      els.folderAccordion.innerHTML = folders.map(folder => {
-        const open = state.openFolders.has(folder);
-        const players = groups[folder];
-        const exampleComputer = players[0]?.computer_name || folder;
-
-        return `
-          <section class="folder-card ${open ? 'open' : ''}">
-            <button class="folder-toggle" type="button" data-folder="${escapeHtml(folder)}">
-              <div class="folder-title-wrap">
-                <h3 class="folder-title">${escapeHtml(folder)}</h3>
-                <div class="folder-sub">Computer: ${escapeHtml(exampleComputer)}</div>
-              </div>
-              <div class="folder-pill">${players.length} player${players.length === 1 ? '' : 's'}</div>
-              <div class="folder-chevron">⌄</div>
-            </button>
-
-            <div class="folder-content">
-              <div class="folder-content-inner">
-                <div class="folder-content-pad">
-                  <div class="player-list">
-                    ${players.map(playerMarkup).join('')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        `;
-      }).join('');
-    }
-
-    function renderUsers() {
-      if (!state.user || !state.user.isAdmin) {
-        els.userList.innerHTML = '';
-        return;
-      }
-
-      els.userList.innerHTML = state.users.map(u => `
-        <article class="user-row">
-          <div>
-            <strong>${escapeHtml(u.username)}</strong>
-            <span>
-              ${u.isAdmin ? 'Admin' : 'User'} •
-              ${u.canPull ? 'Can Pull' : 'No Pull'} •
-              ${u.allFolders ? 'All Folders' : ((u.allowedFolders || []).join(', ') || 'No folders')}
-            </span>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-ghost" type="button" data-user-edit="${u.id}">Edit</button>
-            <button class="btn btn-danger" type="button" data-user-delete="${u.id}">Delete</button>
-          </div>
-        </article>
-      `).join('') || '<div class="message info">No users loaded.</div>';
-    }
-
-    function clearPlayerForm() {
-      els.playerForm.reset();
-      els.playerId.value = '';
-      document.getElementById('signal_strength').value = 15;
-      document.getElementById('direction').value = 'left';
-    }
-
-    function clearUserForm() {
-      els.userForm.reset();
-      els.userId.value = '';
-      els.canPull.checked = true;
-      els.allowedFolders.value = '';
-    }
-
-    function openTerminal() {
-      els.terminalOverlay.classList.add('show');
-      els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Awaiting credentials...';
-      setTimeout(() => document.getElementById('loginUsername').focus(), 60);
-    }
-
-    function closeTerminal() {
-      els.terminalOverlay.classList.remove('show');
-      els.loginForm.reset();
-    }
-
-    function randomToken(len = 24) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let out = '';
-      for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
-      return out;
-    }
-
-    async function terminalSuccess(username) {
-      const lines = [
-        '> C:/Frosted/OS/ Directory sweep',
-        '> dir /s /b',
-        `> users\\${username}`,
-        `> ${randomToken(18)}`,
-        `> ${randomToken(24)}`,
-        `> ${randomToken(28)}`,
-        '> Access profile loaded'
-      ];
-
-      els.terminalLog.textContent = '';
-      for (const line of lines) {
-        els.terminalLog.textContent += (els.terminalLog.textContent ? '\n' : '') + line;
-        await new Promise(r => setTimeout(r, 85));
-      }
-      await new Promise(r => setTimeout(r, 350));
-      closeTerminal();
+      els.usersList.innerHTML = users.map(user => `
+        <div class="item">
+          <strong>${user.username}</strong>
+          <span>Password: ${user.password}</span>
+          <span>Admin: ${String(user.is_admin)} • Pull: ${String(user.can_pull)} • All folders: ${String(user.all_folders)}</span>
+          <span>Allowed folders: ${JSON.stringify(user.allowed_folders || [])}</span>
+        </div>
+      `).join('');
     }
 
     async function loadHealth() {
-      try {
-        const data = await api('/health');
-        els.backendDot.className = data.status === 'ON' ? 'dot online' : 'dot offline';
-        els.backendText.textContent = data.status === 'ON' ? 'Backend online' : 'Backend issue';
-      } catch {
-        els.backendDot.className = 'dot offline';
-        els.backendText.textContent = 'Backend offline';
-      }
+      const res = await request('/health');
+      els.healthValue.textContent = res.ok ? (res.data?.status || 'ON') : `Error ${res.status}`;
+      setOutput('GET /health', res);
+      els.debugMessage.className = res.ok ? 'message success' : 'message error';
+      els.debugMessage.textContent = res.ok ? 'Health loaded.' : 'Health failed.';
     }
 
-    async function loadAuth() {
-      try {
-        const data = await api('/auth/me');
-        state.user = data.user || null;
-      } catch {
-        state.user = null;
-      }
-      updateAuthUI();
+    async function loadDebugUsers() {
+      const res = await request('/debug/users');
+      renderUsers(res.data);
+      setOutput('GET /debug/users', res);
+      els.debugMessage.className = res.ok ? 'message success' : 'message error';
+      els.debugMessage.textContent = res.ok ? 'Users loaded from Supabase.' : 'Failed loading debug users.';
     }
 
-    async function loadPlayers() {
-      if (!isAuthed(state.user)) {
-        state.players = [];
-        renderFolders();
-        updateAuthUI();
-        return;
-      }
+    async function debugLogin() {
+      const body = {
+        username: els.username.value.trim(),
+        password: els.password.value
+      };
 
-      const data = await api('/players');
-      state.players = Array.isArray(data.players) ? data.players : [];
-      renderFolders();
-      updateAuthUI();
-    }
-
-    async function loadUsers() {
-      if (!state.user || !state.user.isAdmin) return;
-      const data = await api('/admin/users');
-      state.users = Array.isArray(data.users) ? data.users : [];
-      renderUsers();
-    }
-
-    async function sendTrigger(computer_name, direction, folder_name) {
-      await api('/trigger', {
+      const res = await request('/debug/login', {
         method: 'POST',
-        body: JSON.stringify({ computer_name, direction, folder_name })
+        body
       });
 
-      els.triggerMessage.className = 'message success';
-      els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})`;
+      setOutput('POST /debug/login', {
+        sent: body,
+        received: res
+      });
+
+      els.debugMessage.className = res.ok ? 'message success' : 'message error';
+      els.debugMessage.textContent = res.ok
+        ? 'Debug login route responded.'
+        : 'Debug login route failed.';
     }
 
-    els.refreshBtn.addEventListener('click', async () => {
-      await loadPlayers();
-      if (state.user && state.user.isAdmin) await loadUsers();
-    });
+    async function checkSession() {
+      const res = await request('/debug/session');
+      const cookieHeader = res.data?.cookieHeader;
+      els.cookieValue.textContent = cookieHeader ? 'Cookie seen by server' : 'No cookie seen';
+      setOutput('GET /debug/session', res);
+      els.debugMessage.className = res.ok ? 'message success' : 'message error';
+      els.debugMessage.textContent = res.ok ? 'Session inspected.' : 'Session inspect failed.';
+    }
 
-    els.folderAccordion.addEventListener('click', async (e) => {
-      const toggle = e.target.closest('[data-folder]');
-      const triggerBtn = e.target.closest('[data-trigger]');
-      const editBtn = e.target.closest('[data-edit]');
-      const deleteBtn = e.target.closest('[data-delete]');
+    async function checkAuthMe() {
+      const res = await request('/auth/me');
+      const user = res.data?.user || null;
+      els.authMeValue.textContent = user ? user.username : 'Not logged in';
+      setOutput('GET /auth/me', res);
+      els.debugMessage.className = res.ok ? 'message success' : 'message error';
+      els.debugMessage.textContent = res.ok ? 'Auth/me checked.' : 'Auth/me failed.';
+    }
 
-      if (toggle) {
-        const folder = toggle.getAttribute('data-folder');
-        if (state.openFolders.has(folder)) state.openFolders.delete(folder);
-        else state.openFolders.add(folder);
-        renderFolders();
-        return;
-      }
-
-      if (triggerBtn) {
-        const player = visiblePlayers().find(p => String(p.id) === String(triggerBtn.getAttribute('data-trigger')));
-        if (!player) return;
-
-        const computer = normalizeComputer(player) || normalizeFolder(player);
-        const folder = normalizeFolder(player);
-        const direction = player.direction || 'left';
-
-        els.triggerComputerName.value = computer;
-        els.triggerFolderName.value = folder;
-        els.triggerDirection.value = direction;
-
-        try {
-          await sendTrigger(computer, direction, folder);
-        } catch (err) {
-          els.triggerMessage.className = 'message error';
-          els.triggerMessage.textContent = err.message;
-        }
-        return;
-      }
-
-      if (editBtn && state.user && state.user.isAdmin) {
-        const player = visiblePlayers().find(p => String(p.id) === String(editBtn.getAttribute('data-edit')));
-        if (!player) return;
-
-        els.playerId.value = player.id;
-        document.getElementById('name').value = player.name || '';
-        document.getElementById('computer_name').value = player.computer_name || '';
-        document.getElementById('channel_name').value = player.channel_name || '';
-        document.getElementById('folder_name').value = player.folder_name || '';
-        document.getElementById('direction').value = player.direction || 'left';
-        document.getElementById('signal_strength').value = Number(player.signal_strength ?? 15);
-
-        els.playerMessage.className = 'message info';
-        els.playerMessage.textContent = `Editing ${player.name}`;
-        return;
-      }
-
-      if (deleteBtn && state.user && state.user.isAdmin) {
-        const id = deleteBtn.getAttribute('data-delete');
-        if (!confirm('Delete this player?')) return;
-
-        try {
-          await api('/players/' + id, { method: 'DELETE' });
-          els.playerMessage.className = 'message success';
-          els.playerMessage.textContent = 'Player deleted.';
-          await loadPlayers();
-        } catch (err) {
-          els.playerMessage.className = 'message error';
-          els.playerMessage.textContent = err.message;
-        }
-      }
-    });
-
-    els.triggerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      try {
-        await sendTrigger(
-          els.triggerComputerName.value.trim(),
-          els.triggerDirection.value,
-          els.triggerFolderName.value.trim()
-        );
-      } catch (err) {
-        els.triggerMessage.className = 'message error';
-        els.triggerMessage.textContent = err.message;
-      }
-    });
-
-    els.playerForm.addEventListener('submit', async (e) => {
+    async function doLogin(e) {
       e.preventDefault();
 
-      const payload = {
-        name: document.getElementById('name').value.trim(),
-        computer_name: document.getElementById('computer_name').value.trim(),
-        channel_name: document.getElementById('channel_name').value.trim(),
-        folder_name: document.getElementById('folder_name').value.trim(),
-        direction: document.getElementById('direction').value,
-        signal_strength: Number(document.getElementById('signal_strength').value || 15)
-      };
-
-      try {
-        const id = els.playerId.value.trim();
-        const method = id ? 'PUT' : 'POST';
-        const path = id ? `/players/${id}` : '/players';
-
-        const data = await api(path, {
-          method,
-          body: JSON.stringify(payload)
-        });
-
-        els.playerMessage.className = 'message success';
-        els.playerMessage.textContent = data.player ? 'Player saved.' : 'Player updated.';
-        clearPlayerForm();
-        await loadPlayers();
-      } catch (err) {
-        els.playerMessage.className = 'message error';
-        els.playerMessage.textContent = err.message;
-      }
-    });
-
-    els.clearPlayerBtn.addEventListener('click', clearPlayerForm);
-
-    els.userForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const payload = {
+      const body = {
         username: els.username.value.trim(),
-        password: els.password.value,
-        isAdmin: els.isAdmin.checked,
-        canPull: els.canPull.checked,
-        allFolders: els.allFolders.checked,
-        allowedFolders: els.allowedFolders.value.split(',').map(s => s.trim()).filter(Boolean)
+        password: els.password.value
       };
 
-      try {
-        const id = els.userId.value.trim();
-        const method = id ? 'PUT' : 'POST';
-        const path = id ? `/admin/users/${id}` : '/admin/users';
+      const res = await request('/auth/local/login', {
+        method: 'POST',
+        body
+      });
 
-        const finalPayload = { ...payload };
-        if (id && !finalPayload.password) delete finalPayload.password;
+      setOutput('POST /auth/local/login', {
+        sent: body,
+        received: res
+      });
 
-        await api(path, {
-          method,
-          body: JSON.stringify(finalPayload)
-        });
-
-        els.userMessage.className = 'message success';
-        els.userMessage.textContent = id ? 'User updated.' : 'User created.';
-        clearUserForm();
-        await loadUsers();
-      } catch (err) {
-        els.userMessage.className = 'message error';
-        els.userMessage.textContent = err.message;
-      }
-    });
-
-    els.clearUserBtn.addEventListener('click', clearUserForm);
-
-    els.userList.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('[data-user-edit]');
-      const deleteBtn = e.target.closest('[data-user-delete]');
-
-      if (editBtn) {
-        const user = state.users.find(u => String(u.id) === String(editBtn.getAttribute('data-user-edit')));
-        if (!user) return;
-
-        els.userId.value = user.id;
-        els.username.value = user.username || '';
-        els.password.value = '';
-        els.isAdmin.checked = !!user.isAdmin;
-        els.canPull.checked = !!user.canPull;
-        els.allFolders.checked = !!user.allFolders;
-        els.allowedFolders.value = (user.allowedFolders || []).join(', ');
-
-        els.userMessage.className = 'message info';
-        els.userMessage.textContent = `Editing ${user.username}`;
+      if (!res.ok) {
+        els.loginMessage.className = 'message error';
+        els.loginMessage.textContent = `Login failed.\nStatus: ${res.status}\nResponse: ${JSON.stringify(res.data, null, 2)}`;
+        await checkSession();
+        await checkAuthMe();
         return;
       }
 
-      if (deleteBtn) {
-        const id = deleteBtn.getAttribute('data-user-delete');
-        if (!confirm('Delete this user?')) return;
+      els.loginMessage.className = 'message success';
+      els.loginMessage.textContent = `Login success.\nUser: ${res.data?.user?.username || 'unknown'}`;
 
-        try {
-          await api('/admin/users/' + id, { method: 'DELETE' });
-          els.userMessage.className = 'message success';
-          els.userMessage.textContent = 'User deleted.';
-          await loadUsers();
-        } catch (err) {
-          els.userMessage.className = 'message error';
-          els.userMessage.textContent = err.message;
-        }
-      }
-    });
+      await checkSession();
+      await checkAuthMe();
+    }
 
-    els.openTerminalBtn.addEventListener('click', openTerminal);
-    els.closeTerminalBtn.addEventListener('click', closeTerminal);
+    async function doLogout() {
+      const res = await request('/auth/logout', { method: 'POST' });
+      setOutput('POST /auth/logout', res);
+      els.loginMessage.className = res.ok ? 'message success' : 'message error';
+      els.loginMessage.textContent = res.ok ? 'Logged out.' : 'Logout failed.';
+      await checkSession();
+      await checkAuthMe();
+    }
 
-    els.terminalOverlay.addEventListener('click', (e) => {
-      if (e.target === els.terminalOverlay) closeTerminal();
-    });
-
-    els.loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value;
-
-      try {
-        const result = await api('/auth/local/login', {
-          method: 'POST',
-          body: JSON.stringify({ username, password })
-        });
-
-        state.user = result.user || null;
-        await terminalSuccess(username);
-        updateAuthUI();
-        await loadPlayers();
-        if (state.user && state.user.isAdmin) await loadUsers();
-
-        if (state.user && !state.user.isAdmin) {
-          if (state.user.allFolders) {
-            els.triggerFolderName.value = '';
-          } else if (Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.length === 1) {
-            els.triggerFolderName.value = state.user.allowedFolders[0];
-            els.triggerComputerName.value = state.user.allowedFolders[0];
-          }
-        }
-      } catch {
-        els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
-      }
-    });
-
-    els.logoutBtn.addEventListener('click', async () => {
-      try { await api('/auth/logout', { method: 'POST' }); } catch {}
-      state.user = null;
-      state.players = [];
-      state.users = [];
-      state.openFolders = new Set();
-      updateAuthUI();
-      renderFolders();
-      renderUsers();
-      els.triggerMessage.className = 'message';
-      els.triggerMessage.textContent = 'Ready.';
-    });
+    els.loginForm.addEventListener('submit', doLogin);
+    els.checkSessionBtn.addEventListener('click', checkSession);
+    els.checkAuthMeBtn.addEventListener('click', checkAuthMe);
+    els.logoutBtn.addEventListener('click', doLogout);
+    els.loadHealthBtn.addEventListener('click', loadHealth);
+    els.loadUsersBtn.addEventListener('click', loadDebugUsers);
+    els.debugLoginBtn.addEventListener('click', debugLogin);
+    els.debugSessionBtn.addEventListener('click', checkSession);
 
     document.addEventListener('DOMContentLoaded', async () => {
       await loadHealth();
-      await loadAuth();
-      await loadPlayers();
-      if (state.user && state.user.isAdmin) await loadUsers();
+      await loadDebugUsers();
+      await checkSession();
+      await checkAuthMe();
     });
   </script>
 </body>
