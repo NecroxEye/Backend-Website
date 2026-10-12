@@ -27,13 +27,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(session({
+  name: 'connect.sid',
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   rolling: true,
   cookie: {
     httpOnly: true,
-    secure: false, // keep false on localhost; set true only on real HTTPS with proper proxy config
+    secure: false,
     sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 24
   }
@@ -211,16 +212,13 @@ app.get('/status', ensureAuth, async (req, res) => {
       user: req.session.user,
       players
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to load status' });
   }
 });
 
 /* =========================
    COMPUTERCRAFT TRIGGERS
-   Keep unchanged
-   GET /trigger?computer_name=...
-   -> { trigger: null } OR { trigger: { computer_name, direction } }
    ========================= */
 let triggerQueue = [];
 
@@ -248,7 +246,7 @@ app.get('/trigger', async (req, res) => {
         direction: trigger.direction
       }
     });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Trigger lookup failed' });
   }
 });
@@ -281,7 +279,7 @@ app.post('/trigger', ensureAuth, async (req, res) => {
     });
 
     return res.json({ ok: true });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Failed to queue trigger' });
   }
 });
@@ -298,7 +296,7 @@ app.get('/players', ensureAuth, async (req, res) => {
     const players = (data || []).filter(p => user.isAdmin || user.allFolders || canSeeFolder(user, normalizeFolderName(p)));
 
     res.json({ players });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to load players' });
   }
 });
@@ -328,7 +326,7 @@ app.post('/players', ensureAdmin, async (req, res) => {
 
     if (error) return res.status(500).json({ error: 'Failed to create player' });
     res.json({ player: data });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create player' });
   }
 });
@@ -365,7 +363,7 @@ app.put('/players/:id', ensureAdmin, async (req, res) => {
 
     if (error) return res.status(500).json({ error: 'Failed to update player' });
     res.json({ player: data });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update player' });
   }
 });
@@ -376,7 +374,7 @@ app.delete('/players/:id', ensureAdmin, async (req, res) => {
     const { error } = await supabase.from('players').delete().eq('id', id);
     if (error) return res.status(500).json({ error: 'Failed to delete player' });
     res.json({ ok: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete player' });
   }
 });
@@ -399,7 +397,7 @@ app.get('/admin/users', ensureAdmin, async (req, res) => {
         allowedFolders: Array.isArray(u.allowed_folders) ? u.allowed_folders : []
       }))
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to load users' });
   }
 });
@@ -407,7 +405,6 @@ app.get('/admin/users', ensureAdmin, async (req, res) => {
 app.post('/admin/users', ensureAdmin, async (req, res) => {
   try {
     const { username, password, isAdmin, canPull, allFolders, allowedFolders } = req.body || {};
-
     if (!username || !password) {
       return res.status(400).json({ error: 'Missing username or password' });
     }
@@ -439,7 +436,7 @@ app.post('/admin/users', ensureAdmin, async (req, res) => {
         allowedFolders: Array.isArray(data.allowed_folders) ? data.allowed_folders : []
       }
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create user' });
   }
 });
@@ -478,7 +475,7 @@ app.put('/admin/users/:id', ensureAdmin, async (req, res) => {
         allowedFolders: Array.isArray(data.allowed_folders) ? data.allowed_folders : []
       }
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update user' });
   }
 });
@@ -493,12 +490,49 @@ app.delete('/admin/users/:id', ensureAdmin, async (req, res) => {
 
     const { error } = await supabase.from('users').delete().eq('id', id);
     if (error) return res.status(500).json({ error: 'Failed to delete user' });
+
     res.json({ ok: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+/* =========================
+   STARTUP INSERT OPTIONAL
+   ========================= */
+async function ensureSeedUser(username, password, extra = {}) {
+  const { data } = await supabase
+    .from('users')
+    .select('id')
+    .eq('username', username)
+    .maybeSingle();
+
+  if (data) return;
+
+  const payload = {
+    username,
+    password,
+    is_admin: !!extra.is_admin,
+    can_pull: extra.can_pull !== undefined ? !!extra.can_pull : true,
+    all_folders: !!extra.all_folders,
+    allowed_folders: Array.isArray(extra.allowed_folders) ? extra.allowed_folders : []
+  };
+
+  const { error } = await supabase.from('users').insert([payload]);
+  if (error) console.error('Seed user insert failed:', username, error.message || error);
+}
+
+(async () => {
+  await ensureSeedUser('Necrox', 'Rauln', {
+    is_admin: false,
+    can_pull: true,
+    all_folders: false,
+    allowed_folders: []
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log('Session cookie name: connect.sid');
+    console.log('Debug routes: /debug/session, /debug/users, /debug/login');
+  });
+})();
