@@ -24,7 +24,6 @@
       --radius:24px;
       --max:1280px;
     }
-
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     body{
@@ -39,7 +38,6 @@
       overflow-x:hidden;
       position:relative;
     }
-
     body::before{
       content:"";
       position:fixed;
@@ -56,566 +54,156 @@
           rgba(0,0,0,.96) 100%);
       box-shadow:inset 0 0 90px rgba(122,50,255,.14);
     }
-
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:-1;
-      opacity:.1;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='208' viewBox='0 0 180 208'><g fill='none' stroke='rgba(123,162,255,0.14)' stroke-width='1'><path d='M45 1h90l44 51v104l-44 51H45L1 156V52z'/></g></svg>");
-      background-size:180px 208px;
-      background-position:center top;
-    }
-
     .wrap{width:min(var(--max), calc(100% - 28px));margin-inline:auto}
     .hidden{display:none!important}
-
     .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      backdrop-filter:blur(14px);
+      position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
       background:linear-gradient(180deg, rgba(6,8,14,.92), rgba(6,8,14,.6));
       border-bottom:1px solid rgba(255,255,255,.05);
     }
-
     .topbar-inner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:14px 0;
-      flex-wrap:wrap;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;flex-wrap:wrap;
     }
-
     .brand{display:flex;align-items:center;gap:12px;min-width:0}
     .brand-badge{
-      width:42px;height:42px;border-radius:14px;
-      display:grid;place-items:center;
-      background:
-        linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.16)),
-        rgba(255,255,255,.04);
-      border:1px solid var(--line);
-      font-family:"Orbitron",sans-serif;
-      font-weight:800;
-      letter-spacing:.08em;
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.16));
+      border:1px solid var(--line);font-family:"Orbitron",sans-serif;font-weight:800;letter-spacing:.08em;
     }
-
-    .eyebrow{
-      display:block;
-      color:var(--cyan);
-      font-size:.72rem;
-      letter-spacing:.22em;
-      text-transform:uppercase;
-      margin-bottom:2px;
-    }
-
-    .title{
-      margin:0;
-      font-family:"Orbitron",sans-serif;
-      font-size:1.05rem;
-      letter-spacing:.06em;
-      white-space:nowrap;
-    }
-
-    .statusbar{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
+    .eyebrow{display:block;color:var(--cyan);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:2px}
+    .title{margin:0;font-family:"Orbitron",sans-serif;font-size:1.05rem;letter-spacing:.06em;white-space:nowrap}
+    .statusbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      min-height:40px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-size:.92rem;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04);color:var(--muted);font-size:.92rem;white-space:nowrap;
     }
-
     .dot{width:9px;height:9px;border-radius:50%;background:var(--amber)}
-    .dot.online{background:var(--green)}
-    .dot.offline{background:var(--red)}
-
+    .dot.online{background:var(--green)} .dot.offline{background:var(--red)}
     .btn{
-      appearance:none;
-      border:none;
-      outline:none;
-      cursor:pointer;
-      color:var(--text);
-      min-height:44px;
-      padding:0 16px;
-      border-radius:14px;
-      font:600 .94rem "Inter",sans-serif;
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border:1px solid rgba(255,255,255,.08);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      transition:transform .16s ease, border-color .16s ease, background .16s ease;
+      appearance:none;border:none;outline:none;cursor:pointer;color:var(--text);min-height:44px;padding:0 16px;border-radius:14px;
+      font:600 .94rem "Inter",sans-serif;background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+      transition:transform .16s ease,border-color .16s ease,background .16s ease;
     }
     .btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
     .btn:active{transform:scale(.985)}
-    .btn-primary{
-      background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));
-      border-color:rgba(94,231,255,.26);
-    }
-    .btn-violet{
-      background:linear-gradient(135deg, rgba(122,50,255,.24), rgba(74,22,140,.18));
-      border-color:rgba(122,50,255,.34);
-    }
-    .btn-danger{
-      background:linear-gradient(135deg, rgba(255,111,145,.18), rgba(200,70,100,.1));
-      border-color:rgba(255,111,145,.3);
-    }
+    .btn-primary{background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));border-color:rgba(94,231,255,.26)}
+    .btn-violet{background:linear-gradient(135deg, rgba(122,50,255,.24), rgba(74,22,140,.18));border-color:rgba(122,50,255,.34)}
+    .btn-danger{background:linear-gradient(135deg, rgba(255,111,145,.18), rgba(200,70,100,.1));border-color:rgba(255,111,145,.3)}
     .btn-ghost{background:rgba(255,255,255,.04)}
-
     main{padding:26px 0 54px}
-
-    .hero{
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:20px;
-      margin-bottom:22px;
-    }
-
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;margin-bottom:22px}
     .panel{
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),
-        var(--panel);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      backdrop-filter:blur(14px);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),var(--panel);
+      border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(14px);
     }
-
-    .hero-copy{
-      padding:30px;
-      min-height:280px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-
-    .hero-kicker{
-      color:var(--cyan);
-      text-transform:uppercase;
-      letter-spacing:.24em;
-      font-size:.72rem;
-      margin:0 0 10px;
-    }
-
-    .hero h1{
-      margin:0 0 14px;
-      font-family:"Orbitron",sans-serif;
-      font-size:clamp(2rem, 4vw, 4rem);
-      line-height:.94;
-      text-transform:uppercase;
-      max-width:12ch;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.65;
-      max-width:60ch;
-    }
-
-    .hero-meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:22px;
-    }
-
-    .hero-side{
-      padding:22px;
-      display:grid;
-      gap:14px;
-      align-content:start;
-    }
-
-    .mini-stat{
-      padding:18px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-    }
-
-    .mini-stat .label{
-      color:var(--muted);
-      font-size:.78rem;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      margin-bottom:8px;
-    }
-
-    .mini-stat .value{
-      font-family:"Orbitron",sans-serif;
-      font-size:clamp(1.2rem,2vw,2rem);
-      word-break:break-word;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 390px;
-      gap:20px;
-      align-items:start;
-    }
-
+    .hero-copy{padding:30px;min-height:280px;display:flex;flex-direction:column;justify-content:space-between}
+    .hero-kicker{color:var(--cyan);text-transform:uppercase;letter-spacing:.24em;font-size:.72rem;margin:0 0 10px}
+    .hero h1{margin:0 0 14px;font-family:"Orbitron",sans-serif;font-size:clamp(2rem,4vw,4rem);line-height:.94;text-transform:uppercase;max-width:12ch}
+    .hero p{margin:0;color:var(--muted);line-height:1.65;max-width:60ch}
+    .hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+    .hero-side{padding:22px;display:grid;gap:14px;align-content:start}
+    .mini-stat{padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)}
+    .mini-stat .label{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+    .mini-stat .value{font-family:"Orbitron",sans-serif;font-size:clamp(1.2rem,2vw,2rem);word-break:break-word}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:20px;align-items:start}
     .stack{display:grid;gap:20px}
     .panel-body{padding:22px}
-
-    .panel-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:end;
-      gap:12px;
-      padding:22px 22px 0;
-    }
-
-    .panel-head h2{
-      margin:0;
-      font-family:"Orbitron",sans-serif;
-      font-size:1.18rem;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-
-    .panel-head p{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:.94rem;
-    }
-
+    .panel-head{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:22px 22px 0}
+    .panel-head h2{margin:0;font-family:"Orbitron",sans-serif;font-size:1.18rem;text-transform:uppercase;letter-spacing:.08em}
+    .panel-head p{margin:6px 0 0;color:var(--muted);font-size:.94rem}
     .folder-accordion{display:grid;gap:14px}
-    .folder-card{
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.024);
-      overflow:hidden;
-    }
-
-    .folder-card.open{
-      border-color:rgba(94,231,255,.22);
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
-    }
-
+    .folder-card{border-radius:20px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.024);overflow:hidden}
+    .folder-card.open{border-color:rgba(94,231,255,.22);background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018))}
     .folder-toggle{
-      width:100%;
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto;
-      gap:14px;
-      align-items:center;
-      text-align:left;
-      background:transparent;
-      border:none;
-      color:var(--text);
-      padding:18px;
-      cursor:pointer;
+      width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;text-align:left;background:transparent;border:none;color:var(--text);padding:18px;cursor:pointer;
     }
-
     .folder-title-wrap{min-width:0}
-    .folder-title{
-      margin:0;
-      font-family:"Orbitron",sans-serif;
-      font-size:1rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .folder-sub{
-      margin-top:5px;
-      color:var(--muted);
-      font-size:.9rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
+    .folder-title{margin:0;font-family:"Orbitron",sans-serif;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .folder-sub{margin-top:5px;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .folder-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:88px;
-      min-height:36px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-weight:700;
-      font-size:.88rem;
+      display:inline-flex;align-items:center;justify-content:center;min-width:88px;min-height:36px;padding:0 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04);color:var(--muted);font-weight:700;font-size:.88rem;
     }
-
     .folder-chevron{
-      width:38px;height:38px;border-radius:12px;
-      display:grid;place-items:center;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-      transition:transform .2s ease;
-      flex-shrink:0;
+      width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);
+      transition:transform .2s ease;flex-shrink:0;
     }
-
     .folder-card.open .folder-chevron{transform:rotate(180deg)}
-
-    .folder-content{
-      display:grid;
-      grid-template-rows:0fr;
-      transition:grid-template-rows .28s ease;
-    }
-
+    .folder-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
     .folder-card.open .folder-content{grid-template-rows:1fr}
     .folder-content-inner{min-height:0;overflow:hidden}
-
-    .folder-content-pad{
-      padding:0 18px 18px;
-      border-top:1px solid rgba(255,255,255,.05);
-    }
-
+    .folder-content-pad{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,.05)}
     .player-list{display:grid;gap:12px;margin-top:14px}
     .player{
-      display:grid;
-      grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr) auto auto;
-      gap:12px;
-      align-items:center;
-      padding:14px 16px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.06);
+      display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr) auto auto;gap:12px;align-items:center;
+      padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
     }
-
     .player-main,.player-meta{min-width:0}
-    .player-main strong{
-      display:block;
-      margin-bottom:4px;
-      font-size:1rem;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .player-main span,.player-meta span{
-      display:block;
-      color:var(--muted);
-      font-size:.9rem;
-      line-height:1.45;
-      word-break:break-word;
-      overflow-wrap:anywhere;
-    }
-
+    .player-main strong{display:block;margin-bottom:4px;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .player-main span,.player-meta span{display:block;color:var(--muted);font-size:.9rem;line-height:1.45;word-break:break-word;overflow-wrap:anywhere}
     .player-meta{display:grid;gap:4px}
-
     .dir-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:38px;
-      padding:0 14px;
-      border-radius:999px;
-      border:1px solid rgba(94,231,255,.18);
-      background:rgba(94,231,255,.08);
-      color:var(--cyan);
-      font-weight:700;
-      font-size:.78rem;
-      text-transform:uppercase;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid rgba(94,231,255,.18);
+      background:rgba(94,231,255,.08);color:var(--cyan);font-weight:700;font-size:.78rem;text-transform:uppercase;white-space:nowrap;
     }
-
-    .player-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
+    .player-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .form-grid{display:grid;gap:14px}
     .field{display:grid;gap:8px}
-    .field label{
-      color:var(--muted);
-      font-size:.84rem;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-    }
-
+    .field label{color:var(--muted);font-size:.84rem;text-transform:uppercase;letter-spacing:.12em}
     .input,.select{
-      width:100%;
-      min-height:48px;
-      padding:0 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.04);
-      color:var(--text);
-      outline:none;
-      font:500 .96rem "Inter",sans-serif;
+      width:100%;min-height:48px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);
+      outline:none;font:500 .96rem "Inter",sans-serif;
     }
-
     .actions{display:flex;gap:12px;flex-wrap:wrap}
-
     .message{
-      margin-top:14px;
-      min-height:52px;
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.07);
-      background:rgba(255,255,255,.03);
-      color:var(--muted);
-      white-space:pre-wrap;
-      word-break:break-word;
+      margin-top:14px;min-height:52px;padding:14px 16px;display:flex;align-items:center;border-radius:14px;border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);color:var(--muted);white-space:pre-wrap;word-break:break-word;
     }
-
     .message.success{border-color:rgba(99,245,176,.26);background:rgba(99,245,176,.08);color:#ccffeb}
     .message.error{border-color:rgba(255,111,145,.28);background:rgba(255,111,145,.08);color:#ffd9e3}
     .message.info{border-color:rgba(94,231,255,.24);background:rgba(94,231,255,.08);color:#d9fbff}
-
     .user-list{display:grid;gap:12px;margin-top:14px}
     .user-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:12px;
-      align-items:center;
-      padding:14px 16px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.06);
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
     }
-
     .user-row strong{display:block;margin-bottom:4px}
     .user-row span{display:block;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
-
     .terminal-overlay{
-      position:fixed;
-      inset:0;
-      z-index:100;
-      display:none;
-      place-items:center;
-      padding:20px;
-      background:rgba(2,3,8,.74);
-      backdrop-filter:blur(12px);
+      position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:20px;background:rgba(2,3,8,.74);backdrop-filter:blur(12px);
     }
-
     .terminal-overlay.show{display:grid}
-
     .terminal-shell{
-      width:min(760px, 100%);
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(122,50,255,.26);
-      box-shadow:0 28px 100px rgba(0,0,0,.58);
+      width:min(760px, 100%);border-radius:24px;overflow:hidden;border:1px solid rgba(122,50,255,.26);box-shadow:0 28px 100px rgba(0,0,0,.58);
       background:linear-gradient(180deg, rgba(8,10,18,.98), rgba(4,6,12,.98));
     }
-
     .terminal-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 16px;
-      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.016));
     }
-
     .term-lights{display:flex;gap:8px}
-    .term-lights span{
-      width:10px;height:10px;border-radius:50%;
-      border:1px solid rgba(255,255,255,.08);
-    }
-
+    .term-lights span{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
     .term-lights span:nth-child(1){background:#ff6f91}
     .term-lights span:nth-child(2){background:#ffca6b}
     .term-lights span:nth-child(3){background:#63f5b0}
-
-    .terminal-title{
-      font-family:"Orbitron",sans-serif;
-      font-size:.84rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      color:#dce7ff;
-    }
-
-    .terminal-body{
-      padding:18px;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      color:#9cffc5;
-    }
-
-    .terminal-log{
-      min-height:130px;
-      white-space:pre-wrap;
-      line-height:1.5;
-      color:#9cffc5;
-      margin-bottom:16px;
-      font-size:1rem;
-    }
-
+    .terminal-title{font-family:"Orbitron",sans-serif;font-size:.84rem;letter-spacing:.08em;text-transform:uppercase;color:#dce7ff}
+    .terminal-body{padding:18px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#9cffc5}
+    .terminal-log{min-height:130px;white-space:pre-wrap;line-height:1.5;color:#9cffc5;margin-bottom:16px;font-size:1rem}
     .terminal-form{display:grid;gap:14px}
-
-    .terminal-label{
-      color:#bdf7d7;
-      font-size:.95rem;
-      margin-bottom:6px;
-      display:block;
-    }
-
+    .terminal-label{color:#bdf7d7;font-size:.95rem;margin-bottom:6px;display:block}
     .terminal-input{
-      width:100%;
-      min-height:52px;
-      border-radius:16px;
-      padding:0 16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.04);
-      color:#ebfff4;
-      outline:none;
-      font:500 1rem "Inter",sans-serif;
+      width:100%;min-height:52px;border-radius:16px;padding:0 16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#ebfff4;outline:none;font:500 1rem "Inter",sans-serif;
     }
-
     .terminal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
-
     .debug-box{
-      margin-top:16px;
-      padding:14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:.84rem;
-      line-height:1.45;
-      color:#d9e7ff;
-      white-space:pre-wrap;
-      word-break:break-word;
-      max-height:240px;
-      overflow:auto;
+      margin-top:16px;padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.84rem;line-height:1.45;color:#d9e7ff;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;
     }
-
-    @media (max-width: 1120px){
-      .layout{grid-template-columns:1fr}
+    @media (max-width:1120px){.layout{grid-template-columns:1fr}}
+    @media (max-width:920px){
+      .hero{grid-template-columns:1fr}.player{grid-template-columns:1fr}.player-actions{justify-content:flex-start}.folder-toggle{grid-template-columns:minmax(0,1fr) auto}.user-row{grid-template-columns:1fr}
     }
-
-    @media (max-width: 920px){
-      .hero{grid-template-columns:1fr}
-      .player{grid-template-columns:1fr}
-      .player-actions{justify-content:flex-start}
-      .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
-      .user-row{grid-template-columns:1fr}
-    }
-
-    @media (max-width: 640px){
+    @media (max-width:640px){
       .wrap{width:min(var(--max), calc(100% - 20px))}
       .topbar-inner{flex-direction:column;align-items:flex-start}
       .statusbar{justify-content:flex-start}
@@ -637,7 +225,6 @@
           <h1 class="title">Frosted Fang Control</h1>
         </div>
       </div>
-
       <div class="statusbar">
         <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
         <div class="pill" id="authPill">Unauthenticated</div>
@@ -654,17 +241,15 @@
           <div>
             <p class="hero-kicker">Operational Panel</p>
             <h1>Frosted Fang Security & Pull System</h1>
-            <p>Local username login, Supabase-backed users, folder-based visibility, player editing, and ComputerCraft-safe trigger delivery.</p>
+            <p>GitHub Pages frontend, Render backend, Supabase users, folder-based visibility, and ComputerCraft-safe trigger delivery.</p>
           </div>
-
           <div class="hero-meta">
-            <div class="pill">Local login</div>
+            <div class="pill">Cross-origin API</div>
             <div class="pill">Supabase users</div>
             <div class="pill">Folder-aware roster</div>
           </div>
         </div>
       </article>
-
       <aside class="panel">
         <div class="hero-side">
           <div class="mini-stat">
@@ -712,12 +297,10 @@
                 <label for="triggerComputerName">Computer name</label>
                 <input class="input" id="triggerComputerName" placeholder="LakIo" required />
               </div>
-
               <div class="field">
                 <label for="triggerFolderName">Folder name</label>
                 <input class="input" id="triggerFolderName" placeholder="LakIo" required />
               </div>
-
               <div class="field">
                 <label for="triggerDirection">Direction</label>
                 <select class="select" id="triggerDirection">
@@ -729,12 +312,10 @@
                   <option value="back">back</option>
                 </select>
               </div>
-
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Trigger</button>
               </div>
             </form>
-
             <div id="triggerMessage" class="message">Ready.</div>
           </div>
         </article>
@@ -749,27 +330,10 @@
           <div class="panel-body">
             <form id="playerForm" class="form-grid">
               <input type="hidden" id="playerId" />
-
-              <div class="field">
-                <label for="name">Player name</label>
-                <input class="input" id="name" required />
-              </div>
-
-              <div class="field">
-                <label for="computer_name">Computer name</label>
-                <input class="input" id="computer_name" required />
-              </div>
-
-              <div class="field">
-                <label for="channel_name">Channel name</label>
-                <input class="input" id="channel_name" />
-              </div>
-
-              <div class="field">
-                <label for="folder_name">Folder</label>
-                <input class="input" id="folder_name" required />
-              </div>
-
+              <div class="field"><label for="name">Player name</label><input class="input" id="name" required /></div>
+              <div class="field"><label for="computer_name">Computer name</label><input class="input" id="computer_name" required /></div>
+              <div class="field"><label for="channel_name">Channel name</label><input class="input" id="channel_name" /></div>
+              <div class="field"><label for="folder_name">Folder</label><input class="input" id="folder_name" required /></div>
               <div class="field">
                 <label for="direction">Direction</label>
                 <select class="select" id="direction">
@@ -781,18 +345,12 @@
                   <option value="back">back</option>
                 </select>
               </div>
-
-              <div class="field">
-                <label for="signal_strength">Signal strength</label>
-                <input class="input" type="number" id="signal_strength" min="1" max="15" value="15" />
-              </div>
-
+              <div class="field"><label for="signal_strength">Signal strength</label><input class="input" type="number" id="signal_strength" min="1" max="15" value="15" /></div>
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save player</button>
                 <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
               </div>
             </form>
-
             <div id="playerMessage" class="message">Admin panel ready.</div>
           </div>
         </article>
@@ -801,23 +359,14 @@
           <div class="panel-head">
             <div>
               <h2>User Manager</h2>
-              <p>Admin only. Edit accounts in public.users.</p>
+              <p>Admin only.</p>
             </div>
           </div>
           <div class="panel-body">
             <form id="userForm" class="form-grid">
               <input type="hidden" id="userId" />
-
-              <div class="field">
-                <label for="username">Username</label>
-                <input class="input" id="username" required />
-              </div>
-
-              <div class="field">
-                <label for="password">Password</label>
-                <input class="input" id="password" placeholder="Leave blank only when not changing during edit" />
-              </div>
-
+              <div class="field"><label for="username">Username</label><input class="input" id="username" required /></div>
+              <div class="field"><label for="password">Password</label><input class="input" id="password" placeholder="Leave blank when not changing" /></div>
               <div class="field">
                 <label>Permissions</label>
                 <div style="display:grid;gap:8px;color:var(--muted);font-size:.92rem;">
@@ -826,18 +375,12 @@
                   <label><input type="checkbox" id="allFolders" /> All Folders</label>
                 </div>
               </div>
-
-              <div class="field">
-                <label for="allowedFolders">Allowed folders (comma separated)</label>
-                <input class="input" id="allowedFolders" placeholder="LakIo, Base, Vault" />
-              </div>
-
+              <div class="field"><label for="allowedFolders">Allowed folders (comma separated)</label><input class="input" id="allowedFolders" placeholder="LakIo, Base, Vault" /></div>
               <div class="actions">
                 <button class="btn btn-primary" type="submit">Save user</button>
                 <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
               </div>
             </form>
-
             <div id="userMessage" class="message">Manage users from Supabase.</div>
             <div id="userList" class="user-list"></div>
           </div>
@@ -847,7 +390,7 @@
           <div class="panel-head">
             <div>
               <h2>Debug</h2>
-              <p>Shows what auth is doing live.</p>
+              <p>Cross-origin auth diagnostics.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -873,18 +416,15 @@
         <div id="terminalLog" class="terminal-log">&gt; C:/Frosted/OS/ Checking for access
 &gt;
 &gt; Awaiting credentials...</div>
-
         <form id="loginForm" class="terminal-form">
           <div>
             <label class="terminal-label" for="loginUsername">User</label>
             <input class="terminal-input" id="loginUsername" autocomplete="username" value="Necrox" />
           </div>
-
           <div>
             <label class="terminal-label" for="loginPassword">Password</label>
             <input class="terminal-input" id="loginPassword" type="password" autocomplete="current-password" value="Rauln" />
           </div>
-
           <div class="terminal-actions">
             <button class="btn btn-ghost" type="button" id="closeTerminalBtn">Cancel</button>
             <button class="btn btn-violet" type="submit">Authenticate</button>
@@ -895,13 +435,9 @@
   </div>
 
   <script>
-    const state = {
-      user: null,
-      players: [],
-      users: [],
-      openFolders: new Set()
-    };
+    const API_BASE = 'https://backend-website-syxe.onrender.com';
 
+    const state = { user: null, players: [], users: [], openFolders: new Set() };
     const els = {
       backendDot: document.getElementById('backendDot'),
       backendText: document.getElementById('backendText'),
@@ -954,42 +490,30 @@
     }
 
     async function api(path, options = {}) {
-      const res = await fetch(path, {
+      const res = await fetch(`${API_BASE}${path}`, {
+        mode: 'cors',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {})
-        },
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options
       });
-
       const text = await res.text();
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-
       if (!res.ok) throw new Error((data && data.error) || `Request failed: ${res.status}`);
       return data;
     }
 
     async function apiRaw(path, options = {}) {
-      const res = await fetch(path, {
+      const res = await fetch(`${API_BASE}${path}`, {
+        mode: 'cors',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {})
-        },
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
         ...options
       });
-
       const text = await res.text();
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-
-      return {
-        ok: res.ok,
-        status: res.status,
-        data
-      };
+      return { ok: res.ok, status: res.status, data };
     }
 
     function setDebug(title, data) {
@@ -1034,7 +558,6 @@
       const user = state.user;
       const authed = isAuthed(user);
       const isAdmin = !!(user && user.isAdmin);
-
       els.playerCount.textContent = authed ? String(visiblePlayers().length) : '--';
       els.triggerAccess.textContent = authed ? 'Granted' : 'Denied';
       els.adminAccess.textContent = isAdmin ? 'Granted' : 'Denied';
@@ -1042,12 +565,7 @@
       if (!user) {
         els.authPill.textContent = 'Unauthenticated';
       } else {
-        const scope = user.isAdmin
-          ? 'admin'
-          : user.allFolders
-            ? 'all folders'
-            : ((user.allowedFolders || []).join(', ') || 'limited');
-
+        const scope = user.isAdmin ? 'admin' : user.allFolders ? 'all folders' : ((user.allowedFolders || []).join(', ') || 'limited');
         els.authPill.textContent = `${user.username} • ${scope}`;
       }
 
@@ -1074,9 +592,7 @@
             <span>Folder: ${escapeHtml(normalizeFolder(player))}</span>
             <span>Channel: ${escapeHtml(player.channel_name || '-')}</span>
           </div>
-          <div>
-            <span class="dir-badge">${escapeHtml(player.direction || 'left')}</span>
-          </div>
+          <div><span class="dir-badge">${escapeHtml(player.direction || 'left')}</span></div>
           <div class="player-actions">
             ${state.user && state.user.canPull ? `<button class="btn btn-primary" type="button" data-trigger="${player.id}">Trigger</button>` : ''}
             ${adminControls}
@@ -1172,9 +688,6 @@
 
     function closeTerminal() {
       els.terminalOverlay.classList.remove('show');
-      els.loginForm.reset();
-      document.getElementById('loginUsername').value = 'Necrox';
-      document.getElementById('loginPassword').value = 'Rauln';
     }
 
     function randomToken(len = 24) {
@@ -1194,7 +707,6 @@
         `> ${randomToken(28)}`,
         '> Access profile loaded'
       ];
-
       els.terminalLog.textContent = '';
       for (const line of lines) {
         els.terminalLog.textContent += (els.terminalLog.textContent ? '\n' : '') + line;
@@ -1209,9 +721,10 @@
         const data = await api('/health');
         els.backendDot.className = data.status === 'ON' ? 'dot online' : 'dot offline';
         els.backendText.textContent = data.status === 'ON' ? 'Backend online' : 'Backend issue';
-      } catch {
+      } catch (e) {
         els.backendDot.className = 'dot offline';
         els.backendText.textContent = 'Backend offline';
+        setDebug('GET /health failed', String(e.message || e));
       }
     }
 
@@ -1232,7 +745,6 @@
         updateAuthUI();
         return;
       }
-
       const data = await api('/players');
       state.players = Array.isArray(data.players) ? data.players : [];
       renderFolders();
@@ -1251,7 +763,6 @@
         method: 'POST',
         body: JSON.stringify({ computer_name, direction, folder_name })
       });
-
       els.triggerMessage.className = 'message success';
       els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})`;
     }
@@ -1367,7 +878,6 @@
 
     els.playerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const payload = {
         name: document.getElementById('name').value.trim(),
         computer_name: document.getElementById('computer_name').value.trim(),
@@ -1381,14 +891,9 @@
         const id = els.playerId.value.trim();
         const method = id ? 'PUT' : 'POST';
         const path = id ? `/players/${id}` : '/players';
-
-        const data = await api(path, {
-          method,
-          body: JSON.stringify(payload)
-        });
-
+        await api(path, { method, body: JSON.stringify(payload) });
         els.playerMessage.className = 'message success';
-        els.playerMessage.textContent = data.player ? 'Player saved.' : 'Player updated.';
+        els.playerMessage.textContent = 'Player saved.';
         clearPlayerForm();
         await loadPlayers();
       } catch (err) {
@@ -1401,7 +906,6 @@
 
     els.userForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const payload = {
         username: els.username.value.trim(),
         password: els.password.value,
@@ -1415,15 +919,10 @@
         const id = els.userId.value.trim();
         const method = id ? 'PUT' : 'POST';
         const path = id ? `/admin/users/${id}` : '/admin/users';
-
         const finalPayload = { ...payload };
         if (id && !finalPayload.password) delete finalPayload.password;
 
-        await api(path, {
-          method,
-          body: JSON.stringify(finalPayload)
-        });
-
+        await api(path, { method, body: JSON.stringify(finalPayload) });
         els.userMessage.className = 'message success';
         els.userMessage.textContent = id ? 'User updated.' : 'User created.';
         clearUserForm();
@@ -1492,6 +991,7 @@
       });
 
       setDebug('POST /auth/local/login', {
+        apiBase: API_BASE,
         sent: { username, password },
         received: raw
       });
@@ -1502,12 +1002,10 @@
       }
 
       state.user = raw.data.user || null;
-
       await terminalSuccess(username);
       updateAuthUI();
       await loadPlayers();
       if (state.user && state.user.isAdmin) await loadUsers();
-
       await runDebugSession();
     });
 
@@ -1526,6 +1024,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
+      setDebug('Frontend config', {
+        frontend: window.location.origin + window.location.pathname,
+        apiBase: API_BASE
+      });
       await loadHealth();
       await loadAuth();
       await loadPlayers();
