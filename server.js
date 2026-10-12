@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -23,12 +22,11 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   'https://necroxeye.github.io',
   FRONTEND_ORIGIN
-];
+].filter(Boolean);
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
@@ -36,16 +34,24 @@ app.use(cors({
   allowedHeaders: ['Content-Type']
 }));
 
-app.options('*', cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error(`Not allowed by CORS: ${origin}`));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+    return next();
+  }
+
+  return res.status(403).json({ error: `Not allowed by CORS: ${origin}` });
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
