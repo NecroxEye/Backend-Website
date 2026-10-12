@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -7,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SESSION_SECRET = process.env.SESSION_SECRET;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://necroxeye.github.io/Backend-Website/';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://necroxeye.github.io';
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SESSION_SECRET) {
   console.error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET');
@@ -19,9 +20,31 @@ const app = express();
 
 app.set('trust proxy', 1);
 
+const allowedOrigins = [
+  'https://necroxeye.github.io',
+  FRONTEND_ORIGIN
+];
+
 app.use(cors({
-  origin: FRONTEND_URL,
-  credentials: true
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
+
+app.options('*', cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
@@ -488,7 +511,7 @@ async function ensureSeedUser(username, password, extra = {}) {
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('Frontend URL:', FRONTEND_URL);
+    console.log('Allowed origins:', allowedOrigins);
     console.log('Debug routes available: /debug/session /debug/users /debug/login');
   });
 })();
