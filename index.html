@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -985,28 +986,33 @@
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      const raw = await apiRaw('/auth/local/login', {
-        method: 'POST',
-        body: JSON.stringify({ username, password })
-      });
+      try {
+        const raw = await apiRaw('/auth/local/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
 
-      setDebug('POST /auth/local/login', {
-        apiBase: API_BASE,
-        sent: { username, password },
-        received: raw
-      });
+        setDebug('POST /auth/local/login', {
+          apiBase: API_BASE,
+          sent: { username, password },
+          received: raw
+        });
 
-      if (!raw.ok) {
-        els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
-        return;
+        if (!raw.ok) {
+          els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Authentication failed\n> Access denied';
+          return;
+        }
+
+        state.user = raw.data.user || null;
+        await terminalSuccess(username);
+        updateAuthUI();
+        await loadPlayers();
+        if (state.user && state.user.isAdmin) await loadUsers();
+        await runDebugSession();
+      } catch (err) {
+        els.terminalLog.textContent = `> C:/Frosted/OS/ ERROR\n>\n> ${String(err.message || err)}`;
+        setDebug('POST /auth/local/login failed', String(err.message || err));
       }
-
-      state.user = raw.data.user || null;
-      await terminalSuccess(username);
-      updateAuthUI();
-      await loadPlayers();
-      if (state.user && state.user.isAdmin) await loadUsers();
-      await runDebugSession();
     });
 
     els.logoutBtn.addEventListener('click', async () => {
@@ -1020,7 +1026,7 @@
       renderUsers();
       els.triggerMessage.className = 'message';
       els.triggerMessage.textContent = 'Ready.';
-      await runDebugSession();
+      await runDebugSession().catch(() => {});
     });
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -1028,11 +1034,12 @@
         frontend: window.location.origin + window.location.pathname,
         apiBase: API_BASE
       });
-      await loadHealth();
-      await loadAuth();
-      await loadPlayers();
-      if (state.user && state.user.isAdmin) await loadUsers();
-      await runDebugSession();
+
+      await loadHealth().catch(() => {});
+      await loadAuth().catch(() => {});
+      await loadPlayers().catch(() => {});
+      if (state.user && state.user.isAdmin) await loadUsers().catch(() => {});
+      await runDebugSession().catch(() => {});
     });
   </script>
 </body>
