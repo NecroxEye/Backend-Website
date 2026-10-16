@@ -7,7 +7,14 @@ const PORT = process.env.PORT || 3000;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SESSION_SECRET = process.env.SESSION_SECRET;
+
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://necroxeye.github.io';
+const ALLOWED_ORIGINS = new Set([
+  'https://necroxeye.github.io',
+  FRONTEND_ORIGIN,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+]);
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SESSION_SECRET) {
   console.error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SESSION_SECRET');
@@ -19,14 +26,9 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-const allowedOrigins = [
-  'https://necroxeye.github.io',
-  FRONTEND_ORIGIN
-].filter(Boolean);
-
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
     return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
@@ -36,21 +38,19 @@ app.use(cors({
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-    }
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') {
-      return res.sendStatus(204);
-    }
-    return next();
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
   }
 
-  return res.status(403).json({ error: `Not allowed by CORS: ${origin}` });
+  next();
 });
 
 app.use(express.json());
@@ -104,11 +104,14 @@ function normalizeFolderName(player) {
 }
 
 async function lookupUser(username, password) {
+  const usernameClean = String(username || '').trim();
+  const passwordClean = String(password || '').trim();
+
   return await supabase
     .from('users')
     .select('*')
-    .eq('username', username)
-    .eq('password', password)
+    .eq('username', usernameClean)
+    .eq('password', passwordClean)
     .maybeSingle();
 }
 
@@ -146,7 +149,7 @@ app.post('/debug/login', async (req, res) => {
   try {
     const { username, password } = req.body || {};
     const { data, error } = await lookupUser(username, password);
-    res.json({ username, password, found: !!data, data, error });
+    res.json({ found: !!data, data, error });
   } catch (err) {
     res.status(500).json({ error: err.message || 'debug login failed' });
   }
@@ -163,12 +166,8 @@ app.post('/auth/local/login', async (req, res) => {
 
     const { data, error } = await lookupUser(username, password);
 
-    console.log('[LOGIN] lookup result:', {
-      found: !!data,
-      error: error ? error.message || String(error) : null
-    });
-
     if (error) {
+      console.error('[LOGIN] lookup error:', error);
       return res.status(500).json({ error: error.message || 'Login lookup failed' });
     }
 
@@ -180,7 +179,7 @@ app.post('/auth/local/login', async (req, res) => {
 
     req.session.save((sessionErr) => {
       if (sessionErr) {
-        console.log('[LOGIN] session save error:', sessionErr);
+        console.error('[LOGIN] session save error:', sessionErr);
         return res.status(500).json({ error: 'Session save failed' });
       }
 
@@ -188,7 +187,7 @@ app.post('/auth/local/login', async (req, res) => {
       return res.json({ user: req.session.user });
     });
   } catch (err) {
-    console.log('[LOGIN] fatal error:', err);
+    console.error('[LOGIN] fatal error:', err);
     return res.status(500).json({ error: err.message || 'Login failed' });
   }
 });
@@ -294,7 +293,8 @@ app.get('/players', ensureAuth, async (req, res) => {
     const user = req.session.user;
     const players = (data || []).filter(p => user.isAdmin || user.allFolders || canSeeFolder(user, normalizeFolderName(p)));
     res.json({ players });
-  } catch {
+  } catch (err) {
+    console.error('[PLAYERS GET] error:', err);
     res.status(500).json({ error: 'Failed to load players' });
   }
 });
@@ -322,24 +322,39 @@ app.post('/players', ensureAdmin, async (req, res) => {
       .select()
       .single();
 
-    if (error) return res.status(500).json({ error: 'Failed to create player' });
+    if (error) {
+      console.error('[PLAYERS POST] error:', error);
+      return res.status(500).json({ error: error.message || 'Failed to create player' });
+    }
+
     res.json({ player: data });
-  } catch {
-    res.status(500).json({ error: 'Failed to create player' });
+  } catch (err) {
+    console.error('[PLAYERS POST] exception:', err);
+    res.status(500).json({ error: err.message || 'Failed to create player' });
   }
 });
 
 app.put('/players/:id', ensureAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ error: 'Invalid player id' });
+    }
+
     const { data: existing, error: findError } = await supabase
       .from('players')
       .select('*')
       .eq('id', id)
       .maybeSingle();
 
-    if (findError) return res.status(500).json({ error: 'Failed to load player' });
-    if (!existing) return res.status(404).json({ error: 'Player not found' });
+    if (findError) {
+      console.error('[PLAYERS PUT] load error:', findError);
+      return res.status(500).json({ error: findError.message || 'Failed to load player' });
+    }
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
 
     const { name, computer_name, channel_name, folder_name, direction, signal_strength } = req.body || {};
 
@@ -359,21 +374,36 @@ app.put('/players/:id', ensureAdmin, async (req, res) => {
       .select()
       .single();
 
-    if (error) return res.status(500).json({ error: 'Failed to update player' });
+    if (error) {
+      console.error('[PLAYERS PUT] update error:', error);
+      return res.status(500).json({ error: error.message || 'Failed to update player' });
+    }
+
     res.json({ player: data });
-  } catch {
-    res.status(500).json({ error: 'Failed to update player' });
+  } catch (err) {
+    console.error('[PLAYERS PUT] exception:', err);
+    res.status(500).json({ error: err.message || 'Failed to update player' });
   }
 });
 
 app.delete('/players/:id', ensureAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ error: 'Invalid player id' });
+    }
+
     const { error } = await supabase.from('players').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: 'Failed to delete player' });
+
+    if (error) {
+      console.error('[PLAYERS DELETE] error:', error);
+      return res.status(500).json({ error: error.message || 'Failed to delete player' });
+    }
+
     res.json({ ok: true });
-  } catch {
-    res.status(500).json({ error: 'Failed to delete player' });
+  } catch (err) {
+    console.error('[PLAYERS DELETE] exception:', err);
+    res.status(500).json({ error: err.message || 'Failed to delete player' });
   }
 });
 
@@ -509,15 +539,14 @@ async function ensureSeedUser(username, password, extra = {}) {
 
 (async () => {
   await ensureSeedUser('Necrox', 'Rauln', {
-    is_admin: false,
+    is_admin: true,
     can_pull: true,
-    all_folders: false,
+    all_folders: true,
     allowed_folders: []
   });
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('Allowed origins:', allowedOrigins);
-    console.log('Debug routes available: /debug/session /debug/users /debug/login');
+    console.log('Allowed origins:', [...ALLOWED_ORIGINS]);
   });
 })();
