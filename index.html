@@ -1,464 +1,1295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Frosted Fang — Control Room</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#0c1015;--surface:#131a22;--ink:#ecf3f7;--muted:#a1afbc;--line:#2a3541;--accent:#b7ef69;--error:#ffadb2;--body:"Manrope",sans-serif;--display:"Barlow Condensed",sans-serif;--mono:"IBM Plex Mono",monospace}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);background-image:radial-gradient(ellipse at 100% 0,rgba(111,145,92,.09),transparent 50%)}
-button,input,select{font:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.5;cursor:wait}
-button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-header{border-bottom:1px solid var(--line)}
-.wrap{width:min(1440px,calc(100% - 36px));margin:auto}
-.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:14px}
-.mark{width:36px;height:42px;background:var(--accent);clip-path:polygon(0 0,100% 0,75% 45%,40% 45%,40% 100%,0 100%)}
-.brand strong{font-family:var(--display);font-size:26px;letter-spacing:1px}
-.brand small{display:block;color:var(--muted);font:10px var(--mono);letter-spacing:2px}
-.tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.tag,.eyebrow{font:11px var(--mono);text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
-.online{color:var(--accent)}
-.btn{border:1px solid var(--line);background:transparent;color:var(--ink);padding:11px 16px;border-radius:4px;font-size:12px;font-weight:700;transition:background .18s,transform .18s}
-.btn:hover{background:#26323e;transform:translateY(-2px)}
-.btn:active{transform:scale(.97)}
-.primary{background:var(--accent);color:#14200b;border-color:var(--accent)}
-.primary:hover{background:#ccff86}
-.danger{color:var(--error)}
-main{padding:40px 0 70px}
-.hero{display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px;padding-bottom:32px;border-bottom:1px solid var(--line);animation:enter .5s both}
-h1{font:700 clamp(48px,8vw,96px)/.92 var(--display);text-transform:uppercase;margin:12px 0 20px;letter-spacing:-1px}
-h1 span{color:var(--accent)}
-.hero p{color:var(--muted);font-size:13px;max-width:540px;line-height:1.8}
-.metric{font:70px var(--display);text-align:right}
-.metric small{display:block;font:11px var(--mono);color:var(--muted)}
-.notice{border-left:3px solid var(--accent);background:#172019;padding:18px 20px;margin:22px 0;font-size:13px;line-height:1.8}
-.notice strong{color:var(--accent)}
-details.setup{border:1px solid var(--line);padding:16px;margin-bottom:24px;font-size:13px;line-height:1.8}
-summary{cursor:pointer;font-weight:700}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#080c11;padding:16px;font:12px/1.8 var(--mono);color:#d2e7bb;border:1px solid var(--line)}
-.workspace{display:grid;gap:32px;margin-top:30px;animation:enter .6s .1s both}
-.section-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
-h2{font:600 30px var(--display);text-transform:uppercase;letter-spacing:.5px;margin:0}
-h3{font:600 23px var(--display);margin:0}
-.section-top small{color:var(--muted);font-size:12px}
-.sidebar{background:var(--surface);border-top:3px solid var(--accent);padding:24px;align-self:start}
-label{display:block;font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-input,select{width:100%;min-height:45px;border:1px solid var(--line);background:#0d131b;border-radius:4px;color:var(--ink);padding:10px 12px;font-size:13px}
-select{color-scheme:dark}
-.field{margin:17px 0}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.message{font-size:12px;line-height:1.8;margin:16px 0 0;overflow-wrap:anywhere;color:var(--muted)}
-.message.error{color:var(--error)}
-.message.success{color:var(--accent)}
-.folder{border-top:1px solid var(--line);margin-bottom:22px}
-.folder summary{display:flex;justify-content:space-between;padding:18px 0;font:600 24px var(--display)}
-.folder summary span{font:11px var(--mono);color:var(--muted)}
-.player{padding:18px 0;border-top:1px solid var(--line);display:grid;gap:14px}
-.player strong{font-size:15px}
-.meta{font:11px/1.8 var(--mono);color:var(--muted);overflow-wrap:anywhere;margin-top:6px}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
-.empty{padding:40px 0;color:var(--muted);font-size:13px;line-height:1.8}
-.search{max-width:260px}
-dialog{background:var(--surface);border:1px solid var(--line);color:var(--ink);padding:28px;width:min(440px,calc(100% - 32px));border-radius:8px}
-dialog::backdrop{background:rgba(0,0,0,.75);backdrop-filter:blur(6px)}
-dialog h2{margin-bottom:10px}
-footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font:10px var(--mono)}
-[hidden]{display:none!important}
-@keyframes enter{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
-@media(min-width:1000px){.workspace{grid-template-columns:minmax(0,1fr) 370px}.player{grid-template-columns:1fr auto;align-items:center}}
-@media(max-width:600px){.hero{grid-template-columns:1fr}.metric{text-align:left;font-size:48px}.section-top{flex-wrap:wrap}.search{max-width:100%}.two{grid-template-columns:1fr}.wrap{width:calc(100% - 28px)}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frosted Fang Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#05060a;
+      --bg-2:#090b13;
+      --panel:rgba(10,13,22,.9);
+      --panel-soft:rgba(255,255,255,.03);
+      --line:rgba(123,162,255,.16);
+      --line-strong:rgba(123,162,255,.34);
+      --text:#edf3ff;
+      --muted:#97a4bf;
+      --cyan:#5ee7ff;
+      --violet:#7a32ff;
+      --green:#63f5b0;
+      --red:#ff6f91;
+      --amber:#ffca6b;
+      --shadow:0 18px 60px rgba(0,0,0,.42);
+      --radius:24px;
+      --max:1280px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:"Inter",sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(94,231,255,.05), transparent 24%),
+        radial-gradient(circle at 90% 15%, rgba(122,50,255,.11), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(123,162,255,.05), transparent 34%),
+        linear-gradient(180deg,#04050a 0%,#090b13 52%,#0a0d16 100%);
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:-2;
+      background:
+        linear-gradient(90deg,
+          rgba(0,0,0,.96) 0%,
+          rgba(49,16,94,.88) 7%,
+          rgba(0,0,0,0) 16%,
+          rgba(0,0,0,0) 84%,
+          rgba(49,16,94,.88) 93%,
+          rgba(0,0,0,.96) 100%);
+      box-shadow:inset 0 0 90px rgba(122,50,255,.14);
+    }
+
+    .wrap{width:min(var(--max), calc(100% - 28px));margin-inline:auto}
+    .hidden{display:none!important}
+
+    .topbar{
+      position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+      background:linear-gradient(180deg, rgba(6,8,14,.92), rgba(6,8,14,.6));
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .topbar-inner{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;flex-wrap:wrap;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-badge{
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(94,231,255,.18), rgba(122,50,255,.16));
+      border:1px solid var(--line);
+      font-family:"Orbitron",sans-serif;
+      font-weight:800;
+      letter-spacing:.08em;
+    }
+
+    .eyebrow{
+      display:block;color:var(--cyan);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:2px
+    }
+
+    .title{
+      margin:0;
+      font-family:"Orbitron",sans-serif;
+      font-size:1.05rem;
+      letter-spacing:.06em;
+      white-space:nowrap
+    }
+
+    .statusbar{
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04);color:var(--muted);font-size:.92rem;white-space:nowrap;
+    }
+
+    .dot{width:9px;height:9px;border-radius:50%;background:var(--amber)}
+    .dot.online{background:var(--green)}
+    .dot.offline{background:var(--red)}
+
+    .btn{
+      appearance:none;border:none;outline:none;cursor:pointer;color:var(--text);min-height:44px;padding:0 16px;border-radius:14px;
+      font:600 .94rem "Inter",sans-serif;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.08);
+      display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+      transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:var(--line-strong);box-shadow:0 10px 24px rgba(0,0,0,.24)}
+    .btn:active{transform:scale(.985)}
+    .btn-primary{background:linear-gradient(135deg, rgba(94,231,255,.16), rgba(123,162,255,.16));border-color:rgba(94,231,255,.26)}
+    .btn-violet{background:linear-gradient(135deg, rgba(122,50,255,.24), rgba(74,22,140,.18));border-color:rgba(122,50,255,.34)}
+    .btn-danger{background:linear-gradient(135deg, rgba(255,111,145,.18), rgba(200,70,100,.1));border-color:rgba(255,111,145,.3)}
+    .btn-ghost{background:rgba(255,255,255,.04)}
+
+    main{padding:26px 0 54px}
+
+    .hero{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:20px;
+      margin-bottom:22px
+    }
+
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.018)),var(--panel);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter:blur(14px);
+    }
+
+    .hero-copy{
+      padding:30px;min-height:280px;display:flex;flex-direction:column;justify-content:space-between
+    }
+
+    .hero-kicker{
+      color:var(--cyan);text-transform:uppercase;letter-spacing:.24em;font-size:.72rem;margin:0 0 10px
+    }
+
+    .hero h1{
+      margin:0 0 14px;
+      font-family:"Orbitron",sans-serif;
+      font-size:clamp(2rem,4vw,4rem);
+      line-height:.94;
+      text-transform:uppercase;
+      max-width:12ch
+    }
+
+    .hero p{
+      margin:0;color:var(--muted);line-height:1.65;max-width:60ch
+    }
+
+    .hero-meta{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:22px
+    }
+
+    .hero-side{
+      padding:22px;display:grid;gap:14px;align-content:start
+    }
+
+    .mini-stat{
+      padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)
+    }
+
+    .mini-stat .label{
+      color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px
+    }
+
+    .mini-stat .value{
+      font-family:"Orbitron",sans-serif;
+      font-size:clamp(1.2rem,2vw,2rem);
+      word-break:break-word
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 390px;
+      gap:20px;
+      align-items:start
+    }
+
+    .stack{display:grid;gap:20px}
+    .panel-body{padding:22px}
+
+    .panel-head{
+      display:flex;justify-content:space-between;align-items:end;gap:12px;padding:22px 22px 0
+    }
+
+    .panel-head h2{
+      margin:0;
+      font-family:"Orbitron",sans-serif;
+      font-size:1.18rem;
+      text-transform:uppercase;
+      letter-spacing:.08em
+    }
+
+    .panel-head p{
+      margin:6px 0 0;color:var(--muted);font-size:.94rem
+    }
+
+    .folder-accordion{display:grid;gap:14px}
+
+    .folder-card{
+      border-radius:20px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.024);overflow:hidden
+    }
+
+    .folder-card.open{
+      border-color:rgba(94,231,255,.22);
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018))
+    }
+
+    .folder-toggle{
+      width:100%;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto auto;
+      gap:14px;
+      align-items:center;
+      text-align:left;
+      background:transparent;
+      border:none;
+      color:var(--text);
+      padding:18px;
+      cursor:pointer;
+    }
+
+    .folder-title-wrap{min-width:0}
+    .folder-title{
+      margin:0;
+      font-family:"Orbitron",sans-serif;
+      font-size:1rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+
+    .folder-sub{
+      margin-top:5px;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+
+    .folder-pill{
+      display:inline-flex;align-items:center;justify-content:center;min-width:88px;min-height:36px;padding:0 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04);color:var(--muted);font-weight:700;font-size:.88rem;
+    }
+
+    .folder-chevron{
+      width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);
+      transition:transform .2s ease;flex-shrink:0;
+    }
+
+    .folder-card.open .folder-chevron{transform:rotate(180deg)}
+
+    .folder-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+    .folder-card.open .folder-content{grid-template-rows:1fr}
+    .folder-content-inner{min-height:0;overflow:hidden}
+    .folder-content-pad{padding:0 18px 18px;border-top:1px solid rgba(255,255,255,.05)}
+
+    .player-list{display:grid;gap:12px;margin-top:14px}
+
+    .player{
+      display:grid;
+      grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr) auto auto;
+      gap:12px;
+      align-items:center;
+      padding:14px 16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      animation:reveal .35s ease both;
+    }
+
+    .player-main,.player-meta{min-width:0}
+    .player-main strong{
+      display:block;margin-bottom:4px;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+
+    .player-main span,.player-meta span{
+      display:block;color:var(--muted);font-size:.9rem;line-height:1.45;word-break:break-word;overflow-wrap:anywhere
+    }
+
+    .player-meta{display:grid;gap:4px}
+
+    .dir-badge{
+      display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid rgba(94,231,255,.18);
+      background:rgba(94,231,255,.08);color:var(--cyan);font-weight:700;font-size:.78rem;text-transform:uppercase;white-space:nowrap;
+    }
+
+    .player-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+    .form-grid{display:grid;gap:14px}
+    .field{display:grid;gap:8px}
+    .field label{
+      color:var(--muted);font-size:.84rem;text-transform:uppercase;letter-spacing:.12em
+    }
+
+    .input,.select{
+      width:100%;min-height:48px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);
+      outline:none;font:500 .96rem "Inter",sans-serif;
+    }
+
+    .input:focus,.select:focus{
+      border-color:rgba(94,231,255,.34);
+      box-shadow:0 0 0 3px rgba(94,231,255,.08);
+    }
+
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+
+    .message{
+      margin-top:14px;min-height:52px;padding:14px 16px;display:flex;align-items:center;border-radius:14px;border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.03);color:var(--muted);white-space:pre-wrap;word-break:break-word;
+    }
+    .message.success{border-color:rgba(99,245,176,.26);background:rgba(99,245,176,.08);color:#ccffeb}
+    .message.error{border-color:rgba(255,111,145,.28);background:rgba(255,111,145,.08);color:#ffd9e3}
+    .message.info{border-color:rgba(94,231,255,.24);background:rgba(94,231,255,.08);color:#d9fbff}
+
+    .user-list{display:grid;gap:12px;margin-top:14px}
+    .user-row{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+    }
+    .user-row strong{display:block;margin-bottom:4px}
+    .user-row span{display:block;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+
+    .terminal-overlay{
+      position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:20px;background:rgba(2,3,8,.74);backdrop-filter:blur(12px);
+    }
+    .terminal-overlay.show{display:grid}
+
+    .terminal-shell{
+      width:min(760px, 100%);
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(122,50,255,.26);
+      box-shadow:0 28px 100px rgba(0,0,0,.58);
+      background:linear-gradient(180deg, rgba(8,10,18,.98), rgba(4,6,12,.98));
+      animation:reveal .28s ease both;
+    }
+
+    .terminal-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.016));
+    }
+
+    .term-lights{display:flex;gap:8px}
+    .term-lights span{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
+    .term-lights span:nth-child(1){background:#ff6f91}
+    .term-lights span:nth-child(2){background:#ffca6b}
+    .term-lights span:nth-child(3){background:#63f5b0}
+
+    .terminal-title{
+      font-family:"Orbitron",sans-serif;
+      font-size:.84rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#dce7ff
+    }
+
+    .terminal-body{padding:18px}
+    .terminal-log{
+      min-height:130px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      color:#9cffc5;
+      margin-bottom:16px;
+      font-size:1rem;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+
+    .terminal-form{display:grid;gap:14px}
+    .terminal-label{color:#bdf7d7;font-size:.95rem;margin-bottom:6px;display:block}
+    .terminal-input{
+      width:100%;min-height:52px;border-radius:16px;padding:0 16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#ebfff4;outline:none;font:500 1rem "Inter",sans-serif;
+    }
+
+    .terminal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+
+    .debug-box{
+      margin-top:16px;padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.84rem;line-height:1.45;color:#d9e7ff;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;
+    }
+
+    [data-reveal]{opacity:0;transform:translateY(14px)}
+    .revealed{animation:reveal .45s ease forwards}
+
+    @keyframes reveal{
+      from{opacity:0;transform:translateY(14px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @media (max-width:1120px){
+      .layout{grid-template-columns:1fr}
+    }
+
+    @media (max-width:920px){
+      .hero{grid-template-columns:1fr}
+      .player{grid-template-columns:1fr}
+      .player-actions{justify-content:flex-start}
+      .folder-toggle{grid-template-columns:minmax(0,1fr) auto}
+      .user-row{grid-template-columns:1fr}
+    }
+
+    @media (max-width:640px){
+      .wrap{width:min(var(--max), calc(100% - 20px))}
+      .topbar-inner{flex-direction:column;align-items:flex-start}
+      .statusbar{justify-content:flex-start}
+      .hero-copy,.hero-side,.panel-body,.terminal-body{padding:18px}
+      .panel-head{padding:18px 18px 0}
+      .folder-toggle{grid-template-columns:1fr auto}
+      .folder-pill{justify-self:start}
+      .terminal-actions > *{flex:1 1 auto}
+    }
+  </style>
 </head>
 <body>
-<header>
-<div class="wrap top">
-<div class="brand"><div class="mark" aria-hidden="true"></div><div><strong>FROSTED FANG</strong><small>OPERATIONS / CONTROL ROOM</small></div></div>
-<nav class="tools" aria-label="Account controls">
-<span id="health" class="tag">Connecting…</span>
-<span id="account" class="tag">Signed out</span>
-<button id="loginOpen" class="btn primary">Terminal login</button>
-<button id="logout" class="btn" hidden>Log out</button>
-</nav>
-</div>
-</header>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">F</div>
+        <div>
+          <span class="eyebrow">Security Grid</span>
+          <h1 class="title">Frosted Fang Control</h1>
+        </div>
+      </div>
 
-<main class="wrap">
-<section class="hero">
-<div><div class="eyebrow">Live roster / Remote delivery</div><h1>Stay in<br><span>control.</span></h1><p>Manage players, organize folders, and send triggers directly from your control room. No credentials are embedded in this page.</p></div>
-<div class="metric"><span id="count">—</span><small>VISIBLE PLAYERS</small></div>
-</section>
+      <div class="statusbar">
+        <div class="pill"><span class="dot" id="backendDot"></span><span id="backendText">Checking backend…</span></div>
+        <div class="pill" id="authPill">Unauthenticated</div>
+        <button class="btn btn-violet" id="openTerminalBtn" type="button">Terminal Login</button>
+        <button class="btn btn-danger hidden" id="logoutBtn" type="button">Log Out</button>
+      </div>
+    </div>
+  </header>
 
-<div class="notice">
-<strong>Important: your screenshot shows a missing database column.</strong>
-This HTML preserves numeric and UUID player IDs, but it cannot add database columns or change server validation. Apply the one-time fixes below if you still receive “folder_name” or “Invalid player id” errors.
-</div>
+  <main class="wrap">
+    <section class="hero">
+      <article class="panel" data-reveal>
+        <div class="hero-copy">
+          <div>
+            <p class="hero-kicker">Operational Panel</p>
+            <h1>Frosted Fang Security & Pull System</h1>
+            <p>Folder-based roster control, session-backed access, admin tools, and delayed trigger delivery built for lower TPS worlds.</p>
+          </div>
+          <div class="hero-meta">
+            <div class="pill">GitHub Pages Frontend</div>
+            <div class="pill">Render Backend</div>
+            <div class="pill">2s Trigger Hold</div>
+          </div>
+        </div>
+      </article>
 
-<details class="setup">
-<summary>One-time backend fixes: missing column, UUID IDs, and two-second triggers</summary>
-<p><strong>1. Supabase → SQL Editor:</strong> add the missing folder column and refresh the schema cache.</p>
-<pre>alter table public.players
-  add column if not exists folder_name text;
+      <aside class="panel" data-reveal>
+        <div class="hero-side">
+          <div class="mini-stat">
+            <div class="label">Visible players</div>
+            <div class="value" id="playerCount">--</div>
+          </div>
+          <div class="mini-stat">
+            <div class="label">Trigger access</div>
+            <div class="value" id="triggerAccess">Denied</div>
+          </div>
+          <div class="mini-stat">
+            <div class="label">Admin access</div>
+            <div class="value" id="adminAccess">Denied</div>
+          </div>
+        </div>
+      </aside>
+    </section>
 
-notify pgrst, 'reload schema';</pre>
-<p><strong>2. In server.js:</strong> your PUT and DELETE player routes currently convert IDs with <code>Number(req.params.id)</code>. UUID IDs become NaN. Replace the ID conversion and numeric validation in both routes with:</p>
-<pre>const id = String(req.params.id || '').trim();
-const validId = /^(?:[0-9]+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(id);
+    <section id="appSection" class="layout hidden">
+      <section class="panel" data-reveal>
+        <div class="panel-head">
+          <div>
+            <h2>Roster Folders</h2>
+            <p>Open a folder to view its pearls and controls.</p>
+          </div>
+          <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div id="folderAccordion" class="folder-accordion"></div>
+          <div id="rosterEmpty" class="message info hidden">No visible folders or players found.</div>
+        </div>
+      </section>
 
-if (!validId) {
-  return res.status(400).json({ error: 'Invalid player id' });
-}
+      <aside class="stack">
+        <article class="panel" data-reveal>
+          <div class="panel-head">
+            <div>
+              <h2>Manual Trigger</h2>
+              <p>Send a pearl pull directly.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="triggerForm" class="form-grid">
+              <div class="field">
+                <label for="triggerComputerName">Computer name</label>
+                <input class="input" id="triggerComputerName" placeholder="LakIo" required />
+              </div>
+              <div class="field">
+                <label for="triggerFolderName">Folder name</label>
+                <input class="input" id="triggerFolderName" placeholder="LakIo" required />
+              </div>
+              <div class="field">
+                <label for="triggerDirection">Direction</label>
+                <select class="select" id="triggerDirection">
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                  <option value="top">top</option>
+                  <option value="bottom">bottom</option>
+                  <option value="front">front</option>
+                  <option value="back">back</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Trigger</button>
+              </div>
+            </form>
+            <div id="triggerMessage" class="message">Ready.</div>
+          </div>
+        </article>
 
-// Keep using .eq('id', id).
-// Do not convert UUIDs to Number.</pre>
-<p><strong>3. Two-second trigger delivery must be implemented on the server.</strong> In POST /trigger, use <code>expiresAt: now + 2000</code>. In GET /trigger, do not remove a trigger when it is read. Replace the <code>splice</code> read with:</p>
-<pre>res.setHeader('Cache-Control', 'no-store');
+        <article class="panel hidden" id="playerAdminPanel" data-reveal>
+          <div class="panel-head">
+            <div>
+              <h2>Add / Edit Player</h2>
+              <p>Admin only.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="playerForm" class="form-grid">
+              <input type="hidden" id="playerId" />
+              <div class="field"><label for="name">Player name</label><input class="input" id="name" required /></div>
+              <div class="field"><label for="computer_name">Computer name</label><input class="input" id="computer_name" required /></div>
+              <div class="field"><label for="channel_name">Channel name</label><input class="input" id="channel_name" /></div>
+              <div class="field"><label for="folder_name">Folder</label><input class="input" id="folder_name" required /></div>
+              <div class="field">
+                <label for="direction">Direction</label>
+                <select class="select" id="direction">
+                  <option value="left">left</option>
+                  <option value="right">right</option>
+                  <option value="top">top</option>
+                  <option value="bottom">bottom</option>
+                  <option value="front">front</option>
+                  <option value="back">back</option>
+                </select>
+              </div>
+              <div class="field"><label for="signal_strength">Signal strength</label><input class="input" type="number" id="signal_strength" min="1" max="15" value="15" /></div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save player</button>
+                <button class="btn btn-ghost" type="button" id="clearPlayerBtn">Clear</button>
+              </div>
+            </form>
+            <div id="playerMessage" class="message">Admin panel ready.</div>
+          </div>
+        </article>
 
-cleanExpiredTriggers();
-const trigger = triggerQueue.find(
-  t => String(t.computer_name) === computerName
-);
+        <article class="panel hidden" id="userAdminPanel" data-reveal>
+          <div class="panel-head">
+            <div>
+              <h2>User Manager</h2>
+              <p>Admin only.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form id="userForm" class="form-grid">
+              <input type="hidden" id="userId" />
+              <div class="field"><label for="username">Username</label><input class="input" id="username" required /></div>
+              <div class="field"><label for="password">Password</label><input class="input" id="password" placeholder="Leave blank when not changing" /></div>
+              <div class="field">
+                <label>Permissions</label>
+                <div style="display:grid;gap:8px;color:var(--muted);font-size:.92rem;">
+                  <label><input type="checkbox" id="isAdmin" /> Admin</label>
+                  <label><input type="checkbox" id="canPull" checked /> Can Pull</label>
+                  <label><input type="checkbox" id="allFolders" /> All Folders</label>
+                </div>
+              </div>
+              <div class="field"><label for="allowedFolders">Allowed folders (comma separated)</label><input class="input" id="allowedFolders" placeholder="LakIo, Base, Vault" /></div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save user</button>
+                <button class="btn btn-ghost" type="button" id="clearUserBtn">Clear</button>
+              </div>
+            </form>
+            <div id="userMessage" class="message">Manage users from Supabase.</div>
+            <div id="userList" class="user-list"></div>
+          </div>
+        </article>
 
-return res.json({
-  trigger: trigger ? {
-    computer_name: trigger.computer_name,
-    direction: trigger.direction,
-    createdAt: trigger.createdAt,
-    expiresAt: trigger.expiresAt
-  } : null
-});</pre>
-<p>The computer should remember <code>createdAt</code> and process each trigger only once. Otherwise repeated polling during the two-second window can fire it repeatedly. Two seconds improves delivery, but cannot guarantee receipt if polling takes longer; acknowledgment-based delivery is more reliable. Redeploy server.js after these changes.</p>
-</details>
+        <article class="panel" data-reveal>
+          <div class="panel-head">
+            <div>
+              <h2>Debug</h2>
+              <p>Cross-origin auth diagnostics.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="actions">
+              <button class="btn btn-ghost" type="button" id="debugSessionBtn">/debug/session</button>
+              <button class="btn btn-ghost" type="button" id="debugUsersBtn">/debug/users</button>
+              <button class="btn btn-ghost" type="button" id="authMeBtn">/auth/me</button>
+            </div>
+            <pre id="debugBox" class="debug-box">Waiting for debug output...</pre>
+          </div>
+        </article>
+      </aside>
+    </section>
+  </main>
 
-<div id="globalMessage" class="message" role="status" aria-live="polite"></div>
+  <div class="terminal-overlay" id="terminalOverlay">
+    <div class="terminal-shell">
+      <div class="terminal-top">
+        <div class="term-lights"><span></span><span></span><span></span></div>
+        <div class="terminal-title">Frosted Fang Terminal Access</div>
+      </div>
+      <div class="terminal-body">
+        <div id="terminalLog" class="terminal-log">&gt; C:/Frosted/OS/ Checking for access
+&gt;
+&gt; Awaiting credentials...</div>
 
-<section id="signedOut" class="empty">Sign in to load your roster. Your permissions are checked by the backend.</section>
+        <form id="loginForm" class="terminal-form" autocomplete="off">
+          <div>
+            <label class="terminal-label" for="loginUsername">User</label>
+            <input class="terminal-input" id="loginUsername" autocomplete="off" value="" />
+          </div>
+          <div>
+            <label class="terminal-label" for="loginPassword">Password</label>
+            <input class="terminal-input" id="loginPassword" type="password" autocomplete="new-password" value="" />
+          </div>
+          <div class="terminal-actions">
+            <button class="btn btn-ghost" type="button" id="closeTerminalBtn">Cancel</button>
+            <button class="btn btn-violet" type="submit">Authenticate</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-<section id="workspace" class="workspace" hidden>
-<section aria-labelledby="rosterTitle">
-<div class="section-top"><div><h2 id="rosterTitle">Roster folders</h2><small>Player names, computers, and remote controls</small></div><button id="refresh" class="btn">Refresh</button></div>
-<input id="search" class="search" type="search" placeholder="Search players or folders…" aria-label="Search roster">
-<div id="roster" style="margin-top:24px"></div>
-</section>
+  <script>
+    const API_BASE = 'https://backend-website-syxe.onrender.com';
 
-<aside>
-<section id="playerAdmin" class="sidebar" hidden>
-<div class="eyebrow" id="editMode">Create a new record</div>
-<h2>Add / edit player</h2>
-<form id="playerForm">
-<input type="hidden" id="playerId">
-<div class="field"><label for="playerName">Player name</label><input id="playerName" required maxlength="150"></div>
-<div class="field"><label for="computer">Computer name</label><input id="computer" required maxlength="150"></div>
-<div class="field"><label for="channel">Channel name</label><input id="channel" maxlength="150"></div>
-<div class="field"><label for="folder">Folder</label><input id="folder" required maxlength="150"></div>
-<div class="two">
-<div class="field"><label for="direction">Direction</label><select id="direction"><option>left</option><option>right</option><option>top</option><option>bottom</option><option>front</option><option>back</option></select></div>
-<div class="field"><label for="strength">Signal strength</label><input id="strength" type="number" min="1" max="15" value="15" required></div>
-</div>
-<div class="actions"><button id="savePlayer" class="btn primary" type="submit">Save player</button><button id="clearPlayer" class="btn" type="button">Clear</button></div>
-<div id="playerMessage" class="message" role="status" aria-live="polite">Ready. IDs are preserved exactly as returned by the database.</div>
-</form>
-</section>
+    const state = {
+      user: null,
+      players: [],
+      users: [],
+      openFolders: new Set()
+    };
 
-<section class="sidebar" style="margin-top:24px">
-<div class="eyebrow">Remote command</div><h2>Manual trigger</h2>
-<form id="triggerForm">
-<div class="field"><label for="triggerComputer">Computer name</label><input id="triggerComputer" required></div>
-<div class="field"><label for="triggerFolder">Folder</label><input id="triggerFolder" required></div>
-<div class="field"><label for="triggerDirection">Direction</label><select id="triggerDirection"><option>left</option><option>right</option><option>top</option><option>bottom</option><option>front</option><option>back</option></select></div>
-<button class="btn primary" type="submit">Send trigger</button>
-<div id="triggerMessage" class="message" role="status" aria-live="polite">Two-second retention requires the server patch above.</div>
-</form>
-</section>
+    const els = {
+      backendDot: document.getElementById('backendDot'),
+      backendText: document.getElementById('backendText'),
+      authPill: document.getElementById('authPill'),
+      openTerminalBtn: document.getElementById('openTerminalBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      playerCount: document.getElementById('playerCount'),
+      triggerAccess: document.getElementById('triggerAccess'),
+      adminAccess: document.getElementById('adminAccess'),
+      appSection: document.getElementById('appSection'),
+      folderAccordion: document.getElementById('folderAccordion'),
+      rosterEmpty: document.getElementById('rosterEmpty'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      triggerForm: document.getElementById('triggerForm'),
+      triggerComputerName: document.getElementById('triggerComputerName'),
+      triggerFolderName: document.getElementById('triggerFolderName'),
+      triggerDirection: document.getElementById('triggerDirection'),
+      triggerMessage: document.getElementById('triggerMessage'),
+      playerAdminPanel: document.getElementById('playerAdminPanel'),
+      userAdminPanel: document.getElementById('userAdminPanel'),
+      playerForm: document.getElementById('playerForm'),
+      playerId: document.getElementById('playerId'),
+      playerMessage: document.getElementById('playerMessage'),
+      clearPlayerBtn: document.getElementById('clearPlayerBtn'),
+      userForm: document.getElementById('userForm'),
+      userId: document.getElementById('userId'),
+      username: document.getElementById('username'),
+      password: document.getElementById('password'),
+      isAdmin: document.getElementById('isAdmin'),
+      canPull: document.getElementById('canPull'),
+      allFolders: document.getElementById('allFolders'),
+      allowedFolders: document.getElementById('allowedFolders'),
+      clearUserBtn: document.getElementById('clearUserBtn'),
+      userMessage: document.getElementById('userMessage'),
+      userList: document.getElementById('userList'),
+      terminalOverlay: document.getElementById('terminalOverlay'),
+      terminalLog: document.getElementById('terminalLog'),
+      loginForm: document.getElementById('loginForm'),
+      closeTerminalBtn: document.getElementById('closeTerminalBtn'),
+      debugSessionBtn: document.getElementById('debugSessionBtn'),
+      debugUsersBtn: document.getElementById('debugUsersBtn'),
+      authMeBtn: document.getElementById('authMeBtn'),
+      debugBox: document.getElementById('debugBox')
+    };
 
-<section id="userAdmin" class="sidebar" style="margin-top:24px" hidden>
-<div class="eyebrow">Access management</div><h2>Users</h2>
-<form id="userForm">
-<input id="userId" type="hidden">
-<div class="field"><label for="userName">Username</label><input id="userName" required autocomplete="off"></div>
-<div class="field"><label for="userPassword">New password</label><input id="userPassword" type="password" autocomplete="new-password" placeholder="Required for new users"></div>
-<div class="field">
-<label><input id="adminFlag" type="checkbox" style="width:auto;min-height:0"> Admin</label>
-<label><input id="pullFlag" type="checkbox" checked style="width:auto;min-height:0"> Can pull</label>
-<label><input id="foldersFlag" type="checkbox" style="width:auto;min-height:0"> All folders</label>
-</div>
-<div class="field"><label for="allowed">Allowed folders, comma separated</label><input id="allowed"></div>
-<div class="actions"><button class="btn primary" type="submit">Save user</button><button id="clearUser" class="btn" type="button">Clear</button></div>
-<div id="userMessage" class="message" role="status"></div>
-</form>
-<div id="users"></div>
-</section>
-</aside>
-</section>
-</main>
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, s => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      })[s]);
+    }
 
-<dialog id="loginDialog" aria-labelledby="loginTitle">
-<div class="eyebrow">Secure session / Terminal</div><h2 id="loginTitle">Authenticate</h2>
-<form id="loginForm" autocomplete="off">
-<div class="field"><label for="loginName">Username</label><input id="loginName" required autocomplete="off" autocapitalize="none" spellcheck="false"></div>
-<div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" required autocomplete="new-password"></div>
-<div class="actions"><button id="loginSubmit" class="btn primary" type="submit">Log in</button><button id="loginCancel" class="btn" type="button">Cancel</button></div>
-<div id="loginMessage" class="message" aria-live="polite">Enter your credentials. Nothing is prefilled by this website.</div>
-</form>
-</dialog>
-<footer><div class="wrap">FROSTED FANG / SESSION-AUTHENTICATED CONTROL ROOM</div></footer>
+    async function api(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
 
-<script>
-'use strict';
-const API_BASE = 'https://backend-website-syxe.onrender.com';
-const $ = id => document.getElementById(id);
-const state = { user:null, players:[], users:[], editingId:null };
-const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const folderOf = p => String(p.folder_name || p.computer_name || 'Unassigned');
-const idOf = row => row.id == null ? '' : String(row.id);
-const validId = id => /^(?:[0-9]+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(id);
-const canPull = () => !!(state.user && (state.user.isAdmin || state.user.canPull));
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
 
-function message(id,text,type=''){
-  $(id).textContent=text;
-  $(id).className='message'+(type?' '+type:'');
-}
-async function request(path, options={}){
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),45000);
-  try{
-    const headers={...(options.headers||{})};
-    if(options.body) headers['Content-Type']='application/json';
-    const res=await fetch(API_BASE+path,{...options,headers,credentials:'include',mode:'cors',cache:'no-store',signal:controller.signal});
-    const text=await res.text();
-    let data;
-    try{data=text?JSON.parse(text):{};}catch{data={};}
-    if(!res.ok) throw new Error(data.error || `Request failed (${res.status}). Check the backend logs.`);
-    return data;
-  }catch(error){
-    if(error.name==='AbortError') throw new Error('Request timed out. Render may be waking up. Try again shortly.');
-    if(error instanceof TypeError) throw new Error('Cannot reach the backend. Check its status, CORS settings, and your connection.');
-    throw error;
-  }finally{clearTimeout(timeout);}
-}
-async function busy(button,task){
-  if(button.disabled)return;
-  button.disabled=true;
-  try{await task();}finally{button.disabled=false;}
-}
-function authUI(){
-  const logged=!!state.user;
-  $('workspace').hidden=!logged;
-  $('signedOut').hidden=logged;
-  $('loginOpen').hidden=logged;
-  $('logout').hidden=!logged;
-  $('playerAdmin').hidden=!state.user?.isAdmin;
-  $('userAdmin').hidden=!state.user?.isAdmin;
-  $('account').textContent=logged?`${state.user.username} / ${state.user.isAdmin?'ADMIN':'USER'}`:'Signed out';
-  $('count').textContent=logged?state.players.length:'—';
-  $('triggerForm').querySelectorAll('input,select,button').forEach(el=>el.disabled=!canPull());
-}
-function renderRoster(){
-  const term=$('search').value.trim().toLowerCase();
-  const groups=new Map();
-  state.players.filter(p=>[p.name,p.computer_name,folderOf(p)].some(v=>String(v||'').toLowerCase().includes(term))).forEach(p=>{
-    const folder=folderOf(p);
-    if(!groups.has(folder))groups.set(folder,[]);
-    groups.get(folder).push(p);
-  });
-  $('roster').innerHTML=[...groups.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([folder,players])=>`
-    <details class="folder" open>
-    <summary>${esc(folder)}<span>${players.length} RECORD${players.length===1?'':'S'}</span></summary>
-    ${players.map(p=>{
-      const id=idOf(p);
-      return `<article class="player"><div><strong>${esc(p.name||'Unnamed player')}</strong>
-      <div class="meta">COMPUTER ${esc(p.computer_name||'—')}<br>CHANNEL ${esc(p.channel_name||'—')} / ${esc(p.direction||'left')} / SIGNAL ${esc(p.signal_strength??15)}<br>ID ${esc(id||'Missing')}</div></div>
-      <div class="actions">
-      ${canPull()?`<button class="btn primary" data-action="trigger" data-id="${esc(id)}">Trigger</button>`:''}
-      ${state.user?.isAdmin?`<button class="btn" data-action="edit" data-id="${esc(id)}">Edit</button><button class="btn danger" data-action="delete" data-id="${esc(id)}">Delete</button>`:''}
-      </div></article>`;
-    }).join('')}</details>`).join('')||'<div class="empty">No visible players match this view.</div>';
-}
-async function loadPlayers(){
-  const data=await request('/players');
-  state.players=Array.isArray(data.players)?data.players:[];
-  authUI();renderRoster();
-}
-function clearPlayer(){
-  state.editingId=null;
-  $('playerForm').reset();
-  $('playerId').value='';
-  $('editMode').textContent='Create a new record';
-  $('savePlayer').textContent='Save player';
-}
-function startEdit(p){
-  const id=idOf(p);
-  if(!validId(id))throw new Error('This record has a missing or unsupported ID. Check the players primary key in Supabase.');
-  state.editingId=id;
-  $('playerId').value=id;
-  $('playerName').value=p.name||'';
-  $('computer').value=p.computer_name||'';
-  $('channel').value=p.channel_name||'';
-  $('folder').value=folderOf(p);
-  $('direction').value=p.direction||'left';
-  $('strength').value=p.signal_strength??15;
-  $('editMode').textContent='Editing existing record';
-  $('savePlayer').textContent='Update player';
-  message('playerMessage',`Editing ${p.name}. ID: ${id}`);
-  $('playerAdmin').scrollIntoView({behavior:'smooth',block:'start'});
-  $('playerName').focus({preventScroll:true});
-}
-async function sendTrigger(payload){
-  message('triggerMessage','Sending trigger…');
-  const data=await request('/trigger',{method:'POST',body:JSON.stringify(payload)});
-  message('triggerMessage',`Trigger queued for ${payload.computer_name}. Retention is controlled by server.js, not this page.`,'success');
-  if(data.expiresAt){
-    const remaining=Math.max(0,data.expiresAt-Date.now());
-    message('triggerMessage',`Trigger queued. Server reports ${Math.round(remaining)} ms remaining.`,'success');
-  }
-}
-$('roster').addEventListener('click',async e=>{
-  const btn=e.target.closest('button[data-action]');
-  if(!btn)return;
-  const p=state.players.find(row=>idOf(row)===btn.dataset.id);
-  if(!p)return;
-  await busy(btn,async()=>{
-    try{
-      if(btn.dataset.action==='edit'){startEdit(p);return;}
-      if(btn.dataset.action==='trigger'){
-        $('triggerComputer').value=p.computer_name||'';
-        $('triggerFolder').value=folderOf(p);
-        $('triggerDirection').value=p.direction||'left';
-        await sendTrigger({computer_name:p.computer_name,direction:p.direction||'left',folder_name:folderOf(p)});
-        message('globalMessage',`Trigger queued for ${p.name}.`,'success');
+      if (!res.ok) {
+        throw new Error((data && data.error) || `Request failed: ${res.status}`);
+      }
+
+      return data;
+    }
+
+    async function apiRaw(path, options = {}) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    function setDebug(title, data) {
+      els.debugBox.textContent = `${title}\n\n${typeof data === 'string' ? data : JSON.stringify(data, null, 2)}`;
+    }
+
+    function normalizeFolder(player) {
+      return String(player.folder_name || player.computer_name || 'Unassigned').trim() || 'Unassigned';
+    }
+
+    function normalizeComputer(player) {
+      return String(player.computer_name || '').trim();
+    }
+
+    function isAuthed(user) {
+      return !!(user && (user.isAdmin || user.canPull));
+    }
+
+    function canSeeFolder(folder) {
+      if (!state.user) return false;
+      if (state.user.isAdmin || state.user.allFolders) return true;
+      return Array.isArray(state.user.allowedFolders) && state.user.allowedFolders.includes(folder);
+    }
+
+    function visiblePlayers() {
+      if (!state.user) return [];
+      if (state.user.isAdmin || state.user.allFolders) return state.players;
+      return state.players.filter(p => canSeeFolder(normalizeFolder(p)));
+    }
+
+    function groupedPlayers() {
+      const out = {};
+      for (const p of visiblePlayers()) {
+        const folder = normalizeFolder(p);
+        if (!out[folder]) out[folder] = [];
+        out[folder].push(p);
+      }
+      return out;
+    }
+
+    function updateAuthUI() {
+      const user = state.user;
+      const authed = isAuthed(user);
+      const isAdmin = !!(user && user.isAdmin);
+
+      els.playerCount.textContent = authed ? String(visiblePlayers().length) : '--';
+      els.triggerAccess.textContent = authed ? 'Granted' : 'Denied';
+      els.adminAccess.textContent = isAdmin ? 'Granted' : 'Denied';
+
+      if (!user) {
+        els.authPill.textContent = 'Unauthenticated';
+      } else {
+        const scope = user.isAdmin ? 'admin' : user.allFolders ? 'all folders' : ((user.allowedFolders || []).join(', ') || 'limited');
+        els.authPill.textContent = `${user.username} • ${scope}`;
+      }
+
+      els.openTerminalBtn.classList.toggle('hidden', authed);
+      els.logoutBtn.classList.toggle('hidden', !authed);
+      els.appSection.classList.toggle('hidden', !authed);
+      els.playerAdminPanel.classList.toggle('hidden', !isAdmin);
+      els.userAdminPanel.classList.toggle('hidden', !isAdmin);
+    }
+
+    function playerMarkup(player) {
+      const adminControls = state.user && state.user.isAdmin ? `
+        <button class="btn btn-ghost" type="button" data-edit="${player.id}">Edit</button>
+        <button class="btn btn-danger" type="button" data-delete="${player.id}">Delete</button>
+      ` : '';
+
+      return `
+        <article class="player">
+          <div class="player-main">
+            <strong>${escapeHtml(player.name)}</strong>
+            <span>Computer: ${escapeHtml(normalizeComputer(player) || normalizeFolder(player))}</span>
+          </div>
+          <div class="player-meta">
+            <span>Folder: ${escapeHtml(normalizeFolder(player))}</span>
+            <span>Channel: ${escapeHtml(player.channel_name || '-')}</span>
+          </div>
+          <div><span class="dir-badge">${escapeHtml(player.direction || 'left')}</span></div>
+          <div class="player-actions">
+            ${state.user && state.user.canPull ? `<button class="btn btn-primary" type="button" data-trigger="${player.id}">Trigger</button>` : ''}
+            ${adminControls}
+          </div>
+        </article>
+      `;
+    }
+
+    function renderFolders() {
+      const groups = groupedPlayers();
+      const folders = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+      if (!folders.length) {
+        els.folderAccordion.innerHTML = '';
+        els.rosterEmpty.classList.remove('hidden');
         return;
       }
-      const id=idOf(p);
-      if(!validId(id))throw new Error('The player ID is missing or unsupported.');
-      if(!confirm(`Delete ${p.name}? This cannot be undone.`))return;
-      await request('/players/'+encodeURIComponent(id),{method:'DELETE'});
-      if(state.editingId===id)clearPlayer();
-      await loadPlayers();
-      message('globalMessage','Player deleted.','success');
-    }catch(error){message('globalMessage',error.message,'error');message('playerMessage',error.message,'error');}
-  });
-});
-$('playerForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  await busy($('savePlayer'),async()=>{
-    try{
-      const id=state.editingId;
-      if(id!==null&&(!validId(id)||$('playerId').value!==id))throw new Error('Edit ID changed unexpectedly. Click Edit again.');
-      const payload={name:$('playerName').value.trim(),computer_name:$('computer').value.trim(),channel_name:$('channel').value.trim(),folder_name:$('folder').value.trim(),direction:$('direction').value,signal_strength:Number($('strength').value)};
-      if(!payload.name||!payload.computer_name||!payload.folder_name)throw new Error('Name, computer, and folder are required.');
-      message('playerMessage','Saving…');
-      await request(id===null?'/players':'/players/'+encodeURIComponent(id),{method:id===null?'POST':'PUT',body:JSON.stringify(payload)});
-      clearPlayer();
-      message('playerMessage','Player saved.','success');
-      await loadPlayers();
-    }catch(error){
-      let text=error.message;
-      if(/invalid player id/i.test(text))text+=' If the ID above is a UUID, remove Number(req.params.id) in server.js using the backend patch above.';
-      if(/folder_name.*column|column.*folder_name/i.test(text))text+=' Add folder_name in Supabase using the SQL shown above.';
-      message('playerMessage',text,'error');
+
+      els.rosterEmpty.classList.add('hidden');
+      state.openFolders = new Set([...state.openFolders].filter(f => folders.includes(f)));
+      if (state.openFolders.size === 0 && folders[0]) state.openFolders.add(folders[0]);
+
+      els.folderAccordion.innerHTML = folders.map(folder => {
+        const open = state.openFolders.has(folder);
+        const players = groups[folder];
+        const exampleComputer = players[0]?.computer_name || folder;
+
+        return `
+          <section class="folder-card ${open ? 'open' : ''}">
+            <button class="folder-toggle" type="button" data-folder="${escapeHtml(folder)}">
+              <div class="folder-title-wrap">
+                <h3 class="folder-title">${escapeHtml(folder)}</h3>
+                <div class="folder-sub">Computer: ${escapeHtml(exampleComputer)}</div>
+              </div>
+              <div class="folder-pill">${players.length} player${players.length === 1 ? '' : 's'}</div>
+              <div class="folder-chevron">⌄</div>
+            </button>
+            <div class="folder-content">
+              <div class="folder-content-inner">
+                <div class="folder-content-pad">
+                  <div class="player-list">${players.map(playerMarkup).join('')}</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }).join('');
     }
-  });
-});
-$('clearPlayer').onclick=()=>{clearPlayer();message('playerMessage','Ready to create a player.');};
-$('search').addEventListener('input',renderRoster);
-$('refresh').onclick=()=>busy($('refresh'),async()=>{
-  try{await loadPlayers();if(state.user?.isAdmin)await loadUsers();message('globalMessage','Roster refreshed.','success');}
-  catch(e){message('globalMessage',e.message,'error');}
-});
-$('triggerForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  await busy(e.submitter,async()=>{
-    try{await sendTrigger({computer_name:$('triggerComputer').value.trim(),folder_name:$('triggerFolder').value.trim(),direction:$('triggerDirection').value});}
-    catch(error){message('triggerMessage',error.message,'error');}
-  });
-});
-function clearUser(){
-  $('userForm').reset();$('userId').value='';$('userPassword').value='';
-}
-async function loadUsers(){
-  const data=await request('/admin/users');
-  state.users=Array.isArray(data.users)?data.users:[];
-  $('users').innerHTML=state.users.map(u=>`<article class="player"><div><strong>${esc(u.username)}</strong><div class="meta">${u.isAdmin?'ADMIN':'USER'} / ${u.canPull?'PULL ENABLED':'NO PULL'}</div></div><div class="actions"><button class="btn" data-user-action="edit" data-id="${esc(idOf(u))}">Edit</button><button class="btn danger" data-user-action="delete" data-id="${esc(idOf(u))}">Delete</button></div></article>`).join('');
-}
-$('clearUser').onclick=clearUser;
-$('users').addEventListener('click',async e=>{
-  const btn=e.target.closest('[data-user-action]');
-  if(!btn)return;
-  const user=state.users.find(u=>idOf(u)===btn.dataset.id);
-  if(!user)return;
-  if(btn.dataset.userAction==='edit'){
-    $('userId').value=idOf(user);$('userName').value=user.username;
-    $('userPassword').value='';$('adminFlag').checked=!!user.isAdmin;
-    $('pullFlag').checked=!!user.canPull;$('foldersFlag').checked=!!user.allFolders;
-    $('allowed').value=(user.allowedFolders||[]).join(', ');
-    message('userMessage','Editing '+user.username);return;
-  }
-  if(!confirm('Delete '+user.username+'?'))return;
-  await busy(btn,async()=>{
-    try{await request('/admin/users/'+encodeURIComponent(idOf(user)),{method:'DELETE'});await loadUsers();message('userMessage','User deleted.','success');}
-    catch(error){message('userMessage',error.message,'error');}
-  });
-});
-$('userForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  await busy(e.submitter,async()=>{
-    try{
-      const id=$('userId').value;
-      const payload={username:$('userName').value.trim(),isAdmin:$('adminFlag').checked,canPull:$('pullFlag').checked,allFolders:$('foldersFlag').checked,allowedFolders:$('allowed').value.split(',').map(s=>s.trim()).filter(Boolean)};
-      if($('userPassword').value)payload.password=$('userPassword').value;
-      if(!id&&!payload.password)throw new Error('A new user needs a password.');
-      await request(id?'/admin/users/'+encodeURIComponent(id):'/admin/users',{method:id?'PUT':'POST',body:JSON.stringify(payload)});
-      clearUser();await loadUsers();message('userMessage','User saved.','success');
-    }catch(error){message('userMessage',error.message,'error');}
-  });
-});
-$('loginOpen').onclick=()=>{
-  $('loginForm').reset();
-  message('loginMessage','Enter your credentials.');
-  $('loginDialog').showModal();$('loginName').focus();
-};
-$('loginCancel').onclick=()=>{if(!$('loginSubmit').disabled)$('loginDialog').close();};
-$('loginForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  await busy($('loginSubmit'),async()=>{
-    try{
-      message('loginMessage','Authenticating… The backend may need time to wake up.');
-      const data=await request('/auth/local/login',{method:'POST',body:JSON.stringify({username:$('loginName').value.trim(),password:$('loginPassword').value})});
-      if(!data.user)throw new Error('The backend did not return a user.');
-      state.user=data.user;
-      $('loginPassword').value='';
-      $('loginDialog').close();authUI();
-      message('globalMessage','Signed in. Loading roster…');
-      try{await loadPlayers();if(state.user.isAdmin)await loadUsers();message('globalMessage','Control room ready.','success');}
-      catch(error){message('globalMessage','Signed in, but data could not load: '+error.message,'error');}
-    }catch(error){message('loginMessage',error.message,'error');}
-  });
-});
-$('logout').onclick=()=>busy($('logout'),async()=>{
-  try{
-    await request('/auth/logout',{method:'POST'});
-    state.user=null;state.players=[];state.users=[];clearPlayer();clearUser();
-    $('loginForm').reset();authUI();renderRoster();
-    message('globalMessage','Signed out.');
-  }catch(error){message('globalMessage',error.message,'error');}
-});
-async function init(){
-  request('/health').then(()=>{
-    $('health').textContent='● Backend online';$('health').classList.add('online');
-  }).catch(()=>{$('health').textContent='Backend unavailable';});
-  try{
-    const data=await request('/auth/me');state.user=data.user||null;authUI();
-    if(state.user){await loadPlayers();if(state.user.isAdmin)await loadUsers();}
-  }catch(error){message('globalMessage',error.message,'error');authUI();}
-}
-init();
-</script>
+
+    function renderUsers() {
+      if (!state.user || !state.user.isAdmin) {
+        els.userList.innerHTML = '';
+        return;
+      }
+
+      els.userList.innerHTML = state.users.map(u => `
+        <article class="user-row">
+          <div>
+            <strong>${escapeHtml(u.username)}</strong>
+            <span>
+              ${u.isAdmin ? 'Admin' : 'User'} •
+              ${u.canPull ? 'Can Pull' : 'No Pull'} •
+              ${u.allFolders ? 'All Folders' : ((u.allowedFolders || []).join(', ') || 'No folders')}
+            </span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost" type="button" data-user-edit="${u.id}">Edit</button>
+            <button class="btn btn-danger" type="button" data-user-delete="${u.id}">Delete</button>
+          </div>
+        </article>
+      `).join('') || '<div class="message info">No users loaded.</div>';
+    }
+
+    function clearPlayerForm() {
+      els.playerForm.reset();
+      els.playerId.value = '';
+      document.getElementById('signal_strength').value = 15;
+      document.getElementById('direction').value = 'left';
+    }
+
+    function clearUserForm() {
+      els.userForm.reset();
+      els.userId.value = '';
+      els.canPull.checked = true;
+      els.allowedFolders.value = '';
+    }
+
+    function openTerminal() {
+      els.terminalOverlay.classList.add('show');
+      els.terminalLog.textContent = '> C:/Frosted/OS/ Checking for access\n>\n> Awaiting credentials...';
+      setTimeout(() => document.getElementById('loginUsername').focus(), 60);
+    }
+
+    function closeTerminal() {
+      els.terminalOverlay.classList.remove('show');
+    }
+
+    async function terminalSuccess(username) {
+      const lines = [
+        '> C:/Frosted/OS/ Directory sweep',
+        '> dir /s /b',
+        `> users\\${username}`,
+        '> Access profile loaded'
+      ];
+
+      els.terminalLog.textContent = '';
+      for (const line of lines) {
+        els.terminalLog.textContent += (els.terminalLog.textContent ? '\n' : '') + line;
+        await new Promise(r => setTimeout(r, 90));
+      }
+      await new Promise(r => setTimeout(r, 280));
+      closeTerminal();
+    }
+
+    async function loadHealth() {
+      try {
+        const data = await api('/health');
+        els.backendDot.className = data.status === 'ON' ? 'dot online' : 'dot offline';
+        els.backendText.textContent = data.status === 'ON' ? 'Backend online' : 'Backend issue';
+      } catch (e) {
+        els.backendDot.className = 'dot offline';
+        els.backendText.textContent = 'Backend offline';
+        setDebug('GET /health failed', String(e.message || e));
+      }
+    }
+
+    async function loadAuth() {
+      try {
+        const data = await api('/auth/me');
+        state.user = data.user || null;
+      } catch {
+        state.user = null;
+      }
+      updateAuthUI();
+    }
+
+    async function loadPlayers() {
+      if (!isAuthed(state.user)) {
+        state.players = [];
+        renderFolders();
+        updateAuthUI();
+        return;
+      }
+
+      const data = await api('/players');
+      state.players = Array.isArray(data.players) ? data.players : [];
+      renderFolders();
+      updateAuthUI();
+    }
+
+    async function loadUsers() {
+      if (!state.user || !state.user.isAdmin) return;
+      const data = await api('/admin/users');
+      state.users = Array.isArray(data.users) ? data.users : [];
+      renderUsers();
+    }
+
+    async function sendTrigger(computer_name, direction, folder_name) {
+      await api('/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ computer_name, direction, folder_name })
+      });
+
+      els.triggerMessage.className = 'message success';
+      els.triggerMessage.textContent = `Triggered ${computer_name} (${direction})\nHeld for 2 seconds for low TPS reads.`;
+    }
+
+    async function runDebugSession() {
+      const result = await apiRaw('/debug/session');
+      setDebug('GET /debug/session', result);
+      return result;
+    }
+
+    async function runDebugUsers() {
+      const result = await apiRaw('/debug/users');
+      setDebug('GET /debug/users', result);
+      return result;
+    }
+
+    async function runAuthMe() {
+      const result = await apiRaw('/auth/me');
+      setDebug('GET /auth/me', result);
+      return result;
+    }
+
+    els.debugSessionBtn.addEventListener('click', runDebugSession);
+    els.debugUsersBtn.addEventListener('click', runDebugUsers);
+    els.authMeBtn.addEventListener('click', runAuthMe);
+
+    els.refreshBtn.addEventListener('click', async () => {
+      await loadPlayers();
+      if (state.user && state.user.isAdmin) await loadUsers();
+    });
+
+    els.folderAccordion.addEventListener('click', async (e) => {
+      const toggle = e.target.closest('[data-folder]');
+      const triggerBtn = e.target.closest('[data-trigger]');
+      const editBtn = e.target.closest('[data-edit]');
+      const deleteBtn = e.target.closest('[data-delete]');
+
+      if (toggle) {
+        const folder = toggle.getAttribute('data-folder');
+        if (state.openFolders.has(folder)) state.openFolders.delete(folder);
+        else state.openFolders.add(folder);
+        renderFolders();
+        revealOnLoad();
+        return;
+      }
+
+      if (triggerBtn) {
+        const player = visiblePlayers().find(p => String(p.id) === String(triggerBtn.getAttribute('data-trigger')));
+        if (!player) return;
+
+        const computer = normalizeComputer(player) || normalizeFolder(player);
+        const folder = normalizeFolder(player);
+        const direction = player.direction || 'left';
+
+        els.triggerComputerName.value = computer;
+        els.triggerFolderName.value = folder;
+        els.triggerDirection.value = direction;
+
+        try {
+          await sendTrigger(computer, direction, folder);
+        } catch (err) {
+          els.triggerMessage.className = 'message error';
+          els.triggerMessage.textContent = err.message;
+        }
+        return;
+      }
+
+      if (editBtn && state.user && state.user.isAdmin) {
+        const player = visiblePlayers().find(p => String(p.id) === String(editBtn.getAttribute('data-edit')));
+        if (!player) return;
+
+        els.playerId.value = player.id;
+        document.getElementById('name').value = player.name || '';
+        document.getElementById('computer_name').value = player.computer_name || '';
+        document.getElementById('channel_name').value = player.channel_name || '';
+        document.getElementById('folder_name').value = player.folder_name || '';
+        document.getElementById('direction').value = player.direction || 'left';
+        document.getElementById('signal_strength').value = Number(player.signal_strength ?? 15);
+
+        els.playerMessage.className = 'message info';
+        els.playerMessage.textContent = `Editing ${player.name}`;
+        return;
+      }
+
+      if (deleteBtn && state.user && state.user.isAdmin) {
+        const id = deleteBtn.getAttribute('data-delete');
+        if (!confirm('Delete this player?')) return;
+
+        try {
+          await api('/players/' + id, { method: 'DELETE' });
+          els.playerMessage.className = 'message success';
+          els.playerMessage.textContent = 'Player deleted.';
+          await loadPlayers();
+          revealOnLoad();
+        } catch (err) {
+          els.playerMessage.className = 'message error';
+          els.playerMessage.textContent = err.message;
+        }
+      }
+    });
+
+    els.triggerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await sendTrigger(
+          els.triggerComputerName.value.trim(),
+          els.triggerDirection.value,
+          els.triggerFolderName.value.trim()
+        );
+      } catch (err) {
+        els.triggerMessage.className = 'message error';
+        els.triggerMessage.textContent = err.message;
+      }
+    });
+
+    els.playerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        name: document.getElementById('name').value.trim(),
+        computer_name: document.getElementById('computer_name').value.trim(),
+        channel_name: document.getElementById('channel_name').value.trim(),
+        folder_name: document.getElementById('folder_name').value.trim(),
+        direction: document.getElementById('direction').value,
+        signal_strength: Number(document.getElementById('signal_strength').value || 15)
+      };
+
+      try {
+        const id = els.playerId.value.trim();
+        const method = id ? 'PUT' : 'POST';
+        const path = id ? `/players/${id}` : '/players';
+
+        await api(path, { method, body: JSON.stringify(payload) });
+        els.playerMessage.className = 'message success';
+        els.playerMessage.textContent = 'Player saved.';
+        clearPlayerForm();
+        await loadPlayers();
+        revealOnLoad();
+      } catch (err) {
+        els.playerMessage.className = 'message error';
+        els.playerMessage.textContent = err.message;
+      }
+    });
+
+    els.clearPlayerBtn.addEventListener('click', clearPlayerForm);
+
+    els.userForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        username: els.username.value.trim(),
+        password: els.password.value,
+        isAdmin: els.isAdmin.checked,
+        canPull: els.canPull.checked,
+        allFolders: els.allFolders.checked,
+        allowedFolders: els.allowedFolders.value.split(',').map(s => s.trim()).filter(Boolean)
+      };
+
+      try {
+        const id = els.userId.value.trim();
+        const method = id ? 'PUT' : 'POST';
+        const path = id ? `/admin/users/${id}` : '/admin/users';
+        const finalPayload = { ...payload };
+        if (id && !finalPayload.password) delete finalPayload.password;
+
+        await api(path, { method, body: JSON.stringify(finalPayload) });
+        els.userMessage.className = 'message success';
+        els.userMessage.textContent = id ? 'User updated.' : 'User created.';
+        clearUserForm();
+        await loadUsers();
+      } catch (err) {
+        els.userMessage.className = 'message error';
+        els.userMessage.textContent = err.message;
+      }
+    });
+
+    els.clearUserBtn.addEventListener('click', clearUserForm);
+
+    els.userList.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('[data-user-edit]');
+      const deleteBtn = e.target.closest('[data-user-delete]');
+
+      if (editBtn) {
+        const user = state.users.find(u => String(u.id) === String(editBtn.getAttribute('data-user-edit')));
+        if (!user) return;
+
+        els.userId.value = user.id;
+        els.username.value = user.username || '';
+        els.password.value = '';
+        els.isAdmin.checked = !!user.isAdmin;
+        els.canPull.checked = !!user.canPull;
+        els.allFolders.checked = !!user.allFolders;
+        els.allowedFolders.value = (user.allowedFolders || []).join(', ');
+
+        els.userMessage.className = 'message info';
+        els.userMessage.textContent = `Editing ${user.username}`;
+        return;
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-user-delete');
+        if (!confirm('Delete this user?')) return;
+
+        try {
+          await api('/admin/users/' + id, { method: 'DELETE' });
+          els.userMessage.className = 'message success';
+          els.userMessage.textContent = 'User deleted.';
+          await loadUsers();
+        } catch (err) {
+          els.userMessage.className = 'message error';
+          els.userMessage.textContent = err.message;
+        }
+      }
+    });
+
+    els.openTerminalBtn.addEventListener('click', openTerminal);
+    els.closeTerminalBtn.addEventListener('click', closeTerminal);
+
+    els.terminalOverlay.addEventListener('click', (e) => {
+      if (e.target === els.terminalOverlay) closeTerminal();
+    });
+
+    els.loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      els.terminalLog.textContent = '> Authenticating...\n> Please wait...';
+
+      try {
+        const raw = await apiRaw('/auth/local/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
+
+        setDebug('POST /auth/local/login', {
+          apiBase: API_BASE,
+          sent: { username },
+          received: raw
+        });
+
+        if (!raw.ok) {
+          els.terminalLog.textContent = '> C:/Frosted/OS/ Authentication failed\n>\n> Access denied';
+          return;
+        }
+
+        state.user = raw.data.user || null;
+        await terminalSuccess(username);
+        updateAuthUI();
+        await loadPlayers();
+        if (state.user && state.user.isAdmin) await loadUsers();
+        await runDebugSession();
+        revealOnLoad();
+      } catch (err) {
+        els.terminalLog.textContent = `> C:/Frosted/OS/ ERROR\n>\n> ${String(err.message || err)}`;
+        setDebug('POST /auth/local/login failed', String(err.message || err));
+      }
+    });
+
+    els.logoutBtn.addEventListener('click', async () => {
+      try {
+        await api('/auth/logout', { method: 'POST' });
+      } catch {}
+
+      state.user = null;
+      state.players = [];
+      state.users = [];
+      state.openFolders = new Set();
+
+      updateAuthUI();
+      renderFolders();
+      renderUsers();
+      els.triggerMessage.className = 'message';
+      els.triggerMessage.textContent = 'Ready.';
+      await runDebugSession().catch(() => {});
+    });
+
+    function revealOnLoad() {
+      const items = document.querySelectorAll('[data-reveal]');
+      items.forEach((el, i) => {
+        if (el.classList.contains('revealed')) return;
+        setTimeout(() => el.classList.add('revealed'), i * 90);
+      });
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('revealed');
+      });
+    }, { threshold: .14 });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      setDebug('Frontend config', {
+        frontend: window.location.origin + window.location.pathname,
+        apiBase: API_BASE,
+        note: 'Backend must hold trigger JSON for 2000ms.'
+      });
+
+      revealOnLoad();
+      await loadHealth().catch(() => {});
+      await loadAuth().catch(() => {});
+      await loadPlayers().catch(() => {});
+      if (state.user && state.user.isAdmin) await loadUsers().catch(() => {});
+      await runDebugSession().catch(() => {});
+    });
+  </script>
 </body>
 </html>
